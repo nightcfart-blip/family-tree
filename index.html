@@ -31,6 +31,7 @@
       </button>
     </header>
 
+
     <main id="treeCanvas" class="tree-canvas">
 
       <div id="characterLayer" class="character-layer"></div>
@@ -62,7 +63,7 @@
   </div>
 
 
-  <!-- CHARACTER CREATION PANEL -->
+  <!-- ADD CHARACTER -->
 
   <div id="formBackdrop" class="backdrop hidden"></div>
 
@@ -88,17 +89,25 @@
 
     </div>
 
+
     <form id="characterForm">
 
       <div class="form-body">
 
         <label class="field">
           <span>Title</span>
-          <input id="title" name="title" type="text">
+
+          <input
+            id="title"
+            name="title"
+            type="text"
+          >
         </label>
+
 
         <label class="field">
           <span>Given Name *</span>
+
           <input
             id="givenName"
             name="givenName"
@@ -107,17 +116,25 @@
           >
         </label>
 
+
         <label class="field">
           <span>Aliases</span>
-          <input id="aliases" name="aliases" type="text">
+
+          <input
+            id="aliases"
+            name="aliases"
+            type="text"
+          >
 
           <small>
             Separate multiple aliases with commas.
           </small>
         </label>
 
+
         <label class="field">
           <span>Maiden Name</span>
+
           <input
             id="maidenName"
             name="maidenName"
@@ -125,8 +142,10 @@
           >
         </label>
 
+
         <label class="field">
           <span>Family Name *</span>
+
           <input
             id="familyName"
             name="familyName"
@@ -135,10 +154,12 @@
           >
         </label>
 
+
         <div class="field-row">
 
           <label class="field">
             <span>Birth Year</span>
+
             <input
               id="birthYear"
               name="birthYear"
@@ -147,8 +168,10 @@
             >
           </label>
 
+
           <label class="field">
             <span>Death Year</span>
+
             <input
               id="deathYear"
               name="deathYear"
@@ -161,6 +184,7 @@
 
       </div>
 
+
       <div class="form-footer">
 
         <button
@@ -171,7 +195,10 @@
           Cancel
         </button>
 
-        <button class="save-button" type="submit">
+        <button
+          class="save-button"
+          type="submit"
+        >
           Save Character
         </button>
 
@@ -182,27 +209,24 @@
   </section>
 
 
-  <!-- PROFILE PANEL -->
+
+  <!-- CHARACTER PROFILE -->
 
   <div id="profileBackdrop" class="backdrop hidden"></div>
 
-  <section id="profilePanel" class="bottom-panel profile-panel hidden">
+  <section id="profilePanel" class="profile-panel hidden">
 
-    <div class="panel-handle"></div>
-
-    <div class="panel-header">
+    <div class="profile-topbar">
 
       <div>
-        <p id="profileTitleTop" class="eyebrow"></p>
-        <h2 id="profileFullName"></h2>
-        <p id="profileYearsTop" class="profile-years-top"></p>
+        <p class="eyebrow">Character Profile</p>
       </div>
 
       <button
         id="closeProfileButton"
         class="icon-button"
         type="button"
-        aria-label="Close"
+        aria-label="Close profile"
       >
         ×
       </button>
@@ -210,37 +234,156 @@
     </div>
 
 
-    <div class="profile-body">
+    <div class="profile-dashboard">
 
-      <section class="profile-section">
 
-        <h3>Identity</h3>
+      <!-- TITLE -->
 
-        <div class="profile-grid">
+      <section class="profile-box title-box">
 
-          <div class="profile-item">
-            <span>Title</span>
-            <strong id="profileTitle"></strong>
+        <span class="box-label">
+          Title
+        </span>
+
+        <div
+          id="profileTitle"
+          class="box-value big-value"
+        ></div>
+
+      </section>
+
+
+      <!-- FULL NAME -->
+
+      <section class="profile-box name-box">
+
+        <span class="box-label">
+          Name
+        </span>
+
+        <div
+          id="profileFullName"
+          class="profile-main-name"
+        ></div>
+
+        <div
+          id="profileYearsTop"
+          class="profile-main-years"
+        ></div>
+
+      </section>
+
+
+      <!-- ALIASES -->
+
+      <section class="profile-box aliases-box">
+
+        <span class="box-label">
+          Aliases
+        </span>
+
+        <div
+          id="profileAliases"
+          class="box-value"
+        ></div>
+
+      </section>
+
+
+      <!-- COLORS -->
+
+      <section class="colors-box">
+
+
+        <div class="color-profile-item">
+
+          <div
+            id="hairColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
+          <span>
+            Hair Color
+          </span>
+
+          <small id="profileHairColor"></small>
+
+        </div>
+
+
+        <div class="color-profile-item">
+
+          <div
+            id="eyeColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
+          <span>
+            Eye Color
+          </span>
+
+          <small id="profileEyeColor"></small>
+
+        </div>
+
+
+        <div class="color-profile-item">
+
+          <div
+            id="skinColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
+          <span>
+            Skin Color
+          </span>
+
+          <small id="profileSkinColor"></small>
+
+        </div>
+
+
+      </section>
+
+
+      <!-- FAMILY -->
+
+      <section class="profile-box family-box">
+
+        <span class="box-label">
+          Family
+        </span>
+
+        <div class="family-list">
+
+          <div>
+            <span>Mother</span>
+            <strong>—</strong>
           </div>
 
-          <div class="profile-item">
-            <span>Given Name</span>
-            <strong id="profileGivenName"></strong>
+          <div>
+            <span>Father</span>
+            <strong>—</strong>
           </div>
 
-          <div class="profile-item">
-            <span>Aliases</span>
-            <strong id="profileAliases"></strong>
+          <div>
+            <span>Siblings</span>
+            <strong>—</strong>
           </div>
 
-          <div class="profile-item">
-            <span>Maiden Name</span>
-            <strong id="profileMaidenName"></strong>
+          <div>
+            <span>Spouses</span>
+            <strong>—</strong>
           </div>
 
-          <div class="profile-item">
-            <span>Family Name</span>
-            <strong id="profileFamilyName"></strong>
+          <div>
+            <span>Lovers</span>
+            <strong>—</strong>
+          </div>
+
+          <div>
+            <span>Children</span>
+            <strong>—</strong>
           </div>
 
         </div>
@@ -248,101 +391,69 @@
       </section>
 
 
-      <section class="profile-section">
+      <!-- RACE -->
 
-        <h3>Dates</h3>
+      <section class="profile-box race-box">
 
-        <div class="profile-grid two-column">
+        <span class="box-label">
+          Race
+        </span>
 
-          <div class="profile-item">
-            <span>Birth Year</span>
-            <strong id="profileBirthYear"></strong>
-          </div>
-
-          <div class="profile-item">
-            <span>Death Year</span>
-            <strong id="profileDeathYear"></strong>
-          </div>
-
-        </div>
+        <div
+          id="profileRace"
+          class="box-value centered-value"
+        ></div>
 
       </section>
 
 
-      <section class="profile-section">
+      <!-- PHYSICAL FEATURE -->
 
-        <h3>Appearance</h3>
+      <section class="profile-box feature-box">
 
-        <div class="profile-grid">
+        <span class="box-label">
+          Notable Physical Feature
+        </span>
 
-          <div class="profile-item">
-            <span>Race</span>
-            <strong id="profileRace"></strong>
-          </div>
-
-          <div class="profile-item color-row">
-            <span>Eye Color</span>
-            <div>
-              <span id="eyeColorSwatch" class="color-swatch"></span>
-              <strong id="profileEyeColor"></strong>
-            </div>
-          </div>
-
-          <div class="profile-item color-row">
-            <span>Hair Color</span>
-            <div>
-              <span id="hairColorSwatch" class="color-swatch"></span>
-              <strong id="profileHairColor"></strong>
-            </div>
-          </div>
-
-          <div class="profile-item color-row">
-            <span>Skin Color</span>
-            <div>
-              <span id="skinColorSwatch" class="color-swatch"></span>
-              <strong id="profileSkinColor"></strong>
-            </div>
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <section class="profile-section">
-
-        <h3>Notable Physical Feature</h3>
-
-        <p
+        <div
           id="profilePhysicalFeature"
-          class="profile-text"
-        ></p>
+          class="box-value"
+        ></div>
 
       </section>
 
 
-      <section class="profile-section">
+      <!-- ACHIEVEMENTS -->
 
-        <h3>Life</h3>
+      <section class="profile-box achievements-box">
 
-        <p
-          id="profileLife"
-          class="profile-text long-text"
-        ></p>
+        <span class="box-label">
+          Noteworthy Achievements
+        </span>
 
-      </section>
-
-
-      <section class="profile-section">
-
-        <h3>Noteworthy Achievements</h3>
-
-        <p
+        <div
           id="profileAchievements"
-          class="profile-text long-text"
-        ></p>
+          class="box-value long-value"
+        ></div>
 
       </section>
+
+
+      <!-- LIFE -->
+
+      <section class="profile-box life-box">
+
+        <span class="box-label">
+          Life
+        </span>
+
+        <div
+          id="profileLife"
+          class="life-text"
+        ></div>
+
+      </section>
+
 
     </div>
 
