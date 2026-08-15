@@ -1,74 +1,113 @@
 const addCharacterButton =
-  document.getElementById("addCharacterButton");
+  document.getElementById(
+    "addCharacterButton"
+  );
 
 const addFirstCharacterButton =
-  document.getElementById("addFirstCharacterButton");
+  document.getElementById(
+    "addFirstCharacterButton"
+  );
 
 const emptyState =
-  document.getElementById("emptyState");
+  document.getElementById(
+    "emptyState"
+  );
 
 const characterLayer =
-  document.getElementById("characterLayer");
+  document.getElementById(
+    "characterLayer"
+  );
 
 
 /* CREATE FORM */
 
 const formBackdrop =
-  document.getElementById("formBackdrop");
+  document.getElementById(
+    "formBackdrop"
+  );
 
 const characterFormPanel =
-  document.getElementById("characterFormPanel");
+  document.getElementById(
+    "characterFormPanel"
+  );
 
 const closeFormButton =
-  document.getElementById("closeFormButton");
+  document.getElementById(
+    "closeFormButton"
+  );
 
 const cancelFormButton =
-  document.getElementById("cancelFormButton");
+  document.getElementById(
+    "cancelFormButton"
+  );
 
 const characterForm =
-  document.getElementById("characterForm");
+  document.getElementById(
+    "characterForm"
+  );
 
 
 /* PROFILE */
 
 const profileBackdrop =
-  document.getElementById("profileBackdrop");
+  document.getElementById(
+    "profileBackdrop"
+  );
 
 const profilePanel =
-  document.getElementById("profilePanel");
+  document.getElementById(
+    "profilePanel"
+  );
 
 const closeProfileButton =
-  document.getElementById("closeProfileButton");
+  document.getElementById(
+    "closeProfileButton"
+  );
 
 const closeProfileFooterButton =
-  document.getElementById("closeProfileFooterButton");
+  document.getElementById(
+    "closeProfileFooterButton"
+  );
 
 const editCharacterButton =
-  document.getElementById("editCharacterButton");
+  document.getElementById(
+    "editCharacterButton"
+  );
 
 
 let characters = [];
+
 let selectedCharacterId = null;
 
 
 /* -------------------------
-   CREATE FORM
+   CHARACTER CREATION
 ------------------------- */
 
 function openCharacterForm() {
 
   characterForm.reset();
 
-  formBackdrop.classList.remove("hidden");
-  characterFormPanel.classList.remove("hidden");
+  formBackdrop.classList.remove(
+    "hidden"
+  );
+
+  characterFormPanel.classList.remove(
+    "hidden"
+  );
 
 }
 
 
 function closeCharacterForm() {
 
-  formBackdrop.classList.add("hidden");
-  characterFormPanel.classList.add("hidden");
+  formBackdrop.classList.add(
+    "hidden"
+  );
+
+  characterFormPanel.classList.add(
+    "hidden"
+  );
 
 }
 
@@ -105,64 +144,63 @@ formBackdrop.addEventListener(
 
 characterForm.addEventListener(
   "submit",
-  function (event) {
+
+  function(event) {
 
     event.preventDefault();
 
 
     const character = {
 
-      id: Date.now(),
+      id:
+        Date.now(),
 
       title:
-        document
-          .getElementById("title")
-          .value
-          .trim(),
+        getInputValue(
+          "title"
+        ),
 
       givenName:
-        document
-          .getElementById("givenName")
-          .value
-          .trim(),
+        getInputValue(
+          "givenName"
+        ),
 
       aliases:
-        document
-          .getElementById("aliases")
-          .value
+        getInputValue(
+          "aliases"
+        )
           .split(",")
-          .map(alias => alias.trim())
-          .filter(alias => alias !== ""),
+          .map(
+            alias =>
+              alias.trim()
+          )
+          .filter(
+            alias =>
+              alias !== ""
+          ),
 
       maidenName:
-        document
-          .getElementById("maidenName")
-          .value
-          .trim(),
+        getInputValue(
+          "maidenName"
+        ),
 
       familyName:
-        document
-          .getElementById("familyName")
-          .value
-          .trim(),
+        getInputValue(
+          "familyName"
+        ),
 
       birthYear:
-        document
-          .getElementById("birthYear")
-          .value
-          .trim(),
+        getInputValue(
+          "birthYear"
+        ),
 
       deathYear:
-        document
-          .getElementById("deathYear")
-          .value
-          .trim(),
+        getInputValue(
+          "deathYear"
+        ),
 
 
-      /*
-        These fields are ready for
-        Step 4: Editing.
-      */
+      /* Future editing fields */
 
       race: "",
 
@@ -181,7 +219,10 @@ characterForm.addEventListener(
     };
 
 
-    characters.push(character);
+    characters.push(
+      character
+    );
+
 
     renderCharacters();
 
@@ -192,7 +233,7 @@ characterForm.addEventListener(
 
 
 /* -------------------------
-   RENDER TREE
+   RENDER CHARACTERS
 ------------------------- */
 
 function renderCharacters() {
@@ -200,54 +241,83 @@ function renderCharacters() {
   characterLayer.innerHTML = "";
 
 
-  if (characters.length === 0) {
+  if (
+    characters.length === 0
+  ) {
 
-    emptyState.classList.remove("hidden");
+    emptyState.classList.remove(
+      "hidden"
+    );
 
     return;
 
   }
 
 
-  emptyState.classList.add("hidden");
+  emptyState.classList.add(
+    "hidden"
+  );
 
 
   characters.forEach(
-    function (character, index) {
+    function(
+      character,
+      index
+    ) {
 
       const node =
-        document.createElement("button");
-
-      node.className = "character-node";
-
-      node.type = "button";
+        document.createElement(
+          "button"
+        );
 
 
-      const column = index % 3;
+      node.className =
+        "character-node";
+
+      node.type =
+        "button";
+
+
+      const column =
+        index % 3;
 
       const row =
-        Math.floor(index / 3);
+        Math.floor(
+          index / 3
+        );
 
 
       node.style.left =
-        `${25 + (column * 25)}%`;
+        `${
+          25 +
+          column * 25
+        }%`;
+
 
       node.style.top =
-        `${120 + (row * 170)}px`;
+        `${
+          120 +
+          row * 170
+        }px`;
 
 
       const initial =
-        character.givenName
+        character
+          .givenName
           .charAt(0)
           .toUpperCase();
 
 
       const fullName =
-        getFullName(character);
+        getTreeName(
+          character
+        );
 
 
       const years =
-        makeYearText(character);
+        makeYearText(
+          character
+        );
 
 
       node.innerHTML = `
@@ -269,15 +339,20 @@ function renderCharacters() {
 
       node.addEventListener(
         "click",
-        function () {
 
-          openProfile(character.id);
+        function() {
+
+          openProfile(
+            character.id
+          );
 
         }
       );
 
 
-      characterLayer.appendChild(node);
+      characterLayer.appendChild(
+        node
+      );
 
     }
   );
@@ -286,14 +361,18 @@ function renderCharacters() {
 
 
 /* -------------------------
-   PROFILE
+   OPEN PROFILE
 ------------------------- */
 
-function openProfile(characterId) {
+function openProfile(
+  characterId
+) {
 
   const character =
     characters.find(
-      person => person.id === characterId
+      person =>
+        person.id ===
+        characterId
     );
 
 
@@ -306,127 +385,140 @@ function openProfile(characterId) {
     character.id;
 
 
-  document
-    .getElementById("profileTitleTop")
-    .textContent =
-      character.title || "Person";
-
-
-  document
-    .getElementById("profileFullName")
-    .textContent =
-      getFullName(character);
-
-
-  document
-    .getElementById("profileYearsTop")
-    .textContent =
-      makeYearText(character);
-
-
   setProfileText(
     "profileTitle",
+
     character.title
   );
 
+
   setProfileText(
-    "profileGivenName",
-    character.givenName
+    "profileFullName",
+
+    getProfileName(
+      character
+    )
   );
+
+
+  setProfileText(
+    "profileYearsTop",
+
+    makeYearText(
+      character
+    )
+  );
+
 
   setProfileText(
     "profileAliases",
+
     character.aliases.length
-      ? character.aliases.join(", ")
+      ? character.aliases.join(
+          "\n"
+        )
       : ""
   );
 
-  setProfileText(
-    "profileMaidenName",
-    character.maidenName
-  );
-
-  setProfileText(
-    "profileFamilyName",
-    character.familyName
-  );
-
-  setProfileText(
-    "profileBirthYear",
-    character.birthYear
-  );
-
-  setProfileText(
-    "profileDeathYear",
-    character.deathYear
-  );
 
   setProfileText(
     "profileRace",
+
     character.race
   );
 
-  setProfileText(
-    "profileEyeColor",
-    character.eyeColor
-  );
 
   setProfileText(
     "profileHairColor",
+
     character.hairColor
   );
 
+
+  setProfileText(
+    "profileEyeColor",
+
+    character.eyeColor
+  );
+
+
   setProfileText(
     "profileSkinColor",
+
     character.skinColor
   );
 
+
   setProfileText(
     "profilePhysicalFeature",
+
     character.physicalFeature
   );
 
-  setProfileText(
-    "profileLife",
-    character.life
-  );
 
   setProfileText(
     "profileAchievements",
+
     character.achievements
+  );
+
+
+  setProfileText(
+    "profileLife",
+
+    character.life
+  );
+
+
+  setColorSwatch(
+    "hairColorSwatch",
+
+    character.hairColor
   );
 
 
   setColorSwatch(
     "eyeColorSwatch",
+
     character.eyeColor
   );
 
-  setColorSwatch(
-    "hairColorSwatch",
-    character.hairColor
-  );
 
   setColorSwatch(
     "skinColorSwatch",
+
     character.skinColor
   );
 
 
-  profileBackdrop.classList.remove("hidden");
+  profileBackdrop.classList.remove(
+    "hidden"
+  );
 
-  profilePanel.classList.remove("hidden");
+
+  profilePanel.classList.remove(
+    "hidden"
+  );
 
 }
 
 
+/* -------------------------
+   CLOSE PROFILE
+------------------------- */
+
 function closeProfile() {
 
-  profileBackdrop.classList.add("hidden");
+  profileBackdrop.classList.add(
+    "hidden"
+  );
 
-  profilePanel.classList.add("hidden");
+  profilePanel.classList.add(
+    "hidden"
+  );
 
-  selectedCharacterId = null;
+  selectedCharacterId =
+    null;
 
 }
 
@@ -453,15 +545,18 @@ profileBackdrop.addEventListener(
 
 editCharacterButton.addEventListener(
   "click",
-  function () {
 
-    if (!selectedCharacterId) {
+  function() {
+
+    if (
+      !selectedCharacterId
+    ) {
       return;
     }
 
 
     alert(
-      "Editing comes in Step 4."
+      "Editing comes next."
     );
 
   }
@@ -469,39 +564,109 @@ editCharacterButton.addEventListener(
 
 
 /* -------------------------
-   HELPERS
+   NAMES
 ------------------------- */
 
-function getFullName(character) {
+function getTreeName(
+  character
+) {
 
-  return `${character.givenName} ${character.familyName}`
+  return `
+    ${character.givenName}
+    ${character.familyName}
+  `
+    .replace(
+      /\s+/g,
+      " "
+    )
     .trim();
 
 }
 
 
-function makeYearText(character) {
+function getProfileName(
+  character
+) {
+
+  const given =
+    character.givenName;
+
+  const maiden =
+    character.maidenName
+      ? `(${character.maidenName})`
+      : "";
+
+  const family =
+    character.familyName;
+
+
+  return `
+    ${given}
+    ${maiden}
+    ${family}
+  `
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
+
+}
+
+
+/* -------------------------
+   YEARS
+------------------------- */
+
+function makeYearText(
+  character
+) {
 
   const birth =
-    character.birthYear || "?";
+    character.birthYear;
 
   const death =
-    character.deathYear || "";
+    character.deathYear;
 
 
-  if (death) {
-    return `${birth} – ${death}`;
+  if (
+    birth &&
+    death
+  ) {
+
+    return `
+      ${birth} – ${death}
+    `.trim();
+
   }
 
 
-  if (character.birthYear) {
-    return `${birth} –`;
+  if (birth) {
+
+    return `
+      ${birth} –
+    `.trim();
+
+  }
+
+
+  if (death) {
+
+    return `
+      ? – ${death}
+    `.trim();
+
   }
 
 
   return "Unknown";
+
 }
 
+
+/* -------------------------
+   PROFILE HELPERS
+------------------------- */
 
 function setProfileText(
   elementId,
@@ -509,7 +674,10 @@ function setProfileText(
 ) {
 
   const element =
-    document.getElementById(elementId);
+    document.getElementById(
+      elementId
+    );
+
 
   element.textContent =
     value || "—";
@@ -523,35 +691,67 @@ function setColorSwatch(
 ) {
 
   const swatch =
-    document.getElementById(elementId);
+    document.getElementById(
+      elementId
+    );
 
 
   if (color) {
 
-    swatch.style.background = color;
+    swatch.style.background =
+      color;
 
   } else {
 
     swatch.style.background =
-      "transparent";
+      "#242429";
 
   }
 
 }
 
 
-function escapeHTML(value) {
+/* -------------------------
+   INPUT
+------------------------- */
+
+function getInputValue(
+  elementId
+) {
+
+  return document
+    .getElementById(
+      elementId
+    )
+    .value
+    .trim();
+
+}
+
+
+/* -------------------------
+   HTML SAFETY
+------------------------- */
+
+function escapeHTML(
+  value
+) {
 
   const element =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
-  element.textContent = value;
+  element.textContent =
+    value;
 
   return element.innerHTML;
 
 }
 
 
-/* FIRST RENDER */
+/* -------------------------
+   FIRST RENDER
+------------------------- */
 
 renderCharacters();
