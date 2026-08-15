@@ -6,52 +6,77 @@ const STORAGE_KEY =
    TREE SETTINGS
 ------------------------- */
 
-const NODE_WIDTH = 180;
-
-const NODE_CIRCLE_SIZE = 82;
-
 const NODE_GAP_X = 230;
-
 const GENERATION_GAP_Y = 230;
+const WORLD_SIZE = 4000;
 
-const TREE_PADDING_X = 180;
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.15;
 
-const TREE_PADDING_TOP = 100;
+
+/* -------------------------
+   CANVAS STATE
+------------------------- */
+
+let viewX = 0;
+let viewY = 0;
+let zoom = 1;
+
+let isPanning = false;
+
+let panStartX = 0;
+let panStartY = 0;
+
+let startViewX = 0;
+let startViewY = 0;
+
+let pinchStartDistance = 0;
+let pinchStartZoom = 1;
+
+let pinchWorldX = 0;
+let pinchWorldY = 0;
 
 
 /* -------------------------
    MAIN ELEMENTS
 ------------------------- */
 
-const addCharacterButton =
-  document.getElementById(
-    "addCharacterButton"
-  );
+const treeCanvas =
+  document.getElementById("treeCanvas");
 
-const addFirstCharacterButton =
-  document.getElementById(
-    "addFirstCharacterButton"
-  );
-
-const emptyState =
-  document.getElementById(
-    "emptyState"
-  );
+const treeViewport =
+  document.getElementById("treeViewport");
 
 const treeWorld =
-  document.getElementById(
-    "treeWorld"
-  );
+  document.getElementById("treeWorld");
 
 const treeLines =
-  document.getElementById(
-    "treeLines"
-  );
+  document.getElementById("treeLines");
 
 const characterLayer =
-  document.getElementById(
-    "characterLayer"
-  );
+  document.getElementById("characterLayer");
+
+const emptyState =
+  document.getElementById("emptyState");
+
+const addCharacterButton =
+  document.getElementById("addCharacterButton");
+
+const addFirstCharacterButton =
+  document.getElementById("addFirstCharacterButton");
+
+const zoomInButton =
+  document.getElementById("zoomInButton");
+
+const zoomOutButton =
+  document.getElementById("zoomOutButton");
+
+const resetViewButton =
+  document.getElementById("resetViewButton");
+
+const zoomIndicator =
+  document.getElementById("zoomIndicator");
 
 
 /* -------------------------
@@ -59,29 +84,19 @@ const characterLayer =
 ------------------------- */
 
 const formBackdrop =
-  document.getElementById(
-    "formBackdrop"
-  );
+  document.getElementById("formBackdrop");
 
 const characterFormPanel =
-  document.getElementById(
-    "characterFormPanel"
-  );
+  document.getElementById("characterFormPanel");
 
 const closeFormButton =
-  document.getElementById(
-    "closeFormButton"
-  );
+  document.getElementById("closeFormButton");
 
 const cancelFormButton =
-  document.getElementById(
-    "cancelFormButton"
-  );
+  document.getElementById("cancelFormButton");
 
 const characterForm =
-  document.getElementById(
-    "characterForm"
-  );
+  document.getElementById("characterForm");
 
 
 /* -------------------------
@@ -89,29 +104,19 @@ const characterForm =
 ------------------------- */
 
 const profileBackdrop =
-  document.getElementById(
-    "profileBackdrop"
-  );
+  document.getElementById("profileBackdrop");
 
 const profilePanel =
-  document.getElementById(
-    "profilePanel"
-  );
+  document.getElementById("profilePanel");
 
 const closeProfileButton =
-  document.getElementById(
-    "closeProfileButton"
-  );
+  document.getElementById("closeProfileButton");
 
 const closeProfileFooterButton =
-  document.getElementById(
-    "closeProfileFooterButton"
-  );
+  document.getElementById("closeProfileFooterButton");
 
 const editCharacterButton =
-  document.getElementById(
-    "editCharacterButton"
-  );
+  document.getElementById("editCharacterButton");
 
 
 /* -------------------------
@@ -119,29 +124,19 @@ const editCharacterButton =
 ------------------------- */
 
 const editBackdrop =
-  document.getElementById(
-    "editBackdrop"
-  );
+  document.getElementById("editBackdrop");
 
 const editPanel =
-  document.getElementById(
-    "editPanel"
-  );
+  document.getElementById("editPanel");
 
 const editCharacterForm =
-  document.getElementById(
-    "editCharacterForm"
-  );
+  document.getElementById("editCharacterForm");
 
 const closeEditButton =
-  document.getElementById(
-    "closeEditButton"
-  );
+  document.getElementById("closeEditButton");
 
 const cancelEditButton =
-  document.getElementById(
-    "cancelEditButton"
-  );
+  document.getElementById("cancelEditButton");
 
 
 /* -------------------------
@@ -168,20 +163,16 @@ function loadCharacters() {
         STORAGE_KEY
       );
 
-
     if (!saved) {
       return [];
     }
 
-
     const parsed =
       JSON.parse(saved);
-
 
     if (!Array.isArray(parsed)) {
       return [];
     }
-
 
     return parsed.map(
       normalizeCharacter
@@ -203,32 +194,15 @@ function loadCharacters() {
 
 function saveCharacters() {
 
-  try {
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(characters)
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Could not save characters:",
-      error
-    );
-
-  }
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(characters)
+  );
 
 }
 
 
-/* -------------------------
-   OLD CHARACTER COMPATIBILITY
-------------------------- */
-
-function normalizeCharacter(
-  character
-) {
+function normalizeCharacter(character) {
 
   return {
 
@@ -242,9 +216,7 @@ function normalizeCharacter(
       character.givenName || "",
 
     aliases:
-      Array.isArray(
-        character.aliases
-      )
+      Array.isArray(character.aliases)
         ? character.aliases
         : [],
 
@@ -288,16 +260,12 @@ function normalizeCharacter(
       character.fatherId || null,
 
     spouseIds:
-      Array.isArray(
-        character.spouseIds
-      )
+      Array.isArray(character.spouseIds)
         ? character.spouseIds
         : [],
 
     loverIds:
-      Array.isArray(
-        character.loverIds
-      )
+      Array.isArray(character.loverIds)
         ? character.loverIds
         : []
 
@@ -306,9 +274,548 @@ function normalizeCharacter(
 }
 
 
+/* =========================================================
+   PAN + ZOOM
+========================================================= */
+
+function applyViewTransform() {
+
+  treeViewport.style.transform =
+    `translate(${viewX}px, ${viewY}px) scale(${zoom})`;
+
+
+  zoomIndicator.textContent =
+    `${Math.round(zoom * 100)}%`;
+
+}
+
+
 /* -------------------------
-   CREATE CHARACTER
+   CENTER TREE
 ------------------------- */
+
+function centerTree() {
+
+  const layout =
+    calculateTreeLayout();
+
+
+  const canvasRect =
+    treeCanvas.getBoundingClientRect();
+
+
+  zoom =
+    Math.min(
+      1,
+      Math.max(
+        MIN_ZOOM,
+        Math.min(
+          canvasRect.width /
+            Math.max(layout.contentWidth, 600),
+
+          canvasRect.height /
+            Math.max(layout.contentHeight, 500)
+        ) * 0.82
+      )
+    );
+
+
+  viewX =
+    canvasRect.width / 2
+    -
+    layout.centerX * zoom;
+
+
+  viewY =
+    Math.max(
+      40,
+      canvasRect.height * 0.12
+      -
+      layout.topY * zoom
+    );
+
+
+  applyViewTransform();
+
+}
+
+
+/* -------------------------
+   ZOOM AROUND SCREEN POINT
+------------------------- */
+
+function zoomAtPoint(
+  newZoom,
+  screenX,
+  screenY
+) {
+
+  newZoom =
+    Math.max(
+      MIN_ZOOM,
+      Math.min(
+        MAX_ZOOM,
+        newZoom
+      )
+    );
+
+
+  const worldX =
+    (screenX - viewX) /
+    zoom;
+
+
+  const worldY =
+    (screenY - viewY) /
+    zoom;
+
+
+  zoom =
+    newZoom;
+
+
+  viewX =
+    screenX -
+    worldX * zoom;
+
+
+  viewY =
+    screenY -
+    worldY * zoom;
+
+
+  applyViewTransform();
+
+}
+
+
+/* -------------------------
+   BUTTON ZOOM
+------------------------- */
+
+zoomInButton.addEventListener(
+  "click",
+  function() {
+
+    const rect =
+      treeCanvas.getBoundingClientRect();
+
+    zoomAtPoint(
+      zoom + ZOOM_STEP,
+      rect.width / 2,
+      rect.height / 2
+    );
+
+  }
+);
+
+
+zoomOutButton.addEventListener(
+  "click",
+  function() {
+
+    const rect =
+      treeCanvas.getBoundingClientRect();
+
+    zoomAtPoint(
+      zoom - ZOOM_STEP,
+      rect.width / 2,
+      rect.height / 2
+    );
+
+  }
+);
+
+
+resetViewButton.addEventListener(
+  "click",
+  centerTree
+);
+
+
+/* -------------------------
+   POINTER PAN
+------------------------- */
+
+treeCanvas.addEventListener(
+  "pointerdown",
+  function(event) {
+
+    if (
+      event.target.closest(
+        ".character-node"
+      )
+    ) {
+      return;
+    }
+
+
+    if (
+      event.pointerType === "touch"
+    ) {
+      return;
+    }
+
+
+    isPanning = true;
+
+    panStartX =
+      event.clientX;
+
+    panStartY =
+      event.clientY;
+
+    startViewX =
+      viewX;
+
+    startViewY =
+      viewY;
+
+
+    treeCanvas.setPointerCapture(
+      event.pointerId
+    );
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointermove",
+  function(event) {
+
+    if (!isPanning) {
+      return;
+    }
+
+
+    viewX =
+      startViewX +
+      (
+        event.clientX -
+        panStartX
+      );
+
+
+    viewY =
+      startViewY +
+      (
+        event.clientY -
+        panStartY
+      );
+
+
+    applyViewTransform();
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointerup",
+  function() {
+
+    isPanning = false;
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointercancel",
+  function() {
+
+    isPanning = false;
+
+  }
+);
+
+
+/* -------------------------
+   TOUCH PAN + PINCH
+------------------------- */
+
+treeCanvas.addEventListener(
+  "touchstart",
+  function(event) {
+
+    if (
+      event.touches.length === 1
+    ) {
+
+      const touch =
+        event.touches[0];
+
+
+      panStartX =
+        touch.clientX;
+
+      panStartY =
+        touch.clientY;
+
+      startViewX =
+        viewX;
+
+      startViewY =
+        viewY;
+
+
+      isPanning =
+        !event.target.closest(
+          ".character-node"
+        );
+
+    }
+
+
+    if (
+      event.touches.length === 2
+    ) {
+
+      isPanning =
+        false;
+
+
+      const first =
+        event.touches[0];
+
+      const second =
+        event.touches[1];
+
+
+      pinchStartDistance =
+        getTouchDistance(
+          first,
+          second
+        );
+
+
+      pinchStartZoom =
+        zoom;
+
+
+      const midpoint =
+        getTouchMidpoint(
+          first,
+          second
+        );
+
+
+      pinchWorldX =
+        (
+          midpoint.x -
+          viewX
+        ) / zoom;
+
+
+      pinchWorldY =
+        (
+          midpoint.y -
+          viewY
+        ) / zoom;
+
+    }
+
+  },
+  {
+    passive: false
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "touchmove",
+  function(event) {
+
+    event.preventDefault();
+
+
+    if (
+      event.touches.length === 1
+      &&
+      isPanning
+    ) {
+
+      const touch =
+        event.touches[0];
+
+
+      viewX =
+        startViewX +
+        (
+          touch.clientX -
+          panStartX
+        );
+
+
+      viewY =
+        startViewY +
+        (
+          touch.clientY -
+          panStartY
+        );
+
+
+      applyViewTransform();
+
+    }
+
+
+    if (
+      event.touches.length === 2
+    ) {
+
+      const first =
+        event.touches[0];
+
+      const second =
+        event.touches[1];
+
+
+      const distance =
+        getTouchDistance(
+          first,
+          second
+        );
+
+
+      const scaleChange =
+        distance /
+        pinchStartDistance;
+
+
+      const newZoom =
+        Math.max(
+          MIN_ZOOM,
+          Math.min(
+            MAX_ZOOM,
+            pinchStartZoom *
+            scaleChange
+          )
+        );
+
+
+      const midpoint =
+        getTouchMidpoint(
+          first,
+          second
+        );
+
+
+      zoom =
+        newZoom;
+
+
+      viewX =
+        midpoint.x -
+        pinchWorldX *
+        zoom;
+
+
+      viewY =
+        midpoint.y -
+        pinchWorldY *
+        zoom;
+
+
+      applyViewTransform();
+
+    }
+
+  },
+  {
+    passive: false
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "touchend",
+  function(event) {
+
+    if (
+      event.touches.length === 0
+    ) {
+
+      isPanning =
+        false;
+
+    }
+
+
+    if (
+      event.touches.length === 1
+    ) {
+
+      const touch =
+        event.touches[0];
+
+
+      panStartX =
+        touch.clientX;
+
+      panStartY =
+        touch.clientY;
+
+      startViewX =
+        viewX;
+
+      startViewY =
+        viewY;
+
+
+      isPanning =
+        true;
+
+    }
+
+  }
+);
+
+
+function getTouchDistance(
+  first,
+  second
+) {
+
+  return Math.hypot(
+    second.clientX -
+    first.clientX,
+
+    second.clientY -
+    first.clientY
+  );
+
+}
+
+
+function getTouchMidpoint(
+  first,
+  second
+) {
+
+  return {
+
+    x:
+      (
+        first.clientX +
+        second.clientX
+      ) / 2,
+
+    y:
+      (
+        first.clientY +
+        second.clientY
+      ) / 2
+
+  };
+
+}
+
+
+/* =========================================================
+   CHARACTER CREATION
+========================================================= */
 
 function openCharacterForm() {
 
@@ -364,10 +871,6 @@ formBackdrop.addEventListener(
 );
 
 
-/* -------------------------
-   SAVE NEW CHARACTER
-------------------------- */
-
 characterForm.addEventListener(
   "submit",
 
@@ -382,41 +885,27 @@ characterForm.addEventListener(
         Date.now(),
 
       title:
-        getInputValue(
-          "title"
-        ),
+        getInputValue("title"),
 
       givenName:
-        getInputValue(
-          "givenName"
-        ),
+        getInputValue("givenName"),
 
       aliases:
         makeAliasArray(
-          getInputValue(
-            "aliases"
-          )
+          getInputValue("aliases")
         ),
 
       maidenName:
-        getInputValue(
-          "maidenName"
-        ),
+        getInputValue("maidenName"),
 
       familyName:
-        getInputValue(
-          "familyName"
-        ),
+        getInputValue("familyName"),
 
       birthYear:
-        getInputValue(
-          "birthYear"
-        ),
+        getInputValue("birthYear"),
 
       deathYear:
-        getInputValue(
-          "deathYear"
-        ),
+        getInputValue("deathYear"),
 
       race: "",
 
@@ -459,13 +948,8 @@ characterForm.addEventListener(
 
 
 /* =========================================================
-   FAMILY TREE LAYOUT
+   TREE LAYOUT
 ========================================================= */
-
-
-/* -------------------------
-   RENDER ENTIRE TREE
-------------------------- */
 
 function renderTree() {
 
@@ -484,12 +968,6 @@ function renderTree() {
       "hidden"
     );
 
-    treeWorld.style.width =
-      "100%";
-
-    treeWorld.style.height =
-      "100%";
-
     return;
 
   }
@@ -502,30 +980,6 @@ function renderTree() {
 
   const layout =
     calculateTreeLayout();
-
-
-  treeWorld.style.width =
-    `${layout.width}px`;
-
-  treeWorld.style.height =
-    `${layout.height}px`;
-
-
-  treeLines.setAttribute(
-    "viewBox",
-    `0 0 ${layout.width} ${layout.height}`
-  );
-
-
-  treeLines.setAttribute(
-    "width",
-    layout.width
-  );
-
-  treeLines.setAttribute(
-    "height",
-    layout.height
-  );
 
 
   drawRelationshipLines(
@@ -558,18 +1012,359 @@ function renderTree() {
 }
 
 
-/* -------------------------
-   GENERATION CALCULATION
-------------------------- */
+function calculateTreeLayout() {
+
+  const generations =
+    calculateAllGenerations();
+
+
+  const rows =
+    new Map();
+
+
+  characters.forEach(
+    character => {
+
+      const generation =
+        generations.get(
+          character.id
+        ) || 0;
+
+
+      if (
+        !rows.has(
+          generation
+        )
+      ) {
+
+        rows.set(
+          generation,
+          []
+        );
+
+      }
+
+
+      rows
+        .get(generation)
+        .push(character);
+
+    }
+  );
+
+
+  const sortedGenerations =
+    Array.from(
+      rows.keys()
+    )
+      .sort(
+        (a,b) => a - b
+      );
+
+
+  const positions =
+    new Map();
+
+
+  const worldCenter =
+    WORLD_SIZE / 2;
+
+
+  let minX =
+    worldCenter;
+
+  let maxX =
+    worldCenter;
+
+  let minY =
+    worldCenter;
+
+  let maxY =
+    worldCenter;
+
+
+  sortedGenerations.forEach(
+    generation => {
+
+      let row =
+        rows.get(
+          generation
+        );
+
+
+      row =
+        clusterSpouses(
+          row
+        );
+
+
+      const rowWidth =
+        (
+          row.length - 1
+        ) *
+        NODE_GAP_X;
+
+
+      const startX =
+        worldCenter -
+        rowWidth / 2;
+
+
+      const y =
+        worldCenter -
+        500 +
+        generation *
+        GENERATION_GAP_Y;
+
+
+      row.forEach(
+        (character,index) => {
+
+          const x =
+            startX +
+            index *
+            NODE_GAP_X;
+
+
+          positions.set(
+            character.id,
+            {
+              x,
+              y
+            }
+          );
+
+
+          minX =
+            Math.min(
+              minX,
+              x
+            );
+
+          maxX =
+            Math.max(
+              maxX,
+              x
+            );
+
+          minY =
+            Math.min(
+              minY,
+              y
+            );
+
+          maxY =
+            Math.max(
+              maxY,
+              y
+            );
+
+        }
+      );
+
+    }
+  );
+
+
+  return {
+
+    positions,
+
+    centerX:
+      (
+        minX +
+        maxX
+      ) / 2,
+
+    topY:
+      minY,
+
+    contentWidth:
+      Math.max(
+        maxX -
+        minX +
+        300,
+        600
+      ),
+
+    contentHeight:
+      Math.max(
+        maxY -
+        minY +
+        350,
+        500
+      )
+
+  };
+
+}
+
+
+function calculateAllGenerations() {
+
+  const memo =
+    new Map();
+
+
+  characters.forEach(
+    character => {
+
+      calculateGeneration(
+        character.id,
+        memo,
+        new Set()
+      );
+
+    }
+  );
+
+
+  /*
+    Keep spouses visually
+    on the same generation.
+  */
+
+  for (
+    let pass = 0;
+    pass < 5;
+    pass++
+  ) {
+
+    characters.forEach(
+      character => {
+
+        character.spouseIds.forEach(
+          spouseId => {
+
+            if (
+              !memo.has(spouseId)
+            ) {
+              return;
+            }
+
+
+            const shared =
+              Math.max(
+                memo.get(
+                  character.id
+                ) || 0,
+
+                memo.get(
+                  spouseId
+                ) || 0
+              );
+
+
+            memo.set(
+              character.id,
+              shared
+            );
+
+            memo.set(
+              spouseId,
+              shared
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /*
+    Re-enforce child below parents.
+  */
+
+  for (
+    let pass = 0;
+    pass < characters.length;
+    pass++
+  ) {
+
+    characters.forEach(
+      character => {
+
+        const parentIds =
+          [
+            character.motherId,
+            character.fatherId
+          ]
+            .filter(Boolean);
+
+
+        if (
+          parentIds.length === 0
+        ) {
+          return;
+        }
+
+
+        const parentLevels =
+          parentIds
+            .map(
+              id =>
+                memo.get(id)
+            )
+            .filter(
+              level =>
+                level !== undefined
+            );
+
+
+        if (
+          parentLevels.length === 0
+        ) {
+          return;
+        }
+
+
+        const minimumChildLevel =
+          Math.max(
+            ...parentLevels
+          ) + 1;
+
+
+        if (
+          (
+            memo.get(
+              character.id
+            ) || 0
+          )
+          <
+          minimumChildLevel
+        ) {
+
+          memo.set(
+            character.id,
+            minimumChildLevel
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  return memo;
+
+}
+
 
 function calculateGeneration(
   characterId,
-  memo = new Map(),
-  visiting = new Set()
+  memo,
+  visiting
 ) {
 
   if (
-    memo.has(characterId)
+    memo.has(
+      characterId
+    )
   ) {
 
     return memo.get(
@@ -580,7 +1375,9 @@ function calculateGeneration(
 
 
   if (
-    visiting.has(characterId)
+    visiting.has(
+      characterId
+    )
   ) {
 
     return 0;
@@ -663,478 +1460,7 @@ function calculateGeneration(
 }
 
 
-/* -------------------------
-   FULL LAYOUT
-------------------------- */
-
-function calculateTreeLayout() {
-
-  const generationMemo =
-    new Map();
-
-
-  const generationMap =
-    new Map();
-
-
-  characters.forEach(
-    character => {
-
-      const generation =
-        calculateGeneration(
-          character.id,
-          generationMemo
-        );
-
-
-      generationMap.set(
-        character.id,
-        generation
-      );
-
-    }
-  );
-
-
-  /*
-    Keep spouses on the same
-    visual generation whenever possible.
-  */
-
-  for (
-    let pass = 0;
-    pass < 4;
-    pass++
-  ) {
-
-    characters.forEach(
-      character => {
-
-        character.spouseIds.forEach(
-          spouseId => {
-
-            if (
-              !generationMap.has(
-                spouseId
-              )
-            ) {
-              return;
-            }
-
-
-            const currentGeneration =
-              generationMap.get(
-                character.id
-              );
-
-
-            const spouseGeneration =
-              generationMap.get(
-                spouseId
-              );
-
-
-            const sharedGeneration =
-              Math.max(
-                currentGeneration,
-                spouseGeneration
-              );
-
-
-            generationMap.set(
-              character.id,
-              sharedGeneration
-            );
-
-            generationMap.set(
-              spouseId,
-              sharedGeneration
-            );
-
-          }
-        );
-
-      }
-    );
-
-  }
-
-
-  /*
-    A child must always be
-    below their parents.
-  */
-
-  for (
-    let pass = 0;
-    pass < characters.length;
-    pass++
-  ) {
-
-    characters.forEach(
-      character => {
-
-        const parentIds =
-          [
-            character.motherId,
-            character.fatherId
-          ]
-            .filter(Boolean);
-
-
-        if (
-          parentIds.length === 0
-        ) {
-          return;
-        }
-
-
-        const parentGenerations =
-          parentIds
-            .map(
-              id =>
-                generationMap.get(id)
-            )
-            .filter(
-              value =>
-                value !== undefined
-            );
-
-
-        if (
-          parentGenerations.length === 0
-        ) {
-          return;
-        }
-
-
-        const requiredGeneration =
-          Math.max(
-            ...parentGenerations
-          ) + 1;
-
-
-        if (
-          generationMap.get(
-            character.id
-          ) <
-          requiredGeneration
-        ) {
-
-          generationMap.set(
-            character.id,
-            requiredGeneration
-          );
-
-        }
-
-      }
-    );
-
-  }
-
-
-  const rows =
-    new Map();
-
-
-  characters.forEach(
-    character => {
-
-      const generation =
-        generationMap.get(
-          character.id
-        ) || 0;
-
-
-      if (
-        !rows.has(
-          generation
-        )
-      ) {
-
-        rows.set(
-          generation,
-          []
-        );
-
-      }
-
-
-      rows
-        .get(generation)
-        .push(character);
-
-    }
-  );
-
-
-  const generations =
-    Array.from(
-      rows.keys()
-    )
-      .sort(
-        (a,b) => a - b
-      );
-
-
-  /*
-    Arrange each generation
-    based on parent positions.
-  */
-
-  const orderIndex =
-    new Map();
-
-
-  generations.forEach(
-    generation => {
-
-      const row =
-        rows.get(
-          generation
-        );
-
-
-      if (
-        generation ===
-        generations[0]
-      ) {
-
-        row.sort(
-          compareCharacterNames
-        );
-
-      } else {
-
-        row.sort(
-          (a,b) => {
-
-            const aParentScore =
-              getParentOrderScore(
-                a,
-                orderIndex
-              );
-
-            const bParentScore =
-              getParentOrderScore(
-                b,
-                orderIndex
-              );
-
-
-            if (
-              aParentScore !==
-              bParentScore
-            ) {
-
-              return (
-                aParentScore -
-                bParentScore
-              );
-
-            }
-
-
-            return compareCharacterNames(
-              a,
-              b
-            );
-
-          }
-        );
-
-      }
-
-
-      const clusteredRow =
-        clusterSpouses(
-          row
-        );
-
-
-      rows.set(
-        generation,
-        clusteredRow
-      );
-
-
-      clusteredRow.forEach(
-        (character,index) => {
-
-          orderIndex.set(
-            character.id,
-            index
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  const longestRow =
-    Math.max(
-      ...Array.from(
-        rows.values()
-      )
-        .map(
-          row => row.length
-        ),
-      1
-    );
-
-
-  const contentWidth =
-    (
-      longestRow - 1
-    ) *
-    NODE_GAP_X;
-
-
-  const width =
-    Math.max(
-      window.innerWidth,
-      contentWidth +
-      TREE_PADDING_X * 2
-    );
-
-
-  const maxGeneration =
-    Math.max(
-      ...generations,
-      0
-    );
-
-
-  const height =
-    Math.max(
-      window.innerHeight - 86,
-      TREE_PADDING_TOP +
-      maxGeneration *
-      GENERATION_GAP_Y +
-      260
-    );
-
-
-  const positions =
-    new Map();
-
-
-  generations.forEach(
-    generation => {
-
-      const row =
-        rows.get(
-          generation
-        );
-
-
-      const rowWidth =
-        (
-          row.length - 1
-        ) *
-        NODE_GAP_X;
-
-
-      const rowStartX =
-        width / 2 -
-        rowWidth / 2;
-
-
-      row.forEach(
-        (character,index) => {
-
-          positions.set(
-            character.id,
-            {
-
-              x:
-                rowStartX +
-                index *
-                NODE_GAP_X,
-
-              y:
-                TREE_PADDING_TOP +
-                generation *
-                GENERATION_GAP_Y,
-
-              generation
-
-            }
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  return {
-    positions,
-    width,
-    height
-  };
-
-}
-
-
-/* -------------------------
-   PARENT ORDERING
-------------------------- */
-
-function getParentOrderScore(
-  character,
-  orderIndex
-) {
-
-  const scores =
-    [
-      character.motherId,
-      character.fatherId
-    ]
-      .filter(Boolean)
-      .map(
-        id =>
-          orderIndex.get(id)
-      )
-      .filter(
-        value =>
-          value !== undefined
-      );
-
-
-  if (
-    scores.length === 0
-  ) {
-
-    return 999999;
-
-  }
-
-
-  return (
-    scores.reduce(
-      (total,value) =>
-        total + value,
-      0
-    )
-    /
-    scores.length
-  );
-
-}
-
-
-/* -------------------------
-   KEEP SPOUSES TOGETHER
-------------------------- */
-
-function clusterSpouses(
-  row
-) {
+function clusterSpouses(row) {
 
   const rowIds =
     new Set(
@@ -1167,7 +1493,6 @@ function clusterSpouses(
 
       const group =
         [];
-
 
       const queue =
         [character];
@@ -1250,10 +1575,6 @@ function clusterSpouses(
 }
 
 
-/* -------------------------
-   RENDER NODE
-------------------------- */
-
 function renderCharacterNode(
   character,
   position
@@ -1311,7 +1632,10 @@ function renderCharacterNode(
   node.addEventListener(
     "click",
 
-    function() {
+    function(event) {
+
+      event.stopPropagation();
+
 
       openProfile(
         character.id
@@ -1329,13 +1653,8 @@ function renderCharacterNode(
 
 
 /* =========================================================
-   TREE CONNECTION LINES
+   CONNECTION LINES
 ========================================================= */
-
-
-/* -------------------------
-   DRAW ALL LINES
-------------------------- */
 
 function drawRelationshipLines(
   positions
@@ -1364,15 +1683,11 @@ function drawRelationshipLines(
 }
 
 
-/* -------------------------
-   SPOUSE LINES
-------------------------- */
-
 function drawSpouseLines(
   positions
 ) {
 
-  const drawnPairs =
+  const drawn =
     new Set();
 
 
@@ -1382,7 +1697,7 @@ function drawSpouseLines(
       character.spouseIds.forEach(
         spouseId => {
 
-          const pairKey =
+          const key =
             [
               character.id,
               spouseId
@@ -1394,23 +1709,20 @@ function drawSpouseLines(
 
 
           if (
-            drawnPairs.has(
-              pairKey
-            )
+            drawn.has(key)
           ) {
             return;
           }
 
 
-          drawnPairs.add(
-            pairKey
-          );
+          drawn.add(key);
 
 
           const first =
             positions.get(
               character.id
             );
+
 
           const second =
             positions.get(
@@ -1426,16 +1738,13 @@ function drawSpouseLines(
           }
 
 
-          const y =
-            first.y +
-            NODE_CIRCLE_SIZE / 2;
-
-
           addSvgLine(
             first.x,
-            y,
+            first.y + 41,
+
             second.x,
-            y,
+            second.y + 41,
+
             "tree-line partner-line"
           );
 
@@ -1448,10 +1757,6 @@ function drawSpouseLines(
 }
 
 
-/* -------------------------
-   GROUP CHILDREN BY PARENTS
-------------------------- */
-
 function buildParentChildGroups() {
 
   const groups =
@@ -1460,14 +1765,6 @@ function buildParentChildGroups() {
 
   characters.forEach(
     child => {
-
-      if (
-        !child.motherId &&
-        !child.fatherId
-      ) {
-        return;
-      }
-
 
       const parentIds =
         [
@@ -1478,6 +1775,13 @@ function buildParentChildGroups() {
           .sort(
             (a,b) => a - b
           );
+
+
+      if (
+        parentIds.length === 0
+      ) {
+        return;
+      }
 
 
       const key =
@@ -1515,16 +1819,12 @@ function buildParentChildGroups() {
 }
 
 
-/* -------------------------
-   DRAW A FAMILY BRANCH
-------------------------- */
-
 function drawParentChildGroup(
   group,
   positions
 ) {
 
-  const parentPositions =
+  const parents =
     group.parentIds
       .map(
         id =>
@@ -1533,7 +1833,7 @@ function drawParentChildGroup(
       .filter(Boolean);
 
 
-  const childPositions =
+  const children =
     group.children
       .map(
         child =>
@@ -1545,130 +1845,110 @@ function drawParentChildGroup(
 
 
   if (
-    parentPositions.length === 0 ||
-    childPositions.length === 0
+    parents.length === 0
+    ||
+    children.length === 0
   ) {
     return;
   }
 
 
-  const parentCircleY =
+  const parentY =
     Math.max(
-      ...parentPositions.map(
-        position =>
-          position.y +
-          NODE_CIRCLE_SIZE / 2
+      ...parents.map(
+        parent =>
+          parent.y + 41
       )
     );
 
 
-  let sourceX;
+  const sourceX =
+    parents.reduce(
+      (sum,parent) =>
+        sum + parent.x,
+      0
+    )
+    /
+    parents.length;
 
 
   if (
-    parentPositions.length === 2
+    parents.length === 2
   ) {
 
-    const first =
-      parentPositions[0];
-
-    const second =
-      parentPositions[1];
-
-
-    sourceX =
-      (
-        first.x +
-        second.x
-      ) / 2;
-
-
-    /*
-      Parent-to-parent connection.
-      It is drawn even if they are
-      not marked as spouses.
-    */
-
     addSvgLine(
-      first.x,
-      parentCircleY,
-      second.x,
-      parentCircleY,
+      parents[0].x,
+      parentY,
+
+      parents[1].x,
+      parentY,
+
       "tree-line"
     );
-
-  } else {
-
-    sourceX =
-      parentPositions[0].x;
 
   }
 
 
-  const childTopY =
-    Math.min(
-      ...childPositions.map(
-        position =>
-          position.y
-      )
-    );
-
-
   const branchY =
-    childTopY - 45;
+    Math.min(
+      ...children.map(
+        child =>
+          child.y
+      )
+    ) - 45;
 
 
   addSvgLine(
     sourceX,
-    parentCircleY,
+    parentY,
+
     sourceX,
     branchY,
+
     "tree-line"
   );
 
 
   const childXs =
-    childPositions.map(
-      position =>
-        position.x
-    );
-
-
-  const minimumX =
-    Math.min(
-      ...childXs
-    );
-
-
-  const maximumX =
-    Math.max(
-      ...childXs
+    children.map(
+      child =>
+        child.x
     );
 
 
   if (
-    childPositions.length > 1
+    children.length > 1
   ) {
 
     addSvgLine(
-      minimumX,
+      Math.min(
+        ...childXs
+      ),
+
       branchY,
-      maximumX,
+
+      Math.max(
+        ...childXs
+      ),
+
       branchY,
+
       "tree-line"
     );
 
   }
 
 
-  childPositions.forEach(
-    position => {
+  children.forEach(
+    child => {
 
       addSvgLine(
-        position.x,
+        child.x,
         branchY,
-        position.x,
-        position.y,
+
+        child.x,
+        child.y,
+
         "tree-line"
       );
 
@@ -1677,10 +1957,6 @@ function drawParentChildGroup(
 
 }
 
-
-/* -------------------------
-   SVG LINE
-------------------------- */
 
 function addSvgLine(
   x1,
@@ -1862,10 +2138,6 @@ function openProfile(
 }
 
 
-/* -------------------------
-   CLICKABLE RELATIVES
-------------------------- */
-
 function renderRelationshipProfile(
   character
 ) {
@@ -1882,75 +2154,51 @@ function renderRelationshipProfile(
     );
 
 
-  const siblings =
-    getSiblings(
-      character.id
-    );
-
-
-  const spouses =
-    getCharactersFromIds(
-      character.spouseIds
-    );
-
-
-  const lovers =
-    getCharactersFromIds(
-      character.loverIds
-    );
-
-
-  const children =
-    getChildren(
-      character.id
-    );
-
-
   renderRelationshipButtons(
     "profileMother",
-    mother
-      ? [mother]
-      : []
+    mother ? [mother] : []
   );
 
 
   renderRelationshipButtons(
     "profileFather",
-    father
-      ? [father]
-      : []
+    father ? [father] : []
   );
 
 
   renderRelationshipButtons(
     "profileSiblings",
-    siblings
+    getSiblings(
+      character.id
+    )
   );
 
 
   renderRelationshipButtons(
     "profileSpouses",
-    spouses
+    getCharactersFromIds(
+      character.spouseIds
+    )
   );
 
 
   renderRelationshipButtons(
     "profileLovers",
-    lovers
+    getCharactersFromIds(
+      character.loverIds
+    )
   );
 
 
   renderRelationshipButtons(
     "profileChildren",
-    children
+    getChildren(
+      character.id
+    )
   );
 
 }
 
-
-/* -------------------------
-   CREATE RELATIVE BUTTONS
-------------------------- */
 
 function renderRelationshipButtons(
   containerId,
@@ -2041,10 +2289,6 @@ function renderRelationshipButtons(
 }
 
 
-/* -------------------------
-   CHILDREN
-------------------------- */
-
 function getChildren(
   parentId
 ) {
@@ -2059,10 +2303,6 @@ function getChildren(
 
 }
 
-
-/* -------------------------
-   SIBLINGS
-------------------------- */
 
 function getSiblings(
   characterId
@@ -2114,10 +2354,6 @@ function getSiblings(
 
 }
 
-
-/* -------------------------
-   CLOSE PROFILE
-------------------------- */
 
 function closeProfile() {
 
@@ -2189,9 +2425,7 @@ function openEditor() {
   document.getElementById(
     "editAliases"
   ).value =
-    character.aliases.join(
-      ", "
-    );
+    character.aliases.join(", ");
 
 
   document.getElementById(
@@ -2287,10 +2521,6 @@ function openEditor() {
 
 }
 
-
-/* -------------------------
-   RELATIONSHIP SELECTS
-------------------------- */
 
 function populateRelationshipSelectors(
   character
@@ -2453,10 +2683,6 @@ function populateMultiSelect(
 }
 
 
-/* -------------------------
-   CANCEL EDIT
-------------------------- */
-
 function cancelEditor() {
 
   editBackdrop.classList.add(
@@ -2497,10 +2723,6 @@ editBackdrop.addEventListener(
 );
 
 
-/* -------------------------
-   SAVE EDIT
-------------------------- */
-
 editCharacterForm.addEventListener(
   "submit",
 
@@ -2529,9 +2751,7 @@ editCharacterForm.addEventListener(
 
 
     character.title =
-      getInputValue(
-        "editTitle"
-      );
+      getInputValue("editTitle");
 
 
     character.givenName =
@@ -2656,7 +2876,6 @@ editCharacterForm.addEventListener(
 
     saveCharacters();
 
-
     renderTree();
 
 
@@ -2676,10 +2895,6 @@ editCharacterForm.addEventListener(
   }
 );
 
-
-/* -------------------------
-   TWO-WAY RELATIONSHIPS
-------------------------- */
 
 function syncTwoWayRelationship(
   characterId,
@@ -2938,19 +3153,6 @@ function getProfileName(
 }
 
 
-function compareCharacterNames(
-  a,
-  b
-) {
-
-  return getTreeName(a)
-    .localeCompare(
-      getTreeName(b)
-    );
-
-}
-
-
 function makeYearText(
   character
 ) {
@@ -2974,16 +3176,12 @@ function makeYearText(
 
 
   if (birth) {
-
     return `${birth} –`;
-
   }
 
 
   if (death) {
-
     return `? – ${death}`;
-
   }
 
 
@@ -3089,7 +3287,7 @@ function escapeHTML(
 
 
 /* -------------------------
-   REDRAW ON SCREEN ROTATION
+   ROTATION / RESIZE
 ------------------------- */
 
 window.addEventListener(
@@ -3108,3 +3306,8 @@ window.addEventListener(
 ------------------------- */
 
 renderTree();
+
+setTimeout(
+  centerTree,
+  100
+);
