@@ -48,13 +48,7 @@ textarea {
   display: flex;
   flex-direction: column;
 
-  background:
-    radial-gradient(
-      circle at center,
-      #18181c 0%,
-      #101013 55%,
-      #0b0b0d 100%
-    );
+  background: #101013;
 }
 
 
@@ -78,19 +72,18 @@ textarea {
     1px solid rgba(255,255,255,0.08);
 
   background:
-    rgba(15,15,18,0.9);
+    rgba(15,15,18,0.94);
 
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 
-  z-index: 10;
+  z-index: 20;
 }
 
 .eyebrow {
   margin: 0 0 4px;
 
   font-size: 11px;
-
   letter-spacing: 0.16em;
   text-transform: uppercase;
 
@@ -133,14 +126,14 @@ textarea {
 }
 
 
-/* TREE VIEWPORT */
+/* INFINITE CANVAS */
 
 .tree-canvas {
   position: relative;
 
   flex: 1;
 
-  overflow: auto;
+  overflow: hidden;
 
   background-color: #101013;
 
@@ -153,25 +146,34 @@ textarea {
 
   background-size: 28px 28px;
 
-  -webkit-overflow-scrolling: touch;
+  touch-action: none;
+
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-
-/* LARGE TREE WORKSPACE */
-
-.tree-world {
-  position: relative;
-
-  min-width: 100%;
-  min-height: 100%;
-}
-
-.character-layer {
+.tree-viewport {
   position: absolute;
 
   inset: 0;
 
-  z-index: 2;
+  overflow: visible;
+
+  transform-origin: 0 0;
+
+  will-change: transform;
+}
+
+.tree-world {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 4000px;
+  height: 4000px;
+
+  transform-origin: 0 0;
 }
 
 .tree-lines {
@@ -189,6 +191,17 @@ textarea {
   pointer-events: none;
 }
 
+.character-layer {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 2;
+}
+
+
+/* TREE LINES */
+
 .tree-line {
   fill: none;
 
@@ -203,9 +216,7 @@ textarea {
 
 .partner-line {
   stroke:
-    rgba(235,228,218,0.6);
-
-  stroke-width: 2;
+    rgba(235,228,218,0.62);
 }
 
 
@@ -224,7 +235,7 @@ textarea {
 
   text-align: center;
 
-  z-index: 5;
+  z-index: 10;
 }
 
 .empty-symbol {
@@ -261,6 +272,82 @@ textarea {
   color: #9d9891;
 
   line-height: 1.55;
+}
+
+
+/* CANVAS CONTROLS */
+
+.canvas-controls {
+  position: absolute;
+
+  right: 14px;
+  bottom:
+    calc(
+      18px +
+      env(safe-area-inset-bottom)
+    );
+
+  display: flex;
+
+  gap: 8px;
+
+  z-index: 15;
+}
+
+.canvas-control-button {
+  min-width: 46px;
+  height: 46px;
+
+  padding: 0 14px;
+
+  border:
+    1px solid rgba(255,255,255,0.12);
+
+  border-radius: 14px;
+
+  background:
+    rgba(25,25,29,0.92);
+
+  color: #f5f3ef;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  font-size: 22px;
+}
+
+.center-button {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.zoom-indicator {
+  position: absolute;
+
+  left: 14px;
+  bottom:
+    calc(
+      22px +
+      env(safe-area-inset-bottom)
+    );
+
+  padding: 8px 10px;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  border-radius: 10px;
+
+  background:
+    rgba(20,20,24,0.78);
+
+  color: #8f8983;
+
+  font-size: 11px;
+
+  z-index: 15;
+
+  pointer-events: none;
 }
 
 
@@ -354,15 +441,6 @@ button:active {
     rgba(0,0,0,0.32);
 
   font-size: 25px;
-
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease;
-}
-
-.character-node:active
-.character-circle {
-  transform: scale(0.95);
 }
 
 .character-name {
@@ -536,13 +614,6 @@ button:active {
   line-height: 1.55;
 }
 
-.field input:focus,
-.field textarea:focus,
-.field select:focus {
-  border-color:
-    rgba(240,233,223,0.55);
-}
-
 .field small {
   display: block;
 
@@ -683,8 +754,6 @@ button:active {
 .color-editor-field strong {
   margin-top: 8px;
 
-  max-width: 100%;
-
   font-size: 9px;
   font-weight: 500;
 
@@ -753,9 +822,6 @@ button:active {
   align-items: stretch;
 }
 
-
-/* PROFILE BOX */
-
 .profile-box {
   min-width: 0;
 
@@ -801,9 +867,6 @@ button:active {
   font-weight: 600;
 }
 
-
-/* PROFILE AREAS */
-
 .title-box {
   grid-area: title;
 }
@@ -821,7 +884,7 @@ button:active {
 .family-box {
   grid-area: family;
 
-  min-height: 470px;
+  min-height: 500px;
 }
 
 .race-box {
@@ -833,7 +896,7 @@ button:active {
 .feature-box {
   grid-area: feature;
 
-  min-height: 268px;
+  min-height: 298px;
 }
 
 .achievements-box {
@@ -847,9 +910,6 @@ button:active {
 
   min-height: 380px;
 }
-
-
-/* NAME */
 
 .profile-main-name {
   font-size:
@@ -867,9 +927,6 @@ button:active {
 
   color: #99928c;
 }
-
-
-/* COLORS */
 
 .colors-box {
   grid-area: colors;
@@ -932,9 +989,6 @@ button:active {
   color: #85807a;
 }
 
-
-/* CLICKABLE FAMILY */
-
 .family-list {
   display: grid;
 
@@ -989,21 +1043,13 @@ button:active {
 
   line-height: 1.45;
 
-  text-decoration:
-    underline;
+  text-decoration: underline;
 
   text-decoration-color:
     rgba(238,234,228,0.3);
 
   text-underline-offset: 3px;
 }
-
-.relationship-button:active {
-  opacity: 0.6;
-}
-
-
-/* RACE */
 
 .centered-value {
   min-height: 100px;
@@ -1018,9 +1064,6 @@ button:active {
   font-weight: 600;
 }
 
-
-/* LIFE */
-
 .life-text {
   min-height: 320px;
 
@@ -1032,9 +1075,6 @@ button:active {
 
   color: #e7e2dc;
 }
-
-
-/* PROFILE FOOTER */
 
 .profile-footer {
   position: absolute;
@@ -1093,42 +1133,9 @@ button:active {
       "life life";
   }
 
-  .family-box {
-    min-height: 500px;
-  }
-
-  .race-box {
-    min-height: 190px;
-  }
-
-  .feature-box {
-    min-height: 298px;
-  }
-
   .large-color-swatch {
     width: 54px;
     height: 54px;
-  }
-
-}
-
-
-@media (max-width: 360px) {
-
-  .profile-dashboard {
-    padding-left: 10px;
-    padding-right: 10px;
-
-    gap: 9px;
-  }
-
-  .profile-box {
-    padding: 13px;
-  }
-
-  .large-color-swatch {
-    width: 46px;
-    height: 46px;
   }
 
 }
