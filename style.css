@@ -90,6 +90,7 @@ textarea {
   margin: 0 0 4px;
 
   font-size: 11px;
+
   letter-spacing: 0.16em;
   text-transform: uppercase;
 
@@ -132,16 +133,16 @@ textarea {
 }
 
 
-/* TREE */
+/* TREE VIEWPORT */
 
 .tree-canvas {
   position: relative;
 
   flex: 1;
 
-  overflow: hidden;
+  overflow: auto;
 
-  touch-action: none;
+  background-color: #101013;
 
   background-image:
     radial-gradient(
@@ -151,12 +152,64 @@ textarea {
     );
 
   background-size: 28px 28px;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* LARGE TREE WORKSPACE */
+
+.tree-world {
+  position: relative;
+
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .character-layer {
   position: absolute;
+
   inset: 0;
+
+  z-index: 2;
 }
+
+.tree-lines {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: visible;
+
+  z-index: 1;
+
+  pointer-events: none;
+}
+
+.tree-line {
+  fill: none;
+
+  stroke:
+    rgba(220,214,205,0.42);
+
+  stroke-width: 2;
+
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.partner-line {
+  stroke:
+    rgba(235,228,218,0.6);
+
+  stroke-width: 2;
+}
+
+
+/* EMPTY */
 
 .empty-state {
   position: absolute;
@@ -170,6 +223,8 @@ textarea {
     translate(-50%,-50%);
 
   text-align: center;
+
+  z-index: 5;
 }
 
 .empty-symbol {
@@ -194,6 +249,7 @@ textarea {
 
 .empty-state h2 {
   margin: 0 0 10px;
+
   font-size: 24px;
 }
 
@@ -251,14 +307,16 @@ button:active {
 .character-node {
   position: absolute;
 
-  width: 170px;
+  width: 180px;
 
   transform:
-    translate(-50%,-50%);
+    translateX(-50%);
 
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  padding: 0;
 
   border: 0;
 
@@ -266,6 +324,10 @@ button:active {
   color: #f5f3ef;
 
   text-align: center;
+
+  cursor: pointer;
+
+  z-index: 3;
 }
 
 .character-circle {
@@ -278,7 +340,7 @@ button:active {
   border-radius: 50%;
 
   border:
-    2px solid rgba(240,233,223,0.7);
+    2px solid rgba(240,233,223,0.72);
 
   background:
     radial-gradient(
@@ -288,16 +350,30 @@ button:active {
     );
 
   box-shadow:
-    0 12px 30px rgba(0,0,0,0.32);
+    0 12px 30px
+    rgba(0,0,0,0.32);
 
   font-size: 25px;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.character-node:active
+.character-circle {
+  transform: scale(0.95);
 }
 
 .character-name {
   margin-top: 10px;
 
+  max-width: 180px;
+
   font-size: 15px;
   font-weight: 600;
+
+  line-height: 1.25;
 }
 
 .character-years {
@@ -313,6 +389,7 @@ button:active {
 
 .backdrop {
   position: fixed;
+
   inset: 0;
 
   background:
@@ -371,7 +448,9 @@ button:active {
 .panel-header {
   display: flex;
 
-  justify-content: space-between;
+  justify-content:
+    space-between;
+
   align-items: center;
 
   padding:
@@ -426,7 +505,8 @@ button:active {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
 
   padding: 12px 14px;
@@ -440,10 +520,13 @@ button:active {
 
   background: #202024;
 
+  color: #f5f3ef;
+
   font-size: 16px;
 }
 
-.field input {
+.field input,
+.field select {
   min-height: 50px;
 }
 
@@ -454,7 +537,8 @@ button:active {
 }
 
 .field input:focus,
-.field textarea:focus {
+.field textarea:focus,
+.field select:focus {
   border-color:
     rgba(240,233,223,0.55);
 }
@@ -467,6 +551,10 @@ button:active {
   font-size: 12px;
 
   color: #77726d;
+}
+
+.relationship-multi {
+  min-height: 140px !important;
 }
 
 .field-row {
@@ -509,7 +597,7 @@ button:active {
 }
 
 
-/* EDITOR SECTIONS */
+/* EDITOR */
 
 .editor-heading {
   margin:
@@ -523,7 +611,6 @@ button:active {
   font-size: 11px;
 
   letter-spacing: 0.16em;
-
   text-transform: uppercase;
 
   color: #918b83;
@@ -538,7 +625,7 @@ button:active {
 }
 
 
-/* COLOR EDITOR */
+/* COLOR EDITING */
 
 .color-editor-grid {
   display: grid;
@@ -598,10 +685,7 @@ button:active {
 
   max-width: 100%;
 
-  overflow: hidden;
-
   font-size: 9px;
-
   font-weight: 500;
 
   color: #817c76;
@@ -629,7 +713,6 @@ button:active {
   min-height: 66px;
 
   display: flex;
-
   align-items: center;
   justify-content: space-between;
 
@@ -695,7 +778,6 @@ button:active {
   font-size: 10px;
 
   letter-spacing: 0.12em;
-
   text-transform: uppercase;
 
   color: #817b75;
@@ -715,11 +797,12 @@ button:active {
 
 .big-value {
   font-size: 18px;
+
   font-weight: 600;
 }
 
 
-/* PROFILE GRID AREAS */
+/* PROFILE AREAS */
 
 .title-box {
   grid-area: title;
@@ -738,25 +821,25 @@ button:active {
 .family-box {
   grid-area: family;
 
-  min-height: 420px;
+  min-height: 470px;
 }
 
 .race-box {
   grid-area: race;
 
-  min-height: 180px;
+  min-height: 190px;
 }
 
 .feature-box {
   grid-area: feature;
 
-  min-height: 220px;
+  min-height: 268px;
 }
 
 .achievements-box {
   grid-area: achievements;
 
-  min-height: 180px;
+  min-height: 190px;
 }
 
 .life-box {
@@ -843,7 +926,6 @@ button:active {
   max-width: 100%;
 
   overflow: hidden;
-  text-overflow: ellipsis;
 
   font-size: 10px;
 
@@ -851,7 +933,7 @@ button:active {
 }
 
 
-/* FAMILY */
+/* CLICKABLE FAMILY */
 
 .family-list {
   display: grid;
@@ -859,26 +941,65 @@ button:active {
   gap: 18px;
 }
 
-.family-list div {
+.family-group {
   display: flex;
 
   flex-direction: column;
 
-  gap: 5px;
+  gap: 6px;
 }
 
-.family-list span {
+.family-group > span {
   font-size: 11px;
 
   color: #79746f;
 }
 
-.family-list strong {
-  font-size: 14px;
+.relationship-values {
+  display: flex;
 
-  font-weight: 500;
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 5px;
+}
+
+.relationship-empty {
+  color: #eeeae4;
+
+  font-size: 14px;
+}
+
+.relationship-button {
+  max-width: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
 
   color: #eeeae4;
+
+  text-align: left;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  line-height: 1.45;
+
+  text-decoration:
+    underline;
+
+  text-decoration-color:
+    rgba(238,234,228,0.3);
+
+  text-underline-offset: 3px;
+}
+
+.relationship-button:active {
+  opacity: 0.6;
 }
 
 
@@ -894,7 +1015,6 @@ button:active {
   text-align: center;
 
   font-size: 18px;
-
   font-weight: 600;
 }
 
@@ -955,7 +1075,7 @@ button:active {
 }
 
 
-/* PHONE PROFILE */
+/* MOBILE PROFILE */
 
 @media (max-width: 520px) {
 
@@ -973,13 +1093,8 @@ button:active {
       "life life";
   }
 
-  /*
-    Taller so Children stays INSIDE
-    the Family card.
-  */
-
   .family-box {
-    min-height: 470px;
+    min-height: 500px;
   }
 
   .race-box {
@@ -987,11 +1102,7 @@ button:active {
   }
 
   .feature-box {
-    min-height: 268px;
-  }
-
-  .achievements-box {
-    min-height: 190px;
+    min-height: 298px;
   }
 
   .large-color-swatch {
@@ -1022,36 +1133,6 @@ button:active {
 
 }
 
-.field select {
-  width: 100%;
-  min-height: 50px;
-
-  padding: 12px 14px;
-
-  border:
-    1px solid rgba(255,255,255,0.1);
-
-  border-radius: 13px;
-
-  background: #202024;
-  color: #f5f3ef;
-
-  font-size: 16px;
-}
-
-.relationship-multi {
-  min-height: 130px !important;
-}
-
-.relationship-name {
-  display: block;
-
-  margin-top: 4px;
-
-  color: #eeeae4;
-
-  line-height: 1.5;
-}
 
 .hidden {
   display: none !important;
