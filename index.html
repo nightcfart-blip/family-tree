@@ -36,18 +36,22 @@
 
     <main id="treeCanvas" class="tree-canvas">
 
-      <div id="treeWorld" class="tree-world">
+      <div id="treeViewport" class="tree-viewport">
 
-        <svg
-          id="treeLines"
-          class="tree-lines"
-          aria-hidden="true"
-        ></svg>
+        <div id="treeWorld" class="tree-world">
 
-        <div
-          id="characterLayer"
-          class="character-layer"
-        ></div>
+          <svg
+            id="treeLines"
+            class="tree-lines"
+            aria-hidden="true"
+          ></svg>
+
+          <div
+            id="characterLayer"
+            class="character-layer"
+          ></div>
+
+        </div>
 
       </div>
 
@@ -72,6 +76,42 @@
           + Add First Character
         </button>
 
+      </div>
+
+
+      <div class="canvas-controls">
+
+        <button
+          id="zoomOutButton"
+          class="canvas-control-button"
+          type="button"
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+
+        <button
+          id="resetViewButton"
+          class="canvas-control-button center-button"
+          type="button"
+        >
+          Center
+        </button>
+
+        <button
+          id="zoomInButton"
+          class="canvas-control-button"
+          type="button"
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+
+      </div>
+
+
+      <div id="zoomIndicator" class="zoom-indicator">
+        100%
       </div>
 
     </main>
@@ -123,10 +163,6 @@
         <label class="field">
           <span>Aliases</span>
           <input id="aliases" type="text">
-
-          <small>
-            Separate multiple aliases with commas.
-          </small>
         </label>
 
         <label class="field">
@@ -155,7 +191,6 @@
 
       </div>
 
-
       <div class="form-footer">
 
         <button
@@ -166,10 +201,7 @@
           Cancel
         </button>
 
-        <button
-          class="save-button"
-          type="submit"
-        >
+        <button class="save-button" type="submit">
           Save Character
         </button>
 
@@ -207,236 +239,101 @@
     <div class="profile-dashboard">
 
       <section class="profile-box title-box">
-
-        <span class="box-label">
-          Title
-        </span>
-
-        <div
-          id="profileTitle"
-          class="box-value big-value"
-        ></div>
-
+        <span class="box-label">Title</span>
+        <div id="profileTitle" class="box-value big-value"></div>
       </section>
-
 
       <section class="profile-box name-box">
-
-        <span class="box-label">
-          Name
-        </span>
-
-        <div
-          id="profileFullName"
-          class="profile-main-name"
-        ></div>
-
-        <div
-          id="profileYearsTop"
-          class="profile-main-years"
-        ></div>
-
+        <span class="box-label">Name</span>
+        <div id="profileFullName" class="profile-main-name"></div>
+        <div id="profileYearsTop" class="profile-main-years"></div>
       </section>
-
 
       <section class="profile-box aliases-box">
-
-        <span class="box-label">
-          Aliases
-        </span>
-
-        <div
-          id="profileAliases"
-          class="box-value"
-        ></div>
-
+        <span class="box-label">Aliases</span>
+        <div id="profileAliases" class="box-value"></div>
       </section>
-
 
       <section class="colors-box">
 
         <div class="color-profile-item">
-
-          <div
-            id="hairColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
+          <div id="hairColorSwatch" class="large-color-swatch"></div>
           <span>Hair Color</span>
           <small id="profileHairColor"></small>
-
         </div>
 
-
         <div class="color-profile-item">
-
-          <div
-            id="eyeColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
+          <div id="eyeColorSwatch" class="large-color-swatch"></div>
           <span>Eye Color</span>
           <small id="profileEyeColor"></small>
-
         </div>
 
-
         <div class="color-profile-item">
-
-          <div
-            id="skinColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
+          <div id="skinColorSwatch" class="large-color-swatch"></div>
           <span>Skin Color</span>
           <small id="profileSkinColor"></small>
-
         </div>
 
       </section>
 
-
-
-      <!-- CLICKABLE FAMILY -->
-
       <section class="profile-box family-box">
 
-        <span class="box-label">
-          Family
-        </span>
-
+        <span class="box-label">Family</span>
 
         <div class="family-list">
 
           <div class="family-group">
-
             <span>Mother</span>
-
-            <div
-              id="profileMother"
-              class="relationship-values"
-            ></div>
-
+            <div id="profileMother" class="relationship-values"></div>
           </div>
 
-
           <div class="family-group">
-
             <span>Father</span>
-
-            <div
-              id="profileFather"
-              class="relationship-values"
-            ></div>
-
+            <div id="profileFather" class="relationship-values"></div>
           </div>
 
-
           <div class="family-group">
-
             <span>Siblings</span>
-
-            <div
-              id="profileSiblings"
-              class="relationship-values"
-            ></div>
-
+            <div id="profileSiblings" class="relationship-values"></div>
           </div>
 
-
           <div class="family-group">
-
             <span>Spouses</span>
-
-            <div
-              id="profileSpouses"
-              class="relationship-values"
-            ></div>
-
+            <div id="profileSpouses" class="relationship-values"></div>
           </div>
 
-
           <div class="family-group">
-
             <span>Lovers</span>
-
-            <div
-              id="profileLovers"
-              class="relationship-values"
-            ></div>
-
+            <div id="profileLovers" class="relationship-values"></div>
           </div>
 
-
           <div class="family-group">
-
             <span>Children</span>
-
-            <div
-              id="profileChildren"
-              class="relationship-values"
-            ></div>
-
+            <div id="profileChildren" class="relationship-values"></div>
           </div>
 
         </div>
 
       </section>
 
-
       <section class="profile-box race-box">
-
-        <span class="box-label">
-          Race
-        </span>
-
-        <div
-          id="profileRace"
-          class="box-value centered-value"
-        ></div>
-
+        <span class="box-label">Race</span>
+        <div id="profileRace" class="box-value centered-value"></div>
       </section>
-
 
       <section class="profile-box feature-box">
-
-        <span class="box-label">
-          Notable Physical Feature
-        </span>
-
-        <div
-          id="profilePhysicalFeature"
-          class="box-value"
-        ></div>
-
+        <span class="box-label">Notable Physical Feature</span>
+        <div id="profilePhysicalFeature" class="box-value"></div>
       </section>
-
 
       <section class="profile-box achievements-box">
-
-        <span class="box-label">
-          Noteworthy Achievements
-        </span>
-
-        <div
-          id="profileAchievements"
-          class="box-value long-value"
-        ></div>
-
+        <span class="box-label">Noteworthy Achievements</span>
+        <div id="profileAchievements" class="box-value long-value"></div>
       </section>
 
-
       <section class="profile-box life-box">
-
-        <span class="box-label">
-          Life
-        </span>
-
-        <div
-          id="profileLife"
-          class="life-text"
-        ></div>
-
+        <span class="box-label">Life</span>
+        <div id="profileLife" class="life-text"></div>
       </section>
 
     </div>
@@ -477,10 +374,7 @@
     <div class="panel-header">
 
       <div>
-        <p class="eyebrow">
-          Character Editor
-        </p>
-
+        <p class="eyebrow">Character Editor</p>
         <h2>Edit Character</h2>
       </div>
 
@@ -499,247 +393,124 @@
 
       <div class="form-body">
 
-
-        <div class="editor-heading">
-          Identity
-        </div>
-
+        <div class="editor-heading">Identity</div>
 
         <label class="field">
           <span>Title</span>
           <input id="editTitle" type="text">
         </label>
 
-
         <label class="field">
           <span>Given Name *</span>
           <input id="editGivenName" type="text" required>
         </label>
-
 
         <label class="field">
           <span>Aliases</span>
           <input id="editAliases" type="text">
         </label>
 
-
         <label class="field">
           <span>Maiden Name</span>
           <input id="editMaidenName" type="text">
         </label>
-
 
         <label class="field">
           <span>Family Name *</span>
           <input id="editFamilyName" type="text" required>
         </label>
 
-
-
-        <div class="editor-heading">
-          Dates
-        </div>
-
+        <div class="editor-heading">Dates</div>
 
         <div class="field-row">
 
           <label class="field">
-
             <span>Birth Year</span>
-
-            <input
-              id="editBirthYear"
-              type="text"
-              inputmode="numeric"
-            >
-
+            <input id="editBirthYear" type="text" inputmode="numeric">
           </label>
-
 
           <label class="field">
-
             <span>Death Year</span>
-
-            <input
-              id="editDeathYear"
-              type="text"
-              inputmode="numeric"
-            >
-
+            <input id="editDeathYear" type="text" inputmode="numeric">
           </label>
 
         </div>
 
 
-
-        <div class="editor-heading">
-          Relationships
-        </div>
-
+        <div class="editor-heading">Relationships</div>
 
         <label class="field">
-
           <span>Mother</span>
-
           <select id="editMother"></select>
-
         </label>
 
-
         <label class="field">
-
           <span>Father</span>
-
           <select id="editFather"></select>
-
         </label>
 
-
         <label class="field">
-
           <span>Spouses</span>
-
-          <select
-            id="editSpouses"
-            class="relationship-multi"
-            multiple
-          ></select>
-
-          <small>
-            Multiple people can be selected.
-          </small>
-
+          <select id="editSpouses" class="relationship-multi" multiple></select>
         </label>
-
 
         <label class="field">
-
           <span>Lovers</span>
-
-          <select
-            id="editLovers"
-            class="relationship-multi"
-            multiple
-          ></select>
-
-          <small>
-            Multiple people can be selected.
-          </small>
-
+          <select id="editLovers" class="relationship-multi" multiple></select>
         </label>
 
 
-
-        <div class="editor-heading">
-          Appearance
-        </div>
-
+        <div class="editor-heading">Appearance</div>
 
         <label class="field">
           <span>Race</span>
           <input id="editRace" type="text">
         </label>
 
-
         <div class="color-editor-grid">
 
           <label class="color-editor-field">
-
             <span>Hair Color</span>
-
-            <input
-              id="editHairColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editHairColorValue">
-              #242429
-            </strong>
-
+            <input id="editHairColor" type="color" value="#242429">
+            <strong id="editHairColorValue">#242429</strong>
           </label>
 
-
           <label class="color-editor-field">
-
             <span>Eye Color</span>
-
-            <input
-              id="editEyeColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editEyeColorValue">
-              #242429
-            </strong>
-
+            <input id="editEyeColor" type="color" value="#242429">
+            <strong id="editEyeColorValue">#242429</strong>
           </label>
 
-
           <label class="color-editor-field">
-
             <span>Skin Color</span>
-
-            <input
-              id="editSkinColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editSkinColorValue">
-              #242429
-            </strong>
-
+            <input id="editSkinColor" type="color" value="#242429">
+            <strong id="editSkinColorValue">#242429</strong>
           </label>
 
         </div>
 
 
         <label class="field">
-
-          <span>
-            Notable Physical Feature
-          </span>
-
-          <textarea
-            id="editPhysicalFeature"
-            rows="4"
-          ></textarea>
-
+          <span>Notable Physical Feature</span>
+          <textarea id="editPhysicalFeature" rows="4"></textarea>
         </label>
-
 
 
         <div class="editor-heading">
           Noteworthy Achievements
         </div>
 
-
         <label class="field">
-
-          <textarea
-            id="editAchievements"
-            rows="7"
-          ></textarea>
-
+          <textarea id="editAchievements" rows="7"></textarea>
         </label>
-
 
 
         <div class="editor-heading">
           Life
         </div>
 
-
         <label class="field">
-
-          <textarea
-            id="editLife"
-            class="life-editor"
-            rows="15"
-          ></textarea>
-
+          <textarea id="editLife" class="life-editor" rows="15"></textarea>
         </label>
 
       </div>
@@ -755,10 +526,7 @@
           Cancel
         </button>
 
-        <button
-          class="save-button"
-          type="submit"
-        >
+        <button class="save-button" type="submit">
           Save Changes
         </button>
 
