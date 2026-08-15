@@ -11,7 +11,17 @@ const characterLayer =
   document.getElementById("characterLayer");
 
 
-/* CREATE */
+/* -------------------------
+   STORAGE
+------------------------- */
+
+const STORAGE_KEY =
+  "fantasyFamilyTreeCharacters";
+
+
+/* -------------------------
+   CREATE
+------------------------- */
 
 const formBackdrop =
   document.getElementById("formBackdrop");
@@ -29,7 +39,9 @@ const characterForm =
   document.getElementById("characterForm");
 
 
-/* PROFILE */
+/* -------------------------
+   PROFILE
+------------------------- */
 
 const profileBackdrop =
   document.getElementById("profileBackdrop");
@@ -47,7 +59,9 @@ const editCharacterButton =
   document.getElementById("editCharacterButton");
 
 
-/* EDITOR */
+/* -------------------------
+   EDITOR
+------------------------- */
 
 const editBackdrop =
   document.getElementById("editBackdrop");
@@ -65,9 +79,84 @@ const cancelEditButton =
   document.getElementById("cancelEditButton");
 
 
-let characters = [];
+let characters =
+  loadCharacters();
 
-let selectedCharacterId = null;
+let selectedCharacterId =
+  null;
+
+
+/* -------------------------
+   LOAD SAVED CHARACTERS
+------------------------- */
+
+function loadCharacters() {
+
+  try {
+
+    const savedData =
+      localStorage.getItem(
+        STORAGE_KEY
+      );
+
+
+    if (!savedData) {
+
+      return [];
+
+    }
+
+
+    const parsedData =
+      JSON.parse(savedData);
+
+
+    if (!Array.isArray(parsedData)) {
+
+      return [];
+
+    }
+
+
+    return parsedData;
+
+  } catch (error) {
+
+    console.error(
+      "Could not load saved characters:",
+      error
+    );
+
+    return [];
+
+  }
+
+}
+
+
+/* -------------------------
+   SAVE CHARACTERS
+------------------------- */
+
+function saveCharacters() {
+
+  try {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(characters)
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Could not save characters:",
+      error
+    );
+
+  }
+
+}
 
 
 /* -------------------------
@@ -78,18 +167,26 @@ function openCharacterForm() {
 
   characterForm.reset();
 
-  formBackdrop.classList.remove("hidden");
+  formBackdrop.classList.remove(
+    "hidden"
+  );
 
-  characterFormPanel.classList.remove("hidden");
+  characterFormPanel.classList.remove(
+    "hidden"
+  );
 
 }
 
 
 function closeCharacterForm() {
 
-  formBackdrop.classList.add("hidden");
+  formBackdrop.classList.add(
+    "hidden"
+  );
 
-  characterFormPanel.classList.add("hidden");
+  characterFormPanel.classList.add(
+    "hidden"
+  );
 
 }
 
@@ -138,27 +235,41 @@ characterForm.addEventListener(
         Date.now(),
 
       title:
-        getInputValue("title"),
+        getInputValue(
+          "title"
+        ),
 
       givenName:
-        getInputValue("givenName"),
+        getInputValue(
+          "givenName"
+        ),
 
       aliases:
         makeAliasArray(
-          getInputValue("aliases")
+          getInputValue(
+            "aliases"
+          )
         ),
 
       maidenName:
-        getInputValue("maidenName"),
+        getInputValue(
+          "maidenName"
+        ),
 
       familyName:
-        getInputValue("familyName"),
+        getInputValue(
+          "familyName"
+        ),
 
       birthYear:
-        getInputValue("birthYear"),
+        getInputValue(
+          "birthYear"
+        ),
 
       deathYear:
-        getInputValue("deathYear"),
+        getInputValue(
+          "deathYear"
+        ),
 
       race: "",
 
@@ -177,7 +288,12 @@ characterForm.addEventListener(
     };
 
 
-    characters.push(character);
+    characters.push(
+      character
+    );
+
+
+    saveCharacters();
 
     renderCharacters();
 
@@ -193,26 +309,38 @@ characterForm.addEventListener(
 
 function renderCharacters() {
 
-  characterLayer.innerHTML = "";
+  characterLayer.innerHTML =
+    "";
 
 
-  if (characters.length === 0) {
+  if (
+    characters.length === 0
+  ) {
 
-    emptyState.classList.remove("hidden");
+    emptyState.classList.remove(
+      "hidden"
+    );
 
     return;
 
   }
 
 
-  emptyState.classList.add("hidden");
+  emptyState.classList.add(
+    "hidden"
+  );
 
 
   characters.forEach(
-    function(character, index) {
+    function(
+      character,
+      index
+    ) {
 
       const node =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
 
 
       node.className =
@@ -226,15 +354,23 @@ function renderCharacters() {
         index % 3;
 
       const row =
-        Math.floor(index / 3);
+        Math.floor(
+          index / 3
+        );
 
 
       node.style.left =
-        `${25 + column * 25}%`;
+        `${
+          25 +
+          column * 25
+        }%`;
 
 
       node.style.top =
-        `${120 + row * 170}px`;
+        `${
+          120 +
+          row * 170
+        }px`;
 
 
       const initial =
@@ -269,13 +405,17 @@ function renderCharacters() {
 
         function() {
 
-          openProfile(character.id);
+          openProfile(
+            character.id
+          );
 
         }
       );
 
 
-      characterLayer.appendChild(node);
+      characterLayer.appendChild(
+        node
+      );
 
     }
   );
@@ -287,14 +427,20 @@ function renderCharacters() {
    PROFILE
 ------------------------- */
 
-function openProfile(characterId) {
+function openProfile(
+  characterId
+) {
 
   const character =
-    getCharacter(characterId);
+    getCharacter(
+      characterId
+    );
 
 
   if (!character) {
+
     return;
+
   }
 
 
@@ -310,13 +456,17 @@ function openProfile(characterId) {
 
   setProfileText(
     "profileFullName",
-    getProfileName(character)
+    getProfileName(
+      character
+    )
   );
 
 
   setProfileText(
     "profileYearsTop",
-    makeYearText(character)
+    makeYearText(
+      character
+    )
   );
 
 
@@ -324,7 +474,9 @@ function openProfile(characterId) {
     "profileAliases",
 
     character.aliases.length
-      ? character.aliases.join("\n")
+      ? character.aliases.join(
+          "\n"
+        )
       : ""
   );
 
@@ -389,9 +541,13 @@ function openProfile(characterId) {
   );
 
 
-  profileBackdrop.classList.remove("hidden");
+  profileBackdrop.classList.remove(
+    "hidden"
+  );
 
-  profilePanel.classList.remove("hidden");
+  profilePanel.classList.remove(
+    "hidden"
+  );
 
 }
 
@@ -402,11 +558,16 @@ function openProfile(characterId) {
 
 function closeProfile() {
 
-  profileBackdrop.classList.add("hidden");
+  profileBackdrop.classList.add(
+    "hidden"
+  );
 
-  profilePanel.classList.add("hidden");
+  profilePanel.classList.add(
+    "hidden"
+  );
 
-  selectedCharacterId = null;
+  selectedCharacterId =
+    null;
 
 }
 
@@ -440,11 +601,15 @@ editCharacterButton.addEventListener(
 function openEditor() {
 
   const character =
-    getCharacter(selectedCharacterId);
+    getCharacter(
+      selectedCharacterId
+    );
 
 
   if (!character) {
+
     return;
+
   }
 
 
@@ -463,7 +628,9 @@ function openEditor() {
   document.getElementById(
     "editAliases"
   ).value =
-    character.aliases.join(", ");
+    character.aliases.join(
+      ", "
+    );
 
 
   document.getElementById(
@@ -535,14 +702,22 @@ function openEditor() {
   );
 
 
-  profilePanel.classList.add("hidden");
+  profilePanel.classList.add(
+    "hidden"
+  );
 
-  profileBackdrop.classList.add("hidden");
+  profileBackdrop.classList.add(
+    "hidden"
+  );
 
 
-  editBackdrop.classList.remove("hidden");
+  editBackdrop.classList.remove(
+    "hidden"
+  );
 
-  editPanel.classList.remove("hidden");
+  editPanel.classList.remove(
+    "hidden"
+  );
 
 }
 
@@ -553,14 +728,20 @@ function openEditor() {
 
 function cancelEditor() {
 
-  editBackdrop.classList.add("hidden");
+  editBackdrop.classList.add(
+    "hidden"
+  );
 
-  editPanel.classList.add("hidden");
+  editPanel.classList.add(
+    "hidden"
+  );
 
 
   if (selectedCharacterId) {
 
-    openProfile(selectedCharacterId);
+    openProfile(
+      selectedCharacterId
+    );
 
   }
 
@@ -596,46 +777,66 @@ editCharacterForm.addEventListener(
 
 
     const character =
-      getCharacter(selectedCharacterId);
+      getCharacter(
+        selectedCharacterId
+      );
 
 
     if (!character) {
+
       return;
+
     }
 
 
     character.title =
-      getInputValue("editTitle");
+      getInputValue(
+        "editTitle"
+      );
 
 
     character.givenName =
-      getInputValue("editGivenName");
+      getInputValue(
+        "editGivenName"
+      );
 
 
     character.aliases =
       makeAliasArray(
-        getInputValue("editAliases")
+        getInputValue(
+          "editAliases"
+        )
       );
 
 
     character.maidenName =
-      getInputValue("editMaidenName");
+      getInputValue(
+        "editMaidenName"
+      );
 
 
     character.familyName =
-      getInputValue("editFamilyName");
+      getInputValue(
+        "editFamilyName"
+      );
 
 
     character.birthYear =
-      getInputValue("editBirthYear");
+      getInputValue(
+        "editBirthYear"
+      );
 
 
     character.deathYear =
-      getInputValue("editDeathYear");
+      getInputValue(
+        "editDeathYear"
+      );
 
 
     character.race =
-      getInputValue("editRace");
+      getInputValue(
+        "editRace"
+      );
 
 
     character.hairColor =
@@ -674,12 +875,24 @@ editCharacterForm.addEventListener(
       );
 
 
+    /*
+      THIS is the important
+      new Step 6 line.
+    */
+
+    saveCharacters();
+
+
     renderCharacters();
 
 
-    editBackdrop.classList.add("hidden");
+    editBackdrop.classList.add(
+      "hidden"
+    );
 
-    editPanel.classList.add("hidden");
+    editPanel.classList.add(
+      "hidden"
+    );
 
 
     openProfile(
@@ -691,7 +904,7 @@ editCharacterForm.addEventListener(
 
 
 /* -------------------------
-   LIVE COLOR HEX
+   LIVE COLOR VALUES
 ------------------------- */
 
 setupColorInput(
@@ -716,10 +929,14 @@ function setupColorInput(
 ) {
 
   const input =
-    document.getElementById(inputId);
+    document.getElementById(
+      inputId
+    );
 
   const label =
-    document.getElementById(labelId);
+    document.getElementById(
+      labelId
+    );
 
 
   input.addEventListener(
@@ -728,7 +945,8 @@ function setupColorInput(
     function() {
 
       label.textContent =
-        input.value.toUpperCase();
+        input.value
+          .toUpperCase();
 
     }
   );
@@ -750,7 +968,9 @@ function getCharacter(id) {
 }
 
 
-function makeAliasArray(value) {
+function makeAliasArray(
+  value
+) {
 
   return value
     .split(",")
@@ -766,19 +986,26 @@ function makeAliasArray(value) {
 }
 
 
-function getTreeName(character) {
+function getTreeName(
+  character
+) {
 
   return `
     ${character.givenName}
     ${character.familyName}
   `
-    .replace(/\s+/g, " ")
+    .replace(
+      /\s+/g,
+      " "
+    )
     .trim();
 
 }
 
 
-function getProfileName(character) {
+function getProfileName(
+  character
+) {
 
   const maiden =
     character.maidenName
@@ -791,13 +1018,18 @@ function getProfileName(character) {
     ${maiden}
     ${character.familyName}
   `
-    .replace(/\s+/g, " ")
+    .replace(
+      /\s+/g,
+      " "
+    )
     .trim();
 
 }
 
 
-function makeYearText(character) {
+function makeYearText(
+  character
+) {
 
   const birth =
     character.birthYear;
@@ -806,7 +1038,10 @@ function makeYearText(character) {
     character.deathYear;
 
 
-  if (birth && death) {
+  if (
+    birth &&
+    death
+  ) {
 
     return `${birth} – ${death}`;
 
@@ -888,7 +1123,9 @@ function setEditColor(
 }
 
 
-function isHexColor(value) {
+function isHexColor(
+  value
+) {
 
   return /^#[0-9A-Fa-f]{6}$/.test(
     value
@@ -902,17 +1139,23 @@ function getInputValue(
 ) {
 
   return document
-    .getElementById(elementId)
+    .getElementById(
+      elementId
+    )
     .value
     .trim();
 
 }
 
 
-function escapeHTML(value) {
+function escapeHTML(
+  value
+) {
 
   const element =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   element.textContent =
     value;
@@ -922,6 +1165,8 @@ function escapeHTML(value) {
 }
 
 
-/* FIRST RENDER */
+/* -------------------------
+   START APP
+------------------------- */
 
 renderCharacters();
