@@ -20,7 +20,6 @@
   <div class="app">
 
     <header class="topbar">
-
       <div>
         <p class="eyebrow">Private Archive</p>
         <h1>Family Tree</h1>
@@ -30,9 +29,7 @@
         <span class="plus">+</span>
         <span>Add</span>
       </button>
-
     </header>
-
 
     <main id="treeCanvas" class="tree-canvas">
 
@@ -74,7 +71,6 @@
     <div class="panel-handle"></div>
 
     <div class="panel-header">
-
       <div>
         <p class="eyebrow">New Person</p>
         <h2>Add Character</h2>
@@ -87,9 +83,7 @@
       >
         ×
       </button>
-
     </div>
-
 
     <form id="characterForm">
 
@@ -100,12 +94,10 @@
           <input id="title" type="text">
         </label>
 
-
         <label class="field">
           <span>Given Name *</span>
           <input id="givenName" type="text" required>
         </label>
-
 
         <label class="field">
           <span>Aliases</span>
@@ -116,46 +108,31 @@
           </small>
         </label>
 
-
         <label class="field">
           <span>Maiden Name</span>
           <input id="maidenName" type="text">
         </label>
-
 
         <label class="field">
           <span>Family Name *</span>
           <input id="familyName" type="text" required>
         </label>
 
-
         <div class="field-row">
 
           <label class="field">
             <span>Birth Year</span>
-
-            <input
-              id="birthYear"
-              type="text"
-              inputmode="numeric"
-            >
+            <input id="birthYear" type="text" inputmode="numeric">
           </label>
-
 
           <label class="field">
             <span>Death Year</span>
-
-            <input
-              id="deathYear"
-              type="text"
-              inputmode="numeric"
-            >
+            <input id="deathYear" type="text" inputmode="numeric">
           </label>
 
         </div>
 
       </div>
-
 
       <div class="form-footer">
 
@@ -167,10 +144,7 @@
           Cancel
         </button>
 
-        <button
-          class="save-button"
-          type="submit"
-        >
+        <button class="save-button" type="submit">
           Save Character
         </button>
 
@@ -181,8 +155,7 @@
   </section>
 
 
-
-  <!-- CHARACTER PROFILE -->
+  <!-- PROFILE -->
 
   <div id="profileBackdrop" class="backdrop hidden"></div>
 
@@ -207,146 +180,82 @@
 
     <div class="profile-dashboard">
 
-
-      <!-- TITLE -->
-
       <section class="profile-box title-box">
-
-        <span class="box-label">
-          Title
-        </span>
-
-        <div
-          id="profileTitle"
-          class="box-value big-value"
-        ></div>
-
+        <span class="box-label">Title</span>
+        <div id="profileTitle" class="box-value big-value"></div>
       </section>
 
-
-      <!-- NAME -->
 
       <section class="profile-box name-box">
-
-        <span class="box-label">
-          Name
-        </span>
-
-        <div
-          id="profileFullName"
-          class="profile-main-name"
-        ></div>
-
-        <div
-          id="profileYearsTop"
-          class="profile-main-years"
-        ></div>
-
+        <span class="box-label">Name</span>
+        <div id="profileFullName" class="profile-main-name"></div>
+        <div id="profileYearsTop" class="profile-main-years"></div>
       </section>
 
-
-      <!-- ALIASES -->
 
       <section class="profile-box aliases-box">
-
-        <span class="box-label">
-          Aliases
-        </span>
-
-        <div
-          id="profileAliases"
-          class="box-value"
-        ></div>
-
+        <span class="box-label">Aliases</span>
+        <div id="profileAliases" class="box-value"></div>
       </section>
 
-
-      <!-- COLORS -->
 
       <section class="colors-box">
 
         <div class="color-profile-item">
-
-          <div
-            id="hairColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
+          <div id="hairColorSwatch" class="large-color-swatch"></div>
           <span>Hair Color</span>
-
           <small id="profileHairColor"></small>
-
         </div>
 
-
         <div class="color-profile-item">
-
-          <div
-            id="eyeColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
+          <div id="eyeColorSwatch" class="large-color-swatch"></div>
           <span>Eye Color</span>
-
           <small id="profileEyeColor"></small>
-
         </div>
 
-
         <div class="color-profile-item">
-
-          <div
-            id="skinColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
+          <div id="skinColorSwatch" class="large-color-swatch"></div>
           <span>Skin Color</span>
-
           <small id="profileSkinColor"></small>
-
         </div>
 
       </section>
 
 
-      <!-- FAMILY -->
-
       <section class="profile-box family-box">
 
-        <span class="box-label">
-          Family
-        </span>
+        <span class="box-label">Family</span>
 
         <div class="family-list">
 
           <div>
             <span>Mother</span>
-            <strong>—</strong>
+            <strong id="profileMother">—</strong>
           </div>
 
           <div>
             <span>Father</span>
-            <strong>—</strong>
+            <strong id="profileFather">—</strong>
           </div>
 
           <div>
             <span>Siblings</span>
-            <strong>—</strong>
+            <strong id="profileSiblings">—</strong>
           </div>
 
           <div>
             <span>Spouses</span>
-            <strong>—</strong>
+            <strong id="profileSpouses">—</strong>
           </div>
 
           <div>
             <span>Lovers</span>
-            <strong>—</strong>
+            <strong id="profileLovers">—</strong>
           </div>
 
           <div>
             <span>Children</span>
-            <strong>—</strong>
+            <strong id="profileChildren">—</strong>
           </div>
 
         </div>
@@ -354,67 +263,27 @@
       </section>
 
 
-      <!-- RACE -->
-
       <section class="profile-box race-box">
-
-        <span class="box-label">
-          Race
-        </span>
-
-        <div
-          id="profileRace"
-          class="box-value centered-value"
-        ></div>
-
+        <span class="box-label">Race</span>
+        <div id="profileRace" class="box-value centered-value"></div>
       </section>
 
-
-      <!-- PHYSICAL FEATURE -->
 
       <section class="profile-box feature-box">
-
-        <span class="box-label">
-          Notable Physical Feature
-        </span>
-
-        <div
-          id="profilePhysicalFeature"
-          class="box-value"
-        ></div>
-
+        <span class="box-label">Notable Physical Feature</span>
+        <div id="profilePhysicalFeature" class="box-value"></div>
       </section>
 
-
-      <!-- ACHIEVEMENTS -->
 
       <section class="profile-box achievements-box">
-
-        <span class="box-label">
-          Noteworthy Achievements
-        </span>
-
-        <div
-          id="profileAchievements"
-          class="box-value long-value"
-        ></div>
-
+        <span class="box-label">Noteworthy Achievements</span>
+        <div id="profileAchievements" class="box-value long-value"></div>
       </section>
 
 
-      <!-- LIFE -->
-
       <section class="profile-box life-box">
-
-        <span class="box-label">
-          Life
-        </span>
-
-        <div
-          id="profileLife"
-          class="life-text"
-        ></div>
-
+        <span class="box-label">Life</span>
+        <div id="profileLife" class="life-text"></div>
       </section>
 
     </div>
@@ -441,7 +310,6 @@
     </div>
 
   </section>
-
 
 
   <!-- EDIT CHARACTER -->
@@ -474,41 +342,29 @@
 
       <div class="form-body">
 
-
-        <!-- IDENTITY -->
-
         <div class="editor-heading">
           Identity
         </div>
-
 
         <label class="field">
           <span>Title</span>
           <input id="editTitle" type="text">
         </label>
 
-
         <label class="field">
           <span>Given Name *</span>
           <input id="editGivenName" type="text" required>
         </label>
 
-
         <label class="field">
           <span>Aliases</span>
           <input id="editAliases" type="text">
-
-          <small>
-            Separate multiple aliases with commas.
-          </small>
         </label>
-
 
         <label class="field">
           <span>Maiden Name</span>
           <input id="editMaidenName" type="text">
         </label>
-
 
         <label class="field">
           <span>Family Name *</span>
@@ -516,45 +372,59 @@
         </label>
 
 
-        <!-- DATES -->
-
         <div class="editor-heading">
           Dates
         </div>
-
 
         <div class="field-row">
 
           <label class="field">
             <span>Birth Year</span>
-
-            <input
-              id="editBirthYear"
-              type="text"
-              inputmode="numeric"
-            >
+            <input id="editBirthYear" type="text" inputmode="numeric">
           </label>
-
 
           <label class="field">
             <span>Death Year</span>
-
-            <input
-              id="editDeathYear"
-              type="text"
-              inputmode="numeric"
-            >
+            <input id="editDeathYear" type="text" inputmode="numeric">
           </label>
 
         </div>
 
 
-        <!-- APPEARANCE -->
+        <div class="editor-heading">
+          Relationships
+        </div>
+
+
+        <label class="field">
+          <span>Mother</span>
+          <select id="editMother"></select>
+        </label>
+
+
+        <label class="field">
+          <span>Father</span>
+          <select id="editFather"></select>
+        </label>
+
+
+        <label class="field">
+          <span>Spouses</span>
+          <select id="editSpouses" multiple class="relationship-multi"></select>
+          <small>Tap more than one if needed.</small>
+        </label>
+
+
+        <label class="field">
+          <span>Lovers</span>
+          <select id="editLovers" multiple class="relationship-multi"></select>
+          <small>Tap more than one if needed.</small>
+        </label>
+
 
         <div class="editor-heading">
           Appearance
         </div>
-
 
         <label class="field">
           <span>Race</span>
@@ -564,55 +434,22 @@
 
         <div class="color-editor-grid">
 
-
           <label class="color-editor-field">
-
             <span>Hair Color</span>
-
-            <input
-              id="editHairColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editHairColorValue">
-              #242429
-            </strong>
-
+            <input id="editHairColor" type="color" value="#242429">
+            <strong id="editHairColorValue">#242429</strong>
           </label>
 
-
           <label class="color-editor-field">
-
             <span>Eye Color</span>
-
-            <input
-              id="editEyeColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editEyeColorValue">
-              #242429
-            </strong>
-
+            <input id="editEyeColor" type="color" value="#242429">
+            <strong id="editEyeColorValue">#242429</strong>
           </label>
 
-
           <label class="color-editor-field">
-
             <span>Skin Color</span>
-
-            <input
-              id="editSkinColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editSkinColorValue">
-              #242429
-            </strong>
-
+            <input id="editSkinColor" type="color" value="#242429">
+            <strong id="editSkinColorValue">#242429</strong>
           </label>
 
         </div>
@@ -620,48 +457,26 @@
 
         <label class="field">
           <span>Notable Physical Feature</span>
-
-          <textarea
-            id="editPhysicalFeature"
-            rows="4"
-          ></textarea>
+          <textarea id="editPhysicalFeature" rows="4"></textarea>
         </label>
 
-
-        <!-- ACHIEVEMENTS -->
 
         <div class="editor-heading">
           Noteworthy Achievements
         </div>
 
-
         <label class="field">
-
-          <textarea
-            id="editAchievements"
-            rows="7"
-          ></textarea>
-
+          <textarea id="editAchievements" rows="7"></textarea>
         </label>
 
-
-        <!-- LIFE -->
 
         <div class="editor-heading">
           Life
         </div>
 
-
         <label class="field">
-
-          <textarea
-            id="editLife"
-            class="life-editor"
-            rows="15"
-          ></textarea>
-
+          <textarea id="editLife" class="life-editor" rows="15"></textarea>
         </label>
-
 
       </div>
 
