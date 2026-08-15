@@ -2,66 +2,151 @@ const STORAGE_KEY =
   "fantasyFamilyTreeCharacters";
 
 
+/* -------------------------
+   TREE SETTINGS
+------------------------- */
+
+const NODE_WIDTH = 180;
+
+const NODE_CIRCLE_SIZE = 82;
+
+const NODE_GAP_X = 230;
+
+const GENERATION_GAP_Y = 230;
+
+const TREE_PADDING_X = 180;
+
+const TREE_PADDING_TOP = 100;
+
+
+/* -------------------------
+   MAIN ELEMENTS
+------------------------- */
+
 const addCharacterButton =
-  document.getElementById("addCharacterButton");
+  document.getElementById(
+    "addCharacterButton"
+  );
 
 const addFirstCharacterButton =
-  document.getElementById("addFirstCharacterButton");
+  document.getElementById(
+    "addFirstCharacterButton"
+  );
 
 const emptyState =
-  document.getElementById("emptyState");
+  document.getElementById(
+    "emptyState"
+  );
+
+const treeWorld =
+  document.getElementById(
+    "treeWorld"
+  );
+
+const treeLines =
+  document.getElementById(
+    "treeLines"
+  );
 
 const characterLayer =
-  document.getElementById("characterLayer");
+  document.getElementById(
+    "characterLayer"
+  );
 
+
+/* -------------------------
+   CREATE
+------------------------- */
 
 const formBackdrop =
-  document.getElementById("formBackdrop");
+  document.getElementById(
+    "formBackdrop"
+  );
 
 const characterFormPanel =
-  document.getElementById("characterFormPanel");
+  document.getElementById(
+    "characterFormPanel"
+  );
 
 const closeFormButton =
-  document.getElementById("closeFormButton");
+  document.getElementById(
+    "closeFormButton"
+  );
 
 const cancelFormButton =
-  document.getElementById("cancelFormButton");
+  document.getElementById(
+    "cancelFormButton"
+  );
 
 const characterForm =
-  document.getElementById("characterForm");
+  document.getElementById(
+    "characterForm"
+  );
 
+
+/* -------------------------
+   PROFILE
+------------------------- */
 
 const profileBackdrop =
-  document.getElementById("profileBackdrop");
+  document.getElementById(
+    "profileBackdrop"
+  );
 
 const profilePanel =
-  document.getElementById("profilePanel");
+  document.getElementById(
+    "profilePanel"
+  );
 
 const closeProfileButton =
-  document.getElementById("closeProfileButton");
+  document.getElementById(
+    "closeProfileButton"
+  );
 
 const closeProfileFooterButton =
-  document.getElementById("closeProfileFooterButton");
+  document.getElementById(
+    "closeProfileFooterButton"
+  );
 
 const editCharacterButton =
-  document.getElementById("editCharacterButton");
+  document.getElementById(
+    "editCharacterButton"
+  );
 
+
+/* -------------------------
+   EDITOR
+------------------------- */
 
 const editBackdrop =
-  document.getElementById("editBackdrop");
+  document.getElementById(
+    "editBackdrop"
+  );
 
 const editPanel =
-  document.getElementById("editPanel");
+  document.getElementById(
+    "editPanel"
+  );
 
 const editCharacterForm =
-  document.getElementById("editCharacterForm");
+  document.getElementById(
+    "editCharacterForm"
+  );
 
 const closeEditButton =
-  document.getElementById("closeEditButton");
+  document.getElementById(
+    "closeEditButton"
+  );
 
 const cancelEditButton =
-  document.getElementById("cancelEditButton");
+  document.getElementById(
+    "cancelEditButton"
+  );
 
+
+/* -------------------------
+   DATA
+------------------------- */
 
 let characters =
   loadCharacters();
@@ -118,19 +203,32 @@ function loadCharacters() {
 
 function saveCharacters() {
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(characters)
-  );
+  try {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(characters)
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Could not save characters:",
+      error
+    );
+
+  }
 
 }
 
 
 /* -------------------------
-   NORMALIZE OLD DATA
+   OLD CHARACTER COMPATIBILITY
 ------------------------- */
 
-function normalizeCharacter(character) {
+function normalizeCharacter(
+  character
+) {
 
   return {
 
@@ -144,7 +242,9 @@ function normalizeCharacter(character) {
       character.givenName || "",
 
     aliases:
-      Array.isArray(character.aliases)
+      Array.isArray(
+        character.aliases
+      )
         ? character.aliases
         : [],
 
@@ -188,12 +288,16 @@ function normalizeCharacter(character) {
       character.fatherId || null,
 
     spouseIds:
-      Array.isArray(character.spouseIds)
+      Array.isArray(
+        character.spouseIds
+      )
         ? character.spouseIds
         : [],
 
     loverIds:
-      Array.isArray(character.loverIds)
+      Array.isArray(
+        character.loverIds
+      )
         ? character.loverIds
         : []
 
@@ -203,25 +307,33 @@ function normalizeCharacter(character) {
 
 
 /* -------------------------
-   CREATE
+   CREATE CHARACTER
 ------------------------- */
 
 function openCharacterForm() {
 
   characterForm.reset();
 
-  formBackdrop.classList.remove("hidden");
+  formBackdrop.classList.remove(
+    "hidden"
+  );
 
-  characterFormPanel.classList.remove("hidden");
+  characterFormPanel.classList.remove(
+    "hidden"
+  );
 
 }
 
 
 function closeCharacterForm() {
 
-  formBackdrop.classList.add("hidden");
+  formBackdrop.classList.add(
+    "hidden"
+  );
 
-  characterFormPanel.classList.add("hidden");
+  characterFormPanel.classList.add(
+    "hidden"
+  );
 
 }
 
@@ -253,7 +365,7 @@ formBackdrop.addEventListener(
 
 
 /* -------------------------
-   SAVE NEW PERSON
+   SAVE NEW CHARACTER
 ------------------------- */
 
 characterForm.addEventListener(
@@ -270,27 +382,41 @@ characterForm.addEventListener(
         Date.now(),
 
       title:
-        getInputValue("title"),
+        getInputValue(
+          "title"
+        ),
 
       givenName:
-        getInputValue("givenName"),
+        getInputValue(
+          "givenName"
+        ),
 
       aliases:
         makeAliasArray(
-          getInputValue("aliases")
+          getInputValue(
+            "aliases"
+          )
         ),
 
       maidenName:
-        getInputValue("maidenName"),
+        getInputValue(
+          "maidenName"
+        ),
 
       familyName:
-        getInputValue("familyName"),
+        getInputValue(
+          "familyName"
+        ),
 
       birthYear:
-        getInputValue("birthYear"),
+        getInputValue(
+          "birthYear"
+        ),
 
       deathYear:
-        getInputValue("deathYear"),
+        getInputValue(
+          "deathYear"
+        ),
 
       race: "",
 
@@ -317,11 +443,14 @@ characterForm.addEventListener(
     };
 
 
-    characters.push(character);
+    characters.push(
+      character
+    );
+
 
     saveCharacters();
 
-    renderCharacters();
+    renderTree();
 
     closeCharacterForm();
 
@@ -329,13 +458,21 @@ characterForm.addEventListener(
 );
 
 
+/* =========================================================
+   FAMILY TREE LAYOUT
+========================================================= */
+
+
 /* -------------------------
-   TREE
+   RENDER ENTIRE TREE
 ------------------------- */
 
-function renderCharacters() {
+function renderTree() {
 
   characterLayer.innerHTML =
+    "";
+
+  treeLines.innerHTML =
     "";
 
 
@@ -347,6 +484,12 @@ function renderCharacters() {
       "hidden"
     );
 
+    treeWorld.style.width =
+      "100%";
+
+    treeWorld.style.height =
+      "100%";
+
     return;
 
   }
@@ -357,78 +500,56 @@ function renderCharacters() {
   );
 
 
-  characters.forEach(
-    function(character, index) {
+  const layout =
+    calculateTreeLayout();
 
-      const node =
-        document.createElement(
-          "button"
+
+  treeWorld.style.width =
+    `${layout.width}px`;
+
+  treeWorld.style.height =
+    `${layout.height}px`;
+
+
+  treeLines.setAttribute(
+    "viewBox",
+    `0 0 ${layout.width} ${layout.height}`
+  );
+
+
+  treeLines.setAttribute(
+    "width",
+    layout.width
+  );
+
+  treeLines.setAttribute(
+    "height",
+    layout.height
+  );
+
+
+  drawRelationshipLines(
+    layout.positions
+  );
+
+
+  characters.forEach(
+    character => {
+
+      const position =
+        layout.positions.get(
+          character.id
         );
 
 
-      node.className =
-        "character-node";
-
-      node.type =
-        "button";
+      if (!position) {
+        return;
+      }
 
 
-      const column =
-        index % 3;
-
-      const row =
-        Math.floor(index / 3);
-
-
-      node.style.left =
-        `${25 + column * 25}%`;
-
-      node.style.top =
-        `${120 + row * 170}px`;
-
-
-      const initial =
-        character.givenName
-          .charAt(0)
-          .toUpperCase();
-
-
-      node.innerHTML = `
-
-        <div class="character-circle">
-          ${escapeHTML(initial)}
-        </div>
-
-        <div class="character-name">
-          ${escapeHTML(
-            getTreeName(character)
-          )}
-        </div>
-
-        <div class="character-years">
-          ${escapeHTML(
-            makeYearText(character)
-          )}
-        </div>
-
-      `;
-
-
-      node.addEventListener(
-        "click",
-
-        function() {
-
-          openProfile(
-            character.id
-          );
-
-        }
-      );
-
-
-      characterLayer.appendChild(
-        node
+      renderCharacterNode(
+        character,
+        position
       );
 
     }
@@ -438,13 +559,1189 @@ function renderCharacters() {
 
 
 /* -------------------------
-   PROFILE
+   GENERATION CALCULATION
 ------------------------- */
 
-function openProfile(characterId) {
+function calculateGeneration(
+  characterId,
+  memo = new Map(),
+  visiting = new Set()
+) {
+
+  if (
+    memo.has(characterId)
+  ) {
+
+    return memo.get(
+      characterId
+    );
+
+  }
+
+
+  if (
+    visiting.has(characterId)
+  ) {
+
+    return 0;
+
+  }
+
 
   const character =
-    getCharacter(characterId);
+    getCharacter(
+      characterId
+    );
+
+
+  if (!character) {
+    return 0;
+  }
+
+
+  visiting.add(
+    characterId
+  );
+
+
+  const parentIds =
+    [
+      character.motherId,
+      character.fatherId
+    ]
+      .filter(Boolean);
+
+
+  if (
+    parentIds.length === 0
+  ) {
+
+    memo.set(
+      characterId,
+      0
+    );
+
+    visiting.delete(
+      characterId
+    );
+
+    return 0;
+
+  }
+
+
+  const parentGenerations =
+    parentIds.map(
+      parentId =>
+        calculateGeneration(
+          parentId,
+          memo,
+          visiting
+        )
+    );
+
+
+  const generation =
+    Math.max(
+      ...parentGenerations
+    ) + 1;
+
+
+  memo.set(
+    characterId,
+    generation
+  );
+
+
+  visiting.delete(
+    characterId
+  );
+
+
+  return generation;
+
+}
+
+
+/* -------------------------
+   FULL LAYOUT
+------------------------- */
+
+function calculateTreeLayout() {
+
+  const generationMemo =
+    new Map();
+
+
+  const generationMap =
+    new Map();
+
+
+  characters.forEach(
+    character => {
+
+      const generation =
+        calculateGeneration(
+          character.id,
+          generationMemo
+        );
+
+
+      generationMap.set(
+        character.id,
+        generation
+      );
+
+    }
+  );
+
+
+  /*
+    Keep spouses on the same
+    visual generation whenever possible.
+  */
+
+  for (
+    let pass = 0;
+    pass < 4;
+    pass++
+  ) {
+
+    characters.forEach(
+      character => {
+
+        character.spouseIds.forEach(
+          spouseId => {
+
+            if (
+              !generationMap.has(
+                spouseId
+              )
+            ) {
+              return;
+            }
+
+
+            const currentGeneration =
+              generationMap.get(
+                character.id
+              );
+
+
+            const spouseGeneration =
+              generationMap.get(
+                spouseId
+              );
+
+
+            const sharedGeneration =
+              Math.max(
+                currentGeneration,
+                spouseGeneration
+              );
+
+
+            generationMap.set(
+              character.id,
+              sharedGeneration
+            );
+
+            generationMap.set(
+              spouseId,
+              sharedGeneration
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /*
+    A child must always be
+    below their parents.
+  */
+
+  for (
+    let pass = 0;
+    pass < characters.length;
+    pass++
+  ) {
+
+    characters.forEach(
+      character => {
+
+        const parentIds =
+          [
+            character.motherId,
+            character.fatherId
+          ]
+            .filter(Boolean);
+
+
+        if (
+          parentIds.length === 0
+        ) {
+          return;
+        }
+
+
+        const parentGenerations =
+          parentIds
+            .map(
+              id =>
+                generationMap.get(id)
+            )
+            .filter(
+              value =>
+                value !== undefined
+            );
+
+
+        if (
+          parentGenerations.length === 0
+        ) {
+          return;
+        }
+
+
+        const requiredGeneration =
+          Math.max(
+            ...parentGenerations
+          ) + 1;
+
+
+        if (
+          generationMap.get(
+            character.id
+          ) <
+          requiredGeneration
+        ) {
+
+          generationMap.set(
+            character.id,
+            requiredGeneration
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  const rows =
+    new Map();
+
+
+  characters.forEach(
+    character => {
+
+      const generation =
+        generationMap.get(
+          character.id
+        ) || 0;
+
+
+      if (
+        !rows.has(
+          generation
+        )
+      ) {
+
+        rows.set(
+          generation,
+          []
+        );
+
+      }
+
+
+      rows
+        .get(generation)
+        .push(character);
+
+    }
+  );
+
+
+  const generations =
+    Array.from(
+      rows.keys()
+    )
+      .sort(
+        (a,b) => a - b
+      );
+
+
+  /*
+    Arrange each generation
+    based on parent positions.
+  */
+
+  const orderIndex =
+    new Map();
+
+
+  generations.forEach(
+    generation => {
+
+      const row =
+        rows.get(
+          generation
+        );
+
+
+      if (
+        generation ===
+        generations[0]
+      ) {
+
+        row.sort(
+          compareCharacterNames
+        );
+
+      } else {
+
+        row.sort(
+          (a,b) => {
+
+            const aParentScore =
+              getParentOrderScore(
+                a,
+                orderIndex
+              );
+
+            const bParentScore =
+              getParentOrderScore(
+                b,
+                orderIndex
+              );
+
+
+            if (
+              aParentScore !==
+              bParentScore
+            ) {
+
+              return (
+                aParentScore -
+                bParentScore
+              );
+
+            }
+
+
+            return compareCharacterNames(
+              a,
+              b
+            );
+
+          }
+        );
+
+      }
+
+
+      const clusteredRow =
+        clusterSpouses(
+          row
+        );
+
+
+      rows.set(
+        generation,
+        clusteredRow
+      );
+
+
+      clusteredRow.forEach(
+        (character,index) => {
+
+          orderIndex.set(
+            character.id,
+            index
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  const longestRow =
+    Math.max(
+      ...Array.from(
+        rows.values()
+      )
+        .map(
+          row => row.length
+        ),
+      1
+    );
+
+
+  const contentWidth =
+    (
+      longestRow - 1
+    ) *
+    NODE_GAP_X;
+
+
+  const width =
+    Math.max(
+      window.innerWidth,
+      contentWidth +
+      TREE_PADDING_X * 2
+    );
+
+
+  const maxGeneration =
+    Math.max(
+      ...generations,
+      0
+    );
+
+
+  const height =
+    Math.max(
+      window.innerHeight - 86,
+      TREE_PADDING_TOP +
+      maxGeneration *
+      GENERATION_GAP_Y +
+      260
+    );
+
+
+  const positions =
+    new Map();
+
+
+  generations.forEach(
+    generation => {
+
+      const row =
+        rows.get(
+          generation
+        );
+
+
+      const rowWidth =
+        (
+          row.length - 1
+        ) *
+        NODE_GAP_X;
+
+
+      const rowStartX =
+        width / 2 -
+        rowWidth / 2;
+
+
+      row.forEach(
+        (character,index) => {
+
+          positions.set(
+            character.id,
+            {
+
+              x:
+                rowStartX +
+                index *
+                NODE_GAP_X,
+
+              y:
+                TREE_PADDING_TOP +
+                generation *
+                GENERATION_GAP_Y,
+
+              generation
+
+            }
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  return {
+    positions,
+    width,
+    height
+  };
+
+}
+
+
+/* -------------------------
+   PARENT ORDERING
+------------------------- */
+
+function getParentOrderScore(
+  character,
+  orderIndex
+) {
+
+  const scores =
+    [
+      character.motherId,
+      character.fatherId
+    ]
+      .filter(Boolean)
+      .map(
+        id =>
+          orderIndex.get(id)
+      )
+      .filter(
+        value =>
+          value !== undefined
+      );
+
+
+  if (
+    scores.length === 0
+  ) {
+
+    return 999999;
+
+  }
+
+
+  return (
+    scores.reduce(
+      (total,value) =>
+        total + value,
+      0
+    )
+    /
+    scores.length
+  );
+
+}
+
+
+/* -------------------------
+   KEEP SPOUSES TOGETHER
+------------------------- */
+
+function clusterSpouses(
+  row
+) {
+
+  const rowIds =
+    new Set(
+      row.map(
+        character =>
+          character.id
+      )
+    );
+
+
+  const visited =
+    new Set();
+
+
+  const groups =
+    [];
+
+
+  row.forEach(
+    character => {
+
+      if (
+        visited.has(
+          character.id
+        )
+      ) {
+        return;
+      }
+
+
+      const group =
+        [];
+
+
+      const queue =
+        [character];
+
+
+      while (
+        queue.length
+      ) {
+
+        const current =
+          queue.shift();
+
+
+        if (
+          visited.has(
+            current.id
+          )
+        ) {
+          continue;
+        }
+
+
+        visited.add(
+          current.id
+        );
+
+
+        group.push(
+          current
+        );
+
+
+        current.spouseIds.forEach(
+          spouseId => {
+
+            if (
+              !rowIds.has(
+                spouseId
+              )
+            ) {
+              return;
+            }
+
+
+            const spouse =
+              getCharacter(
+                spouseId
+              );
+
+
+            if (
+              spouse &&
+              !visited.has(
+                spouse.id
+              )
+            ) {
+
+              queue.push(
+                spouse
+              );
+
+            }
+
+          }
+        );
+
+      }
+
+
+      groups.push(
+        group
+      );
+
+    }
+  );
+
+
+  return groups.flat();
+
+}
+
+
+/* -------------------------
+   RENDER NODE
+------------------------- */
+
+function renderCharacterNode(
+  character,
+  position
+) {
+
+  const node =
+    document.createElement(
+      "button"
+    );
+
+
+  node.className =
+    "character-node";
+
+
+  node.type =
+    "button";
+
+
+  node.style.left =
+    `${position.x}px`;
+
+
+  node.style.top =
+    `${position.y}px`;
+
+
+  const initial =
+    character.givenName
+      .charAt(0)
+      .toUpperCase();
+
+
+  node.innerHTML = `
+
+    <div class="character-circle">
+      ${escapeHTML(initial)}
+    </div>
+
+    <div class="character-name">
+      ${escapeHTML(
+        getTreeName(character)
+      )}
+    </div>
+
+    <div class="character-years">
+      ${escapeHTML(
+        makeYearText(character)
+      )}
+    </div>
+
+  `;
+
+
+  node.addEventListener(
+    "click",
+
+    function() {
+
+      openProfile(
+        character.id
+      );
+
+    }
+  );
+
+
+  characterLayer.appendChild(
+    node
+  );
+
+}
+
+
+/* =========================================================
+   TREE CONNECTION LINES
+========================================================= */
+
+
+/* -------------------------
+   DRAW ALL LINES
+------------------------- */
+
+function drawRelationshipLines(
+  positions
+) {
+
+  drawSpouseLines(
+    positions
+  );
+
+
+  const familyGroups =
+    buildParentChildGroups();
+
+
+  familyGroups.forEach(
+    group => {
+
+      drawParentChildGroup(
+        group,
+        positions
+      );
+
+    }
+  );
+
+}
+
+
+/* -------------------------
+   SPOUSE LINES
+------------------------- */
+
+function drawSpouseLines(
+  positions
+) {
+
+  const drawnPairs =
+    new Set();
+
+
+  characters.forEach(
+    character => {
+
+      character.spouseIds.forEach(
+        spouseId => {
+
+          const pairKey =
+            [
+              character.id,
+              spouseId
+            ]
+              .sort(
+                (a,b) => a - b
+              )
+              .join("-");
+
+
+          if (
+            drawnPairs.has(
+              pairKey
+            )
+          ) {
+            return;
+          }
+
+
+          drawnPairs.add(
+            pairKey
+          );
+
+
+          const first =
+            positions.get(
+              character.id
+            );
+
+          const second =
+            positions.get(
+              spouseId
+            );
+
+
+          if (
+            !first ||
+            !second
+          ) {
+            return;
+          }
+
+
+          const y =
+            first.y +
+            NODE_CIRCLE_SIZE / 2;
+
+
+          addSvgLine(
+            first.x,
+            y,
+            second.x,
+            y,
+            "tree-line partner-line"
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+/* -------------------------
+   GROUP CHILDREN BY PARENTS
+------------------------- */
+
+function buildParentChildGroups() {
+
+  const groups =
+    new Map();
+
+
+  characters.forEach(
+    child => {
+
+      if (
+        !child.motherId &&
+        !child.fatherId
+      ) {
+        return;
+      }
+
+
+      const parentIds =
+        [
+          child.motherId,
+          child.fatherId
+        ]
+          .filter(Boolean)
+          .sort(
+            (a,b) => a - b
+          );
+
+
+      const key =
+        parentIds.join("-");
+
+
+      if (
+        !groups.has(key)
+      ) {
+
+        groups.set(
+          key,
+          {
+            parentIds,
+            children: []
+          }
+        );
+
+      }
+
+
+      groups
+        .get(key)
+        .children
+        .push(child);
+
+    }
+  );
+
+
+  return Array.from(
+    groups.values()
+  );
+
+}
+
+
+/* -------------------------
+   DRAW A FAMILY BRANCH
+------------------------- */
+
+function drawParentChildGroup(
+  group,
+  positions
+) {
+
+  const parentPositions =
+    group.parentIds
+      .map(
+        id =>
+          positions.get(id)
+      )
+      .filter(Boolean);
+
+
+  const childPositions =
+    group.children
+      .map(
+        child =>
+          positions.get(
+            child.id
+          )
+      )
+      .filter(Boolean);
+
+
+  if (
+    parentPositions.length === 0 ||
+    childPositions.length === 0
+  ) {
+    return;
+  }
+
+
+  const parentCircleY =
+    Math.max(
+      ...parentPositions.map(
+        position =>
+          position.y +
+          NODE_CIRCLE_SIZE / 2
+      )
+    );
+
+
+  let sourceX;
+
+
+  if (
+    parentPositions.length === 2
+  ) {
+
+    const first =
+      parentPositions[0];
+
+    const second =
+      parentPositions[1];
+
+
+    sourceX =
+      (
+        first.x +
+        second.x
+      ) / 2;
+
+
+    /*
+      Parent-to-parent connection.
+      It is drawn even if they are
+      not marked as spouses.
+    */
+
+    addSvgLine(
+      first.x,
+      parentCircleY,
+      second.x,
+      parentCircleY,
+      "tree-line"
+    );
+
+  } else {
+
+    sourceX =
+      parentPositions[0].x;
+
+  }
+
+
+  const childTopY =
+    Math.min(
+      ...childPositions.map(
+        position =>
+          position.y
+      )
+    );
+
+
+  const branchY =
+    childTopY - 45;
+
+
+  addSvgLine(
+    sourceX,
+    parentCircleY,
+    sourceX,
+    branchY,
+    "tree-line"
+  );
+
+
+  const childXs =
+    childPositions.map(
+      position =>
+        position.x
+    );
+
+
+  const minimumX =
+    Math.min(
+      ...childXs
+    );
+
+
+  const maximumX =
+    Math.max(
+      ...childXs
+    );
+
+
+  if (
+    childPositions.length > 1
+  ) {
+
+    addSvgLine(
+      minimumX,
+      branchY,
+      maximumX,
+      branchY,
+      "tree-line"
+    );
+
+  }
+
+
+  childPositions.forEach(
+    position => {
+
+      addSvgLine(
+        position.x,
+        branchY,
+        position.x,
+        position.y,
+        "tree-line"
+      );
+
+    }
+  );
+
+}
+
+
+/* -------------------------
+   SVG LINE
+------------------------- */
+
+function addSvgLine(
+  x1,
+  y1,
+  x2,
+  y2,
+  className
+) {
+
+  const line =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "line"
+    );
+
+
+  line.setAttribute(
+    "x1",
+    x1
+  );
+
+  line.setAttribute(
+    "y1",
+    y1
+  );
+
+  line.setAttribute(
+    "x2",
+    x2
+  );
+
+  line.setAttribute(
+    "y2",
+    y2
+  );
+
+  line.setAttribute(
+    "class",
+    className
+  );
+
+
+  treeLines.appendChild(
+    line
+  );
+
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+function openProfile(
+  characterId
+) {
+
+  const character =
+    getCharacter(
+      characterId
+    );
 
 
   if (!character) {
@@ -464,13 +1761,17 @@ function openProfile(characterId) {
 
   setProfileText(
     "profileFullName",
-    getProfileName(character)
+    getProfileName(
+      character
+    )
   );
 
 
   setProfileText(
     "profileYearsTop",
-    makeYearText(character)
+    makeYearText(
+      character
+    )
   );
 
 
@@ -478,7 +1779,9 @@ function openProfile(characterId) {
     "profileAliases",
 
     character.aliases.length
-      ? character.aliases.join("\n")
+      ? character.aliases.join(
+          "\n"
+        )
       : ""
   );
 
@@ -530,10 +1833,12 @@ function openProfile(characterId) {
     character.hairColor
   );
 
+
   setColorSwatch(
     "eyeColorSwatch",
     character.eyeColor
   );
+
 
   setColorSwatch(
     "skinColorSwatch",
@@ -558,7 +1863,7 @@ function openProfile(characterId) {
 
 
 /* -------------------------
-   RELATIONSHIP PROFILE
+   CLICKABLE RELATIVES
 ------------------------- */
 
 function renderRelationshipProfile(
@@ -570,25 +1875,30 @@ function renderRelationshipProfile(
       character.motherId
     );
 
+
   const father =
     getCharacter(
       character.fatherId
     );
+
 
   const siblings =
     getSiblings(
       character.id
     );
 
+
   const spouses =
     getCharactersFromIds(
       character.spouseIds
     );
 
+
   const lovers =
     getCharactersFromIds(
       character.loverIds
     );
+
 
   const children =
     getChildren(
@@ -596,51 +1906,136 @@ function renderRelationshipProfile(
     );
 
 
-  setProfileText(
+  renderRelationshipButtons(
     "profileMother",
     mother
-      ? getTreeName(mother)
-      : ""
+      ? [mother]
+      : []
   );
 
 
-  setProfileText(
+  renderRelationshipButtons(
     "profileFather",
     father
-      ? getTreeName(father)
-      : ""
+      ? [father]
+      : []
   );
 
 
-  setProfileText(
+  renderRelationshipButtons(
     "profileSiblings",
-    makeRelationshipText(
-      siblings
-    )
+    siblings
   );
 
 
-  setProfileText(
+  renderRelationshipButtons(
     "profileSpouses",
-    makeRelationshipText(
-      spouses
-    )
+    spouses
   );
 
 
-  setProfileText(
+  renderRelationshipButtons(
     "profileLovers",
-    makeRelationshipText(
-      lovers
-    )
+    lovers
   );
 
 
-  setProfileText(
+  renderRelationshipButtons(
     "profileChildren",
-    makeRelationshipText(
-      children
-    )
+    children
+  );
+
+}
+
+
+/* -------------------------
+   CREATE RELATIVE BUTTONS
+------------------------- */
+
+function renderRelationshipButtons(
+  containerId,
+  people
+) {
+
+  const container =
+    document.getElementById(
+      containerId
+    );
+
+
+  container.innerHTML =
+    "";
+
+
+  if (
+    people.length === 0
+  ) {
+
+    const empty =
+      document.createElement(
+        "span"
+      );
+
+
+    empty.className =
+      "relationship-empty";
+
+
+    empty.textContent =
+      "—";
+
+
+    container.appendChild(
+      empty
+    );
+
+
+    return;
+
+  }
+
+
+  people.forEach(
+    person => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+
+      button.type =
+        "button";
+
+
+      button.className =
+        "relationship-button";
+
+
+      button.textContent =
+        getTreeName(
+          person
+        );
+
+
+      button.addEventListener(
+        "click",
+
+        function() {
+
+          openProfile(
+            person.id
+          );
+
+        }
+      );
+
+
+      container.appendChild(
+        button
+      );
+
+    }
   );
 
 }
@@ -650,7 +2045,9 @@ function renderRelationshipProfile(
    CHILDREN
 ------------------------- */
 
-function getChildren(parentId) {
+function getChildren(
+  parentId
+) {
 
   return characters.filter(
     character =>
@@ -667,7 +2064,9 @@ function getChildren(parentId) {
    SIBLINGS
 ------------------------- */
 
-function getSiblings(characterId) {
+function getSiblings(
+  characterId
+) {
 
   const character =
     getCharacter(
@@ -684,7 +2083,8 @@ function getSiblings(characterId) {
     other => {
 
       if (
-        other.id === character.id
+        other.id ===
+        character.id
       ) {
         return false;
       }
@@ -705,8 +2105,7 @@ function getSiblings(characterId) {
 
 
       return Boolean(
-        sameMother
-        ||
+        sameMother ||
         sameFather
       );
 
@@ -752,9 +2151,9 @@ profileBackdrop.addEventListener(
 );
 
 
-/* -------------------------
-   OPEN EDITOR
-------------------------- */
+/* =========================================================
+   EDITOR
+========================================================= */
 
 editCharacterButton.addEventListener(
   "click",
@@ -790,7 +2189,9 @@ function openEditor() {
   document.getElementById(
     "editAliases"
   ).value =
-    character.aliases.join(", ");
+    character.aliases.join(
+      ", "
+    );
 
 
   document.getElementById(
@@ -888,7 +2289,7 @@ function openEditor() {
 
 
 /* -------------------------
-   RELATIONSHIP SELECTORS
+   RELATIONSHIP SELECTS
 ------------------------- */
 
 function populateRelationshipSelectors(
@@ -959,15 +2360,20 @@ function populateSingleSelect(
 
 
       option.value =
-        String(character.id);
+        String(
+          character.id
+        );
 
 
       option.textContent =
-        getTreeName(character);
+        getTreeName(
+          character
+        );
 
 
       if (
-        character.id === selectedId
+        character.id ===
+        selectedId
       ) {
 
         option.selected =
@@ -1020,11 +2426,15 @@ function populateMultiSelect(
 
 
       option.value =
-        String(character.id);
+        String(
+          character.id
+        );
 
 
       option.textContent =
-        getTreeName(character);
+        getTreeName(
+          character
+        );
 
 
       option.selected =
@@ -1058,7 +2468,9 @@ function cancelEditor() {
   );
 
 
-  if (selectedCharacterId) {
+  if (
+    selectedCharacterId
+  ) {
 
     openProfile(
       selectedCharacterId
@@ -1244,7 +2656,8 @@ editCharacterForm.addEventListener(
 
     saveCharacters();
 
-    renderCharacters();
+
+    renderTree();
 
 
     editBackdrop.classList.add(
@@ -1279,7 +2692,9 @@ function syncTwoWayRelationship(
     otherId => {
 
       if (
-        newIds.includes(otherId)
+        newIds.includes(
+          otherId
+        )
       ) {
         return;
       }
@@ -1297,10 +2712,12 @@ function syncTwoWayRelationship(
 
 
       other[fieldName] =
-        other[fieldName].filter(
-          id =>
-            id !== characterId
-        );
+        other[fieldName]
+          .filter(
+            id =>
+              id !==
+              characterId
+          );
 
     }
   );
@@ -1321,14 +2738,16 @@ function syncTwoWayRelationship(
 
 
       if (
-        !other[fieldName].includes(
-          characterId
-        )
+        !other[fieldName]
+          .includes(
+            characterId
+          )
       ) {
 
-        other[fieldName].push(
-          characterId
-        );
+        other[fieldName]
+          .push(
+            characterId
+          );
 
       }
 
@@ -1370,14 +2789,16 @@ function getSelectedMultipleIds(
   )
     .map(
       option =>
-        Number(option.value)
+        Number(
+          option.value
+        )
     );
 
 }
 
 
 /* -------------------------
-   COLOR INPUTS
+   COLORS
 ------------------------- */
 
 setupColorInput(
@@ -1406,6 +2827,7 @@ function setupColorInput(
       inputId
     );
 
+
   const label =
     document.getElementById(
       labelId
@@ -1418,7 +2840,8 @@ function setupColorInput(
     function() {
 
       label.textContent =
-        input.value.toUpperCase();
+        input.value
+          .toUpperCase();
 
     }
   );
@@ -1426,9 +2849,21 @@ function setupColorInput(
 }
 
 
-/* -------------------------
-   RELATIONSHIP HELPERS
-------------------------- */
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getCharacter(
+  id
+) {
+
+  return characters.find(
+    character =>
+      character.id === id
+  );
+
+}
+
 
 function getCharactersFromIds(
   ids
@@ -1440,39 +2875,6 @@ function getCharactersFromIds(
         getCharacter(id)
     )
     .filter(Boolean);
-
-}
-
-
-function makeRelationshipText(
-  people
-) {
-
-  if (!people.length) {
-    return "";
-  }
-
-
-  return people
-    .map(
-      person =>
-        getTreeName(person)
-    )
-    .join("\n");
-
-}
-
-
-/* -------------------------
-   GENERAL HELPERS
-------------------------- */
-
-function getCharacter(id) {
-
-  return characters.find(
-    character =>
-      character.id === id
-  );
 
 }
 
@@ -1503,7 +2905,10 @@ function getTreeName(
     ${character.givenName}
     ${character.familyName}
   `
-    .replace(/\s+/g, " ")
+    .replace(
+      /\s+/g,
+      " "
+    )
     .trim();
 
 }
@@ -1524,8 +2929,24 @@ function getProfileName(
     ${maiden}
     ${character.familyName}
   `
-    .replace(/\s+/g, " ")
+    .replace(
+      /\s+/g,
+      " "
+    )
     .trim();
+
+}
+
+
+function compareCharacterNames(
+  a,
+  b
+) {
+
+  return getTreeName(a)
+    .localeCompare(
+      getTreeName(b)
+    );
 
 }
 
@@ -1537,22 +2958,32 @@ function makeYearText(
   const birth =
     character.birthYear;
 
+
   const death =
     character.deathYear;
 
 
-  if (birth && death) {
+  if (
+    birth &&
+    death
+  ) {
+
     return `${birth} – ${death}`;
+
   }
 
 
   if (birth) {
+
     return `${birth} –`;
+
   }
 
 
   if (death) {
+
     return `? – ${death}`;
+
   }
 
 
@@ -1647,8 +3078,10 @@ function escapeHTML(
       "div"
     );
 
+
   element.textContent =
     value;
+
 
   return element.innerHTML;
 
@@ -1656,7 +3089,22 @@ function escapeHTML(
 
 
 /* -------------------------
+   REDRAW ON SCREEN ROTATION
+------------------------- */
+
+window.addEventListener(
+  "resize",
+
+  function() {
+
+    renderTree();
+
+  }
+);
+
+
+/* -------------------------
    START
 ------------------------- */
 
-renderCharacters();
+renderTree();
