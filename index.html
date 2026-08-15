@@ -20,6 +20,7 @@
   <div class="app">
 
     <header class="topbar">
+
       <div>
         <p class="eyebrow">Private Archive</p>
         <h1>Family Tree</h1>
@@ -29,6 +30,7 @@
         <span class="plus">+</span>
         <span>Add</span>
       </button>
+
     </header>
 
 
@@ -82,7 +84,6 @@
         id="closeFormButton"
         class="icon-button"
         type="button"
-        aria-label="Close"
       >
         ×
       </button>
@@ -96,35 +97,19 @@
 
         <label class="field">
           <span>Title</span>
-
-          <input
-            id="title"
-            name="title"
-            type="text"
-          >
+          <input id="title" type="text">
         </label>
 
 
         <label class="field">
           <span>Given Name *</span>
-
-          <input
-            id="givenName"
-            name="givenName"
-            type="text"
-            required
-          >
+          <input id="givenName" type="text" required>
         </label>
 
 
         <label class="field">
           <span>Aliases</span>
-
-          <input
-            id="aliases"
-            name="aliases"
-            type="text"
-          >
+          <input id="aliases" type="text">
 
           <small>
             Separate multiple aliases with commas.
@@ -134,24 +119,13 @@
 
         <label class="field">
           <span>Maiden Name</span>
-
-          <input
-            id="maidenName"
-            name="maidenName"
-            type="text"
-          >
+          <input id="maidenName" type="text">
         </label>
 
 
         <label class="field">
           <span>Family Name *</span>
-
-          <input
-            id="familyName"
-            name="familyName"
-            type="text"
-            required
-          >
+          <input id="familyName" type="text" required>
         </label>
 
 
@@ -162,7 +136,6 @@
 
             <input
               id="birthYear"
-              name="birthYear"
               type="text"
               inputmode="numeric"
             >
@@ -174,7 +147,6 @@
 
             <input
               id="deathYear"
-              name="deathYear"
               type="text"
               inputmode="numeric"
             >
@@ -218,15 +190,14 @@
 
     <div class="profile-topbar">
 
-      <div>
-        <p class="eyebrow">Character Profile</p>
-      </div>
+      <p class="eyebrow">
+        Character Profile
+      </p>
 
       <button
         id="closeProfileButton"
         class="icon-button"
         type="button"
-        aria-label="Close profile"
       >
         ×
       </button>
@@ -253,7 +224,7 @@
       </section>
 
 
-      <!-- FULL NAME -->
+      <!-- NAME -->
 
       <section class="profile-box name-box">
 
@@ -294,7 +265,6 @@
 
       <section class="colors-box">
 
-
         <div class="color-profile-item">
 
           <div
@@ -302,9 +272,7 @@
             class="large-color-swatch"
           ></div>
 
-          <span>
-            Hair Color
-          </span>
+          <span>Hair Color</span>
 
           <small id="profileHairColor"></small>
 
@@ -318,9 +286,7 @@
             class="large-color-swatch"
           ></div>
 
-          <span>
-            Eye Color
-          </span>
+          <span>Eye Color</span>
 
           <small id="profileEyeColor"></small>
 
@@ -334,14 +300,11 @@
             class="large-color-swatch"
           ></div>
 
-          <span>
-            Skin Color
-          </span>
+          <span>Skin Color</span>
 
           <small id="profileSkinColor"></small>
 
         </div>
-
 
       </section>
 
@@ -454,7 +417,6 @@
 
       </section>
 
-
     </div>
 
 
@@ -477,6 +439,253 @@
       </button>
 
     </div>
+
+  </section>
+
+
+
+  <!-- EDIT CHARACTER -->
+
+  <div id="editBackdrop" class="backdrop hidden"></div>
+
+  <section id="editPanel" class="bottom-panel editor-panel hidden">
+
+    <div class="panel-handle"></div>
+
+    <div class="panel-header">
+
+      <div>
+        <p class="eyebrow">Character Editor</p>
+        <h2>Edit Character</h2>
+      </div>
+
+      <button
+        id="closeEditButton"
+        class="icon-button"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="editCharacterForm">
+
+      <div class="form-body">
+
+
+        <!-- IDENTITY -->
+
+        <div class="editor-heading">
+          Identity
+        </div>
+
+
+        <label class="field">
+          <span>Title</span>
+          <input id="editTitle" type="text">
+        </label>
+
+
+        <label class="field">
+          <span>Given Name *</span>
+          <input id="editGivenName" type="text" required>
+        </label>
+
+
+        <label class="field">
+          <span>Aliases</span>
+          <input id="editAliases" type="text">
+
+          <small>
+            Separate multiple aliases with commas.
+          </small>
+        </label>
+
+
+        <label class="field">
+          <span>Maiden Name</span>
+          <input id="editMaidenName" type="text">
+        </label>
+
+
+        <label class="field">
+          <span>Family Name *</span>
+          <input id="editFamilyName" type="text" required>
+        </label>
+
+
+        <!-- DATES -->
+
+        <div class="editor-heading">
+          Dates
+        </div>
+
+
+        <div class="field-row">
+
+          <label class="field">
+            <span>Birth Year</span>
+
+            <input
+              id="editBirthYear"
+              type="text"
+              inputmode="numeric"
+            >
+          </label>
+
+
+          <label class="field">
+            <span>Death Year</span>
+
+            <input
+              id="editDeathYear"
+              type="text"
+              inputmode="numeric"
+            >
+          </label>
+
+        </div>
+
+
+        <!-- APPEARANCE -->
+
+        <div class="editor-heading">
+          Appearance
+        </div>
+
+
+        <label class="field">
+          <span>Race</span>
+          <input id="editRace" type="text">
+        </label>
+
+
+        <div class="color-editor-grid">
+
+
+          <label class="color-editor-field">
+
+            <span>Hair Color</span>
+
+            <input
+              id="editHairColor"
+              type="color"
+              value="#242429"
+            >
+
+            <strong id="editHairColorValue">
+              #242429
+            </strong>
+
+          </label>
+
+
+          <label class="color-editor-field">
+
+            <span>Eye Color</span>
+
+            <input
+              id="editEyeColor"
+              type="color"
+              value="#242429"
+            >
+
+            <strong id="editEyeColorValue">
+              #242429
+            </strong>
+
+          </label>
+
+
+          <label class="color-editor-field">
+
+            <span>Skin Color</span>
+
+            <input
+              id="editSkinColor"
+              type="color"
+              value="#242429"
+            >
+
+            <strong id="editSkinColorValue">
+              #242429
+            </strong>
+
+          </label>
+
+        </div>
+
+
+        <label class="field">
+          <span>Notable Physical Feature</span>
+
+          <textarea
+            id="editPhysicalFeature"
+            rows="4"
+          ></textarea>
+        </label>
+
+
+        <!-- ACHIEVEMENTS -->
+
+        <div class="editor-heading">
+          Noteworthy Achievements
+        </div>
+
+
+        <label class="field">
+
+          <textarea
+            id="editAchievements"
+            rows="7"
+          ></textarea>
+
+        </label>
+
+
+        <!-- LIFE -->
+
+        <div class="editor-heading">
+          Life
+        </div>
+
+
+        <label class="field">
+
+          <textarea
+            id="editLife"
+            class="life-editor"
+            rows="15"
+          ></textarea>
+
+        </label>
+
+
+      </div>
+
+
+      <div class="form-footer">
+
+        <button
+          id="cancelEditButton"
+          class="secondary-button"
+          type="button"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="save-button"
+          type="submit"
+        >
+          Save Changes
+        </button>
+
+      </div>
+
+    </form>
 
   </section>
 
