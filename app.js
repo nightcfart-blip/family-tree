@@ -10,6 +10,9 @@ const emptyState =
 const characterLayer =
   document.getElementById("characterLayer");
 
+
+/* CREATE FORM */
+
 const formBackdrop =
   document.getElementById("formBackdrop");
 
@@ -26,28 +29,47 @@ const characterForm =
   document.getElementById("characterForm");
 
 
+/* PROFILE */
+
+const profileBackdrop =
+  document.getElementById("profileBackdrop");
+
+const profilePanel =
+  document.getElementById("profilePanel");
+
+const closeProfileButton =
+  document.getElementById("closeProfileButton");
+
+const closeProfileFooterButton =
+  document.getElementById("closeProfileFooterButton");
+
+const editCharacterButton =
+  document.getElementById("editCharacterButton");
+
+
 let characters = [];
+let selectedCharacterId = null;
 
 
 /* -------------------------
-   OPEN / CLOSE FORM
+   CREATE FORM
 ------------------------- */
 
 function openCharacterForm() {
+
   characterForm.reset();
 
   formBackdrop.classList.remove("hidden");
   characterFormPanel.classList.remove("hidden");
 
-  setTimeout(() => {
-    document.getElementById("givenName").focus();
-  }, 100);
 }
 
 
 function closeCharacterForm() {
+
   formBackdrop.classList.add("hidden");
   characterFormPanel.classList.add("hidden");
+
 }
 
 
@@ -78,7 +100,7 @@ formBackdrop.addEventListener(
 
 
 /* -------------------------
-   SAVE CHARACTER
+   SAVE NEW CHARACTER
 ------------------------- */
 
 characterForm.addEventListener(
@@ -134,7 +156,27 @@ characterForm.addEventListener(
         document
           .getElementById("deathYear")
           .value
-          .trim()
+          .trim(),
+
+
+      /*
+        These fields are ready for
+        Step 4: Editing.
+      */
+
+      race: "",
+
+      eyeColor: "",
+
+      hairColor: "",
+
+      skinColor: "",
+
+      physicalFeature: "",
+
+      life: "",
+
+      achievements: ""
 
     };
 
@@ -150,7 +192,7 @@ characterForm.addEventListener(
 
 
 /* -------------------------
-   RENDER TREE CHARACTERS
+   RENDER TREE
 ------------------------- */
 
 function renderCharacters() {
@@ -181,25 +223,17 @@ function renderCharacters() {
       node.type = "button";
 
 
-      /*
-        TEMPORARY POSITIONING
-
-        For now, every new person gets
-        spaced across the canvas.
-
-        Later, our family-tree engine
-        will calculate their real position.
-      */
-
       const column = index % 3;
 
-      const row = Math.floor(index / 3);
+      const row =
+        Math.floor(index / 3);
+
 
       node.style.left =
         `${25 + (column * 25)}%`;
 
       node.style.top =
-        `${30 + (row * 170)}px`;
+        `${120 + (row * 170)}px`;
 
 
       const initial =
@@ -209,8 +243,7 @@ function renderCharacters() {
 
 
       const fullName =
-        `${character.givenName} ${character.familyName}`
-          .trim();
+        getFullName(character);
 
 
       const years =
@@ -238,10 +271,7 @@ function renderCharacters() {
         "click",
         function () {
 
-          console.log(
-            "Character selected:",
-            character
-          );
+          openProfile(character.id);
 
         }
       );
@@ -256,8 +286,199 @@ function renderCharacters() {
 
 
 /* -------------------------
-   YEAR DISPLAY
+   PROFILE
 ------------------------- */
+
+function openProfile(characterId) {
+
+  const character =
+    characters.find(
+      person => person.id === characterId
+    );
+
+
+  if (!character) {
+    return;
+  }
+
+
+  selectedCharacterId =
+    character.id;
+
+
+  document
+    .getElementById("profileTitleTop")
+    .textContent =
+      character.title || "Person";
+
+
+  document
+    .getElementById("profileFullName")
+    .textContent =
+      getFullName(character);
+
+
+  document
+    .getElementById("profileYearsTop")
+    .textContent =
+      makeYearText(character);
+
+
+  setProfileText(
+    "profileTitle",
+    character.title
+  );
+
+  setProfileText(
+    "profileGivenName",
+    character.givenName
+  );
+
+  setProfileText(
+    "profileAliases",
+    character.aliases.length
+      ? character.aliases.join(", ")
+      : ""
+  );
+
+  setProfileText(
+    "profileMaidenName",
+    character.maidenName
+  );
+
+  setProfileText(
+    "profileFamilyName",
+    character.familyName
+  );
+
+  setProfileText(
+    "profileBirthYear",
+    character.birthYear
+  );
+
+  setProfileText(
+    "profileDeathYear",
+    character.deathYear
+  );
+
+  setProfileText(
+    "profileRace",
+    character.race
+  );
+
+  setProfileText(
+    "profileEyeColor",
+    character.eyeColor
+  );
+
+  setProfileText(
+    "profileHairColor",
+    character.hairColor
+  );
+
+  setProfileText(
+    "profileSkinColor",
+    character.skinColor
+  );
+
+  setProfileText(
+    "profilePhysicalFeature",
+    character.physicalFeature
+  );
+
+  setProfileText(
+    "profileLife",
+    character.life
+  );
+
+  setProfileText(
+    "profileAchievements",
+    character.achievements
+  );
+
+
+  setColorSwatch(
+    "eyeColorSwatch",
+    character.eyeColor
+  );
+
+  setColorSwatch(
+    "hairColorSwatch",
+    character.hairColor
+  );
+
+  setColorSwatch(
+    "skinColorSwatch",
+    character.skinColor
+  );
+
+
+  profileBackdrop.classList.remove("hidden");
+
+  profilePanel.classList.remove("hidden");
+
+}
+
+
+function closeProfile() {
+
+  profileBackdrop.classList.add("hidden");
+
+  profilePanel.classList.add("hidden");
+
+  selectedCharacterId = null;
+
+}
+
+
+closeProfileButton.addEventListener(
+  "click",
+  closeProfile
+);
+
+closeProfileFooterButton.addEventListener(
+  "click",
+  closeProfile
+);
+
+profileBackdrop.addEventListener(
+  "click",
+  closeProfile
+);
+
+
+/* -------------------------
+   EDIT BUTTON
+------------------------- */
+
+editCharacterButton.addEventListener(
+  "click",
+  function () {
+
+    if (!selectedCharacterId) {
+      return;
+    }
+
+
+    alert(
+      "Editing comes in Step 4."
+    );
+
+  }
+);
+
+
+/* -------------------------
+   HELPERS
+------------------------- */
+
+function getFullName(character) {
+
+  return `${character.givenName} ${character.familyName}`
+    .trim();
+
+}
+
 
 function makeYearText(character) {
 
@@ -282,9 +503,42 @@ function makeYearText(character) {
 }
 
 
-/* -------------------------
-   SAFETY
-------------------------- */
+function setProfileText(
+  elementId,
+  value
+) {
+
+  const element =
+    document.getElementById(elementId);
+
+  element.textContent =
+    value || "—";
+
+}
+
+
+function setColorSwatch(
+  elementId,
+  color
+) {
+
+  const swatch =
+    document.getElementById(elementId);
+
+
+  if (color) {
+
+    swatch.style.background = color;
+
+  } else {
+
+    swatch.style.background =
+      "transparent";
+
+  }
+
+}
+
 
 function escapeHTML(value) {
 
