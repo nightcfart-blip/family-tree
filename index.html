@@ -33,6 +33,8 @@
 
     <main id="treeCanvas" class="tree-canvas">
 
+      <div id="characterLayer" class="character-layer"></div>
+
       <div id="emptyState" class="empty-state">
 
         <div class="empty-symbol">
@@ -57,11 +59,160 @@
 
     </main>
 
-    <div id="message" class="message hidden">
-      Character creation comes next.
+  </div>
+
+
+  <!-- CHARACTER CREATION PANEL -->
+
+  <div id="formBackdrop" class="form-backdrop hidden"></div>
+
+  <section id="characterFormPanel" class="form-panel hidden">
+
+    <div class="form-handle"></div>
+
+    <div class="form-header">
+
+      <div>
+        <p class="eyebrow">New Person</p>
+        <h2>Add Character</h2>
+      </div>
+
+      <button
+        id="closeFormButton"
+        class="icon-button"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
     </div>
 
-  </div>
+    <form id="characterForm">
+
+      <div class="form-body">
+
+        <label class="field">
+          <span>Title</span>
+
+          <input
+            id="title"
+            name="title"
+            type="text"
+            placeholder="Lady, Prince, Dr..."
+          >
+        </label>
+
+
+        <label class="field">
+          <span>Given Name *</span>
+
+          <input
+            id="givenName"
+            name="givenName"
+            type="text"
+            placeholder="Seraphine"
+            required
+          >
+        </label>
+
+
+        <label class="field">
+          <span>Aliases</span>
+
+          <input
+            id="aliases"
+            name="aliases"
+            type="text"
+            placeholder="The Ash Queen, Sera..."
+          >
+
+          <small>
+            You can separate several aliases with commas.
+          </small>
+        </label>
+
+
+        <label class="field">
+          <span>Maiden Name</span>
+
+          <input
+            id="maidenName"
+            name="maidenName"
+            type="text"
+            placeholder="Morcant"
+          >
+        </label>
+
+
+        <label class="field">
+          <span>Family Name *</span>
+
+          <input
+            id="familyName"
+            name="familyName"
+            type="text"
+            placeholder="Vale"
+            required
+          >
+        </label>
+
+
+        <div class="field-row">
+
+          <label class="field">
+            <span>Birth Year</span>
+
+            <input
+              id="birthYear"
+              name="birthYear"
+              type="text"
+              inputmode="numeric"
+              placeholder="1204"
+            >
+          </label>
+
+
+          <label class="field">
+            <span>Death Year</span>
+
+            <input
+              id="deathYear"
+              name="deathYear"
+              type="text"
+              inputmode="numeric"
+              placeholder="1278"
+            >
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-footer">
+
+        <button
+          id="cancelFormButton"
+          class="secondary-button"
+          type="button"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="save-button"
+          type="submit"
+        >
+          Save Character
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
 
   <script src="app.js"></script>
 
