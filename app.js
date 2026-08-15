@@ -1,3 +1,7 @@
+const STORAGE_KEY =
+  "fantasyFamilyTreeCharacters";
+
+
 const addCharacterButton =
   document.getElementById("addCharacterButton");
 
@@ -10,18 +14,6 @@ const emptyState =
 const characterLayer =
   document.getElementById("characterLayer");
 
-
-/* -------------------------
-   STORAGE
-------------------------- */
-
-const STORAGE_KEY =
-  "fantasyFamilyTreeCharacters";
-
-
-/* -------------------------
-   CREATE
-------------------------- */
 
 const formBackdrop =
   document.getElementById("formBackdrop");
@@ -39,10 +31,6 @@ const characterForm =
   document.getElementById("characterForm");
 
 
-/* -------------------------
-   PROFILE
-------------------------- */
-
 const profileBackdrop =
   document.getElementById("profileBackdrop");
 
@@ -58,10 +46,6 @@ const closeProfileFooterButton =
 const editCharacterButton =
   document.getElementById("editCharacterButton");
 
-
-/* -------------------------
-   EDITOR
-------------------------- */
 
 const editBackdrop =
   document.getElementById("editBackdrop");
@@ -87,43 +71,41 @@ let selectedCharacterId =
 
 
 /* -------------------------
-   LOAD SAVED CHARACTERS
+   STORAGE
 ------------------------- */
 
 function loadCharacters() {
 
   try {
 
-    const savedData =
+    const saved =
       localStorage.getItem(
         STORAGE_KEY
       );
 
 
-    if (!savedData) {
-
+    if (!saved) {
       return [];
-
     }
 
 
-    const parsedData =
-      JSON.parse(savedData);
+    const parsed =
+      JSON.parse(saved);
 
 
-    if (!Array.isArray(parsedData)) {
-
+    if (!Array.isArray(parsed)) {
       return [];
-
     }
 
 
-    return parsedData;
+    return parsed.map(
+      normalizeCharacter
+    );
 
   } catch (error) {
 
     console.error(
-      "Could not load saved characters:",
+      "Could not load characters:",
       error
     );
 
@@ -134,59 +116,112 @@ function loadCharacters() {
 }
 
 
-/* -------------------------
-   SAVE CHARACTERS
-------------------------- */
-
 function saveCharacters() {
 
-  try {
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(characters)
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Could not save characters:",
-      error
-    );
-
-  }
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(characters)
+  );
 
 }
 
 
 /* -------------------------
-   ADD CHARACTER
+   NORMALIZE OLD DATA
+------------------------- */
+
+function normalizeCharacter(character) {
+
+  return {
+
+    id:
+      character.id,
+
+    title:
+      character.title || "",
+
+    givenName:
+      character.givenName || "",
+
+    aliases:
+      Array.isArray(character.aliases)
+        ? character.aliases
+        : [],
+
+    maidenName:
+      character.maidenName || "",
+
+    familyName:
+      character.familyName || "",
+
+    birthYear:
+      character.birthYear || "",
+
+    deathYear:
+      character.deathYear || "",
+
+    race:
+      character.race || "",
+
+    eyeColor:
+      character.eyeColor || "",
+
+    hairColor:
+      character.hairColor || "",
+
+    skinColor:
+      character.skinColor || "",
+
+    physicalFeature:
+      character.physicalFeature || "",
+
+    life:
+      character.life || "",
+
+    achievements:
+      character.achievements || "",
+
+    motherId:
+      character.motherId || null,
+
+    fatherId:
+      character.fatherId || null,
+
+    spouseIds:
+      Array.isArray(character.spouseIds)
+        ? character.spouseIds
+        : [],
+
+    loverIds:
+      Array.isArray(character.loverIds)
+        ? character.loverIds
+        : []
+
+  };
+
+}
+
+
+/* -------------------------
+   CREATE
 ------------------------- */
 
 function openCharacterForm() {
 
   characterForm.reset();
 
-  formBackdrop.classList.remove(
-    "hidden"
-  );
+  formBackdrop.classList.remove("hidden");
 
-  characterFormPanel.classList.remove(
-    "hidden"
-  );
+  characterFormPanel.classList.remove("hidden");
 
 }
 
 
 function closeCharacterForm() {
 
-  formBackdrop.classList.add(
-    "hidden"
-  );
+  formBackdrop.classList.add("hidden");
 
-  characterFormPanel.classList.add(
-    "hidden"
-  );
+  characterFormPanel.classList.add("hidden");
 
 }
 
@@ -218,7 +253,7 @@ formBackdrop.addEventListener(
 
 
 /* -------------------------
-   SAVE NEW CHARACTER
+   SAVE NEW PERSON
 ------------------------- */
 
 characterForm.addEventListener(
@@ -235,41 +270,27 @@ characterForm.addEventListener(
         Date.now(),
 
       title:
-        getInputValue(
-          "title"
-        ),
+        getInputValue("title"),
 
       givenName:
-        getInputValue(
-          "givenName"
-        ),
+        getInputValue("givenName"),
 
       aliases:
         makeAliasArray(
-          getInputValue(
-            "aliases"
-          )
+          getInputValue("aliases")
         ),
 
       maidenName:
-        getInputValue(
-          "maidenName"
-        ),
+        getInputValue("maidenName"),
 
       familyName:
-        getInputValue(
-          "familyName"
-        ),
+        getInputValue("familyName"),
 
       birthYear:
-        getInputValue(
-          "birthYear"
-        ),
+        getInputValue("birthYear"),
 
       deathYear:
-        getInputValue(
-          "deathYear"
-        ),
+        getInputValue("deathYear"),
 
       race: "",
 
@@ -283,15 +304,20 @@ characterForm.addEventListener(
 
       life: "",
 
-      achievements: ""
+      achievements: "",
+
+      motherId: null,
+
+      fatherId: null,
+
+      spouseIds: [],
+
+      loverIds: []
 
     };
 
 
-    characters.push(
-      character
-    );
-
+    characters.push(character);
 
     saveCharacters();
 
@@ -332,10 +358,7 @@ function renderCharacters() {
 
 
   characters.forEach(
-    function(
-      character,
-      index
-    ) {
+    function(character, index) {
 
       const node =
         document.createElement(
@@ -354,23 +377,14 @@ function renderCharacters() {
         index % 3;
 
       const row =
-        Math.floor(
-          index / 3
-        );
+        Math.floor(index / 3);
 
 
       node.style.left =
-        `${
-          25 +
-          column * 25
-        }%`;
-
+        `${25 + column * 25}%`;
 
       node.style.top =
-        `${
-          120 +
-          row * 170
-        }px`;
+        `${120 + row * 170}px`;
 
 
       const initial =
@@ -427,20 +441,14 @@ function renderCharacters() {
    PROFILE
 ------------------------- */
 
-function openProfile(
-  characterId
-) {
+function openProfile(characterId) {
 
   const character =
-    getCharacter(
-      characterId
-    );
+    getCharacter(characterId);
 
 
   if (!character) {
-
     return;
-
   }
 
 
@@ -456,17 +464,13 @@ function openProfile(
 
   setProfileText(
     "profileFullName",
-    getProfileName(
-      character
-    )
+    getProfileName(character)
   );
 
 
   setProfileText(
     "profileYearsTop",
-    makeYearText(
-      character
-    )
+    makeYearText(character)
   );
 
 
@@ -474,9 +478,7 @@ function openProfile(
     "profileAliases",
 
     character.aliases.length
-      ? character.aliases.join(
-          "\n"
-        )
+      ? character.aliases.join("\n")
       : ""
   );
 
@@ -528,16 +530,19 @@ function openProfile(
     character.hairColor
   );
 
-
   setColorSwatch(
     "eyeColorSwatch",
     character.eyeColor
   );
 
-
   setColorSwatch(
     "skinColorSwatch",
     character.skinColor
+  );
+
+
+  renderRelationshipProfile(
+    character
   );
 
 
@@ -547,6 +552,165 @@ function openProfile(
 
   profilePanel.classList.remove(
     "hidden"
+  );
+
+}
+
+
+/* -------------------------
+   RELATIONSHIP PROFILE
+------------------------- */
+
+function renderRelationshipProfile(
+  character
+) {
+
+  const mother =
+    getCharacter(
+      character.motherId
+    );
+
+  const father =
+    getCharacter(
+      character.fatherId
+    );
+
+  const siblings =
+    getSiblings(
+      character.id
+    );
+
+  const spouses =
+    getCharactersFromIds(
+      character.spouseIds
+    );
+
+  const lovers =
+    getCharactersFromIds(
+      character.loverIds
+    );
+
+  const children =
+    getChildren(
+      character.id
+    );
+
+
+  setProfileText(
+    "profileMother",
+    mother
+      ? getTreeName(mother)
+      : ""
+  );
+
+
+  setProfileText(
+    "profileFather",
+    father
+      ? getTreeName(father)
+      : ""
+  );
+
+
+  setProfileText(
+    "profileSiblings",
+    makeRelationshipText(
+      siblings
+    )
+  );
+
+
+  setProfileText(
+    "profileSpouses",
+    makeRelationshipText(
+      spouses
+    )
+  );
+
+
+  setProfileText(
+    "profileLovers",
+    makeRelationshipText(
+      lovers
+    )
+  );
+
+
+  setProfileText(
+    "profileChildren",
+    makeRelationshipText(
+      children
+    )
+  );
+
+}
+
+
+/* -------------------------
+   CHILDREN
+------------------------- */
+
+function getChildren(parentId) {
+
+  return characters.filter(
+    character =>
+
+      character.motherId === parentId
+      ||
+      character.fatherId === parentId
+  );
+
+}
+
+
+/* -------------------------
+   SIBLINGS
+------------------------- */
+
+function getSiblings(characterId) {
+
+  const character =
+    getCharacter(
+      characterId
+    );
+
+
+  if (!character) {
+    return [];
+  }
+
+
+  return characters.filter(
+    other => {
+
+      if (
+        other.id === character.id
+      ) {
+        return false;
+      }
+
+
+      const sameMother =
+        character.motherId
+        &&
+        other.motherId ===
+          character.motherId;
+
+
+      const sameFather =
+        character.fatherId
+        &&
+        other.fatherId ===
+          character.fatherId;
+
+
+      return Boolean(
+        sameMother
+        ||
+        sameFather
+      );
+
+    }
   );
 
 }
@@ -607,9 +771,7 @@ function openEditor() {
 
 
   if (!character) {
-
     return;
-
   }
 
 
@@ -628,9 +790,7 @@ function openEditor() {
   document.getElementById(
     "editAliases"
   ).value =
-    character.aliases.join(
-      ", "
-    );
+    character.aliases.join(", ");
 
 
   document.getElementById(
@@ -702,6 +862,11 @@ function openEditor() {
   );
 
 
+  populateRelationshipSelectors(
+    character
+  );
+
+
   profilePanel.classList.add(
     "hidden"
   );
@@ -723,7 +888,163 @@ function openEditor() {
 
 
 /* -------------------------
-   CANCEL EDITOR
+   RELATIONSHIP SELECTORS
+------------------------- */
+
+function populateRelationshipSelectors(
+  character
+) {
+
+  populateSingleSelect(
+    "editMother",
+    character.id,
+    character.motherId
+  );
+
+
+  populateSingleSelect(
+    "editFather",
+    character.id,
+    character.fatherId
+  );
+
+
+  populateMultiSelect(
+    "editSpouses",
+    character.id,
+    character.spouseIds
+  );
+
+
+  populateMultiSelect(
+    "editLovers",
+    character.id,
+    character.loverIds
+  );
+
+}
+
+
+function populateSingleSelect(
+  selectId,
+  currentCharacterId,
+  selectedId
+) {
+
+  const select =
+    document.getElementById(
+      selectId
+    );
+
+
+  select.innerHTML =
+    `<option value="">— None —</option>`;
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        character.id ===
+        currentCharacterId
+      ) {
+        return;
+      }
+
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        String(character.id);
+
+
+      option.textContent =
+        getTreeName(character);
+
+
+      if (
+        character.id === selectedId
+      ) {
+
+        option.selected =
+          true;
+
+      }
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+function populateMultiSelect(
+  selectId,
+  currentCharacterId,
+  selectedIds
+) {
+
+  const select =
+    document.getElementById(
+      selectId
+    );
+
+
+  select.innerHTML =
+    "";
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        character.id ===
+        currentCharacterId
+      ) {
+        return;
+      }
+
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        String(character.id);
+
+
+      option.textContent =
+        getTreeName(character);
+
+
+      option.selected =
+        selectedIds.includes(
+          character.id
+        );
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+/* -------------------------
+   CANCEL EDIT
 ------------------------- */
 
 function cancelEditor() {
@@ -765,7 +1086,7 @@ editBackdrop.addEventListener(
 
 
 /* -------------------------
-   SAVE EDITS
+   SAVE EDIT
 ------------------------- */
 
 editCharacterForm.addEventListener(
@@ -783,10 +1104,16 @@ editCharacterForm.addEventListener(
 
 
     if (!character) {
-
       return;
-
     }
+
+
+    const oldSpouseIds =
+      [...character.spouseIds];
+
+
+    const oldLoverIds =
+      [...character.loverIds];
 
 
     character.title =
@@ -833,6 +1160,30 @@ editCharacterForm.addEventListener(
       );
 
 
+    character.motherId =
+      getSelectedSingleId(
+        "editMother"
+      );
+
+
+    character.fatherId =
+      getSelectedSingleId(
+        "editFather"
+      );
+
+
+    character.spouseIds =
+      getSelectedMultipleIds(
+        "editSpouses"
+      );
+
+
+    character.loverIds =
+      getSelectedMultipleIds(
+        "editLovers"
+      );
+
+
     character.race =
       getInputValue(
         "editRace"
@@ -875,13 +1226,23 @@ editCharacterForm.addEventListener(
       );
 
 
-    /*
-      THIS is the important
-      new Step 6 line.
-    */
+    syncTwoWayRelationship(
+      character.id,
+      oldSpouseIds,
+      character.spouseIds,
+      "spouseIds"
+    );
+
+
+    syncTwoWayRelationship(
+      character.id,
+      oldLoverIds,
+      character.loverIds,
+      "loverIds"
+    );
+
 
     saveCharacters();
-
 
     renderCharacters();
 
@@ -904,7 +1265,119 @@ editCharacterForm.addEventListener(
 
 
 /* -------------------------
-   LIVE COLOR VALUES
+   TWO-WAY RELATIONSHIPS
+------------------------- */
+
+function syncTwoWayRelationship(
+  characterId,
+  oldIds,
+  newIds,
+  fieldName
+) {
+
+  oldIds.forEach(
+    otherId => {
+
+      if (
+        newIds.includes(otherId)
+      ) {
+        return;
+      }
+
+
+      const other =
+        getCharacter(
+          otherId
+        );
+
+
+      if (!other) {
+        return;
+      }
+
+
+      other[fieldName] =
+        other[fieldName].filter(
+          id =>
+            id !== characterId
+        );
+
+    }
+  );
+
+
+  newIds.forEach(
+    otherId => {
+
+      const other =
+        getCharacter(
+          otherId
+        );
+
+
+      if (!other) {
+        return;
+      }
+
+
+      if (
+        !other[fieldName].includes(
+          characterId
+        )
+      ) {
+
+        other[fieldName].push(
+          characterId
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+/* -------------------------
+   SELECT HELPERS
+------------------------- */
+
+function getSelectedSingleId(
+  selectId
+) {
+
+  const value =
+    document.getElementById(
+      selectId
+    ).value;
+
+
+  return value
+    ? Number(value)
+    : null;
+
+}
+
+
+function getSelectedMultipleIds(
+  selectId
+) {
+
+  return Array.from(
+    document.getElementById(
+      selectId
+    ).selectedOptions
+  )
+    .map(
+      option =>
+        Number(option.value)
+    );
+
+}
+
+
+/* -------------------------
+   COLOR INPUTS
 ------------------------- */
 
 setupColorInput(
@@ -945,8 +1418,7 @@ function setupColorInput(
     function() {
 
       label.textContent =
-        input.value
-          .toUpperCase();
+        input.value.toUpperCase();
 
     }
   );
@@ -955,7 +1427,44 @@ function setupColorInput(
 
 
 /* -------------------------
-   HELPERS
+   RELATIONSHIP HELPERS
+------------------------- */
+
+function getCharactersFromIds(
+  ids
+) {
+
+  return ids
+    .map(
+      id =>
+        getCharacter(id)
+    )
+    .filter(Boolean);
+
+}
+
+
+function makeRelationshipText(
+  people
+) {
+
+  if (!people.length) {
+    return "";
+  }
+
+
+  return people
+    .map(
+      person =>
+        getTreeName(person)
+    )
+    .join("\n");
+
+}
+
+
+/* -------------------------
+   GENERAL HELPERS
 ------------------------- */
 
 function getCharacter(id) {
@@ -994,10 +1503,7 @@ function getTreeName(
     ${character.givenName}
     ${character.familyName}
   `
-    .replace(
-      /\s+/g,
-      " "
-    )
+    .replace(/\s+/g, " ")
     .trim();
 
 }
@@ -1018,10 +1524,7 @@ function getProfileName(
     ${maiden}
     ${character.familyName}
   `
-    .replace(
-      /\s+/g,
-      " "
-    )
+    .replace(/\s+/g, " ")
     .trim();
 
 }
@@ -1038,27 +1541,18 @@ function makeYearText(
     character.deathYear;
 
 
-  if (
-    birth &&
-    death
-  ) {
-
+  if (birth && death) {
     return `${birth} – ${death}`;
-
   }
 
 
   if (birth) {
-
     return `${birth} –`;
-
   }
 
 
   if (death) {
-
     return `? – ${death}`;
-
   }
 
 
@@ -1085,13 +1579,9 @@ function setColorSwatch(
   color
 ) {
 
-  const swatch =
-    document.getElementById(
-      elementId
-    );
-
-
-  swatch.style.background =
+  document.getElementById(
+    elementId
+  ).style.background =
     color || "#242429";
 
 }
@@ -1166,7 +1656,7 @@ function escapeHTML(
 
 
 /* -------------------------
-   START APP
+   START
 ------------------------- */
 
 renderCharacters();
