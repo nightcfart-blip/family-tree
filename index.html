@@ -2,22 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>My Family Tree</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#111111">
+
+  <title>Fantasy Family Tree</title>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <h1>My Fantasy Family Tree</h1>
+  <div class="app">
 
-  <div id="app">
-    Loading...
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Private Archive</p>
+        <h1>Family Tree</h1>
+      </div>
+
+      <button id="addCharacterButton" class="add-button" type="button">
+        <span class="plus">+</span>
+        <span>Add</span>
+      </button>
+    </header>
+
+    <main id="treeCanvas" class="tree-canvas">
+
+      <div id="emptyState" class="empty-state">
+
+        <div class="empty-symbol">
+          ✦
+        </div>
+
+        <h2>Your tree is empty</h2>
+
+        <p>
+          Add your first character to begin building your family.
+        </p>
+
+        <button
+          id="addFirstCharacterButton"
+          class="primary-button"
+          type="button"
+        >
+          + Add First Character
+        </button>
+
+      </div>
+
+    </main>
+
+    <div id="message" class="message hidden">
+      Character creation comes next.
+    </div>
+
   </div>
 
-  <script src="data.js"></script>
   <script src="app.js"></script>
 
 </body>
