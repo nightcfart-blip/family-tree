@@ -7218,37 +7218,182 @@ function drawRelationshipLines(
       }
 
 
-      [
-        child.motherId,
+      const motherPosition =
+        child.motherId
+          ? positions.get(
+              child.motherId
+            )
+          : null;
+
+
+      const fatherPosition =
         child.fatherId
-      ]
-        .filter(Boolean)
-        .forEach(
-          parentId => {
-
-            const parent =
-              positions.get(
-                parentId
-              );
+          ? positions.get(
+              child.fatherId
+            )
+          : null;
 
 
-            if (!parent) {
-              return;
-            }
+      /*
+        BOTH PARENTS KNOWN
+
+        Connect parents horizontally,
+        then start the child line
+        from the midpoint of that bond.
+      */
+
+      if (
+        motherPosition &&
+        fatherPosition
+      ) {
+
+        const parentY =
+          (
+            motherPosition.y +
+            fatherPosition.y
+          ) / 2 + 42;
 
 
-            addSvgLine(
-              parent.x,
-              parent.y + 42,
+        const midpointX =
+          (
+            motherPosition.x +
+            fatherPosition.x
+          ) / 2;
 
-              childPosition.x,
-              childPosition.y,
 
-              "tree-line"
-            );
+        /*
+          Parent bond
+        */
 
-          }
+        addSvgLine(
+          motherPosition.x,
+          parentY,
+
+          fatherPosition.x,
+          parentY,
+
+          "tree-line partner-line"
         );
+
+
+        /*
+          Vertical line down from
+          the center of the bond
+        */
+
+        const childTopY =
+          childPosition.y;
+
+
+        const elbowY =
+          childTopY - 55;
+
+
+        addSvgLine(
+          midpointX,
+          parentY,
+
+          midpointX,
+          elbowY,
+
+          "tree-line"
+        );
+
+
+        /*
+          Horizontal branch toward child
+        */
+
+        addSvgLine(
+          midpointX,
+          elbowY,
+
+          childPosition.x,
+          elbowY,
+
+          "tree-line"
+        );
+
+
+        /*
+          Final short vertical
+          into child
+        */
+
+        addSvgLine(
+          childPosition.x,
+          elbowY,
+
+          childPosition.x,
+          childTopY,
+
+          "tree-line"
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+        ONLY ONE PARENT KNOWN
+      */
+
+      const singleParent =
+        motherPosition ||
+        fatherPosition;
+
+
+      if (
+        singleParent
+      ) {
+
+        const parentBottomY =
+          singleParent.y + 42;
+
+
+        const childTopY =
+          childPosition.y;
+
+
+        const elbowY =
+          childTopY - 55;
+
+
+        addSvgLine(
+          singleParent.x,
+          parentBottomY,
+
+          singleParent.x,
+          elbowY,
+
+          "tree-line"
+        );
+
+
+        addSvgLine(
+          singleParent.x,
+          elbowY,
+
+          childPosition.x,
+          elbowY,
+
+          "tree-line"
+        );
+
+
+        addSvgLine(
+          childPosition.x,
+          elbowY,
+
+          childPosition.x,
+          childTopY,
+
+          "tree-line"
+        );
+
+      }
 
     }
   );
