@@ -2427,3 +2427,113 @@ button:active {
   }
 
 }
+
+/* GENETIC MODEL SETTINGS */
+
+.genetic-settings-group {
+  margin-top: 14px;
+
+  padding: 13px;
+
+  border:
+    1px solid rgba(184,154,99,0.11);
+
+  border-radius: 14px;
+
+  background:
+    rgba(184,154,99,0.025);
+}
+
+
+.genetic-settings-title {
+  margin-bottom: 10px;
+
+  color: #c9ad7d;
+
+  font-family: var(--serif);
+
+  font-size: 16px;
+}
+
+
+.genetic-setting-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  min-height: 48px;
+
+  border-bottom:
+    1px solid rgba(220,200,170,0.06);
+
+  color: #cfc4b5;
+
+  font-size: 12px;
+}
+
+
+.genetic-setting-row:last-of-type {
+  border-bottom: 0;
+}
+
+
+.genetic-setting-row > div {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+
+.genetic-setting-row input {
+  width: 72px;
+
+  min-height: 38px;
+
+  padding: 7px;
+
+  border:
+    1px solid rgba(220,200,170,0.1);
+
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #211e1a;
+
+  color: var(--ivory);
+
+  text-align: right;
+}
+
+
+.genetic-setting-row strong {
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+.genetic-setting-total {
+  margin-top: 10px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  text-align: right;
+}
+
+
+.genetic-setting-total.valid {
+  color: #94b78b;
+}
+
+
+.genetic-setting-total.invalid {
+  color: #d79890;
+}
