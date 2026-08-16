@@ -28,15 +28,29 @@
 
     <div class="topbar-actions">
 
-      <button id="searchButton" class="top-icon-button" type="button">
+      <button
+        id="searchButton"
+        class="top-icon-button"
+        type="button"
+        aria-label="Search"
+      >
         ⌕
       </button>
 
-      <button id="worldButton" class="top-icon-button" type="button">
+      <button
+        id="worldButton"
+        class="top-icon-button"
+        type="button"
+        aria-label="World"
+      >
         ◉
       </button>
 
-      <button id="addCharacterButton" class="add-button" type="button">
+      <button
+        id="addCharacterButton"
+        class="add-button"
+        type="button"
+      >
         <span class="plus">+</span>
         <span>Add</span>
       </button>
@@ -161,7 +175,10 @@
       autocomplete="off"
     >
 
-    <div id="searchResults" class="search-results"></div>
+    <div
+      id="searchResults"
+      class="search-results"
+    ></div>
 
   </div>
 
@@ -221,7 +238,10 @@
         class="world-select"
       ></select>
 
-      <div id="vantageStatus" class="vantage-status"></div>
+      <div
+        id="vantageStatus"
+        class="vantage-status"
+      ></div>
 
     </section>
 
@@ -236,25 +256,21 @@
         Create the reusable Races and Species used by your world.
       </p>
 
-      <div class="library-main-buttons">
+      <button
+        id="manageRacesButton"
+        class="world-action-button"
+        type="button"
+      >
+        Manage Races
+      </button>
 
-        <button
-          id="manageRacesButton"
-          class="world-action-button"
-          type="button"
-        >
-          Manage Races
-        </button>
-
-        <button
-          id="manageSpeciesButton"
-          class="world-action-button secondary-world-button"
-          type="button"
-        >
-          Manage Species
-        </button>
-
-      </div>
+      <button
+        id="manageSpeciesButton"
+        class="world-action-button secondary-world-button"
+        type="button"
+      >
+        Manage Species
+      </button>
 
       <div class="library-counts">
 
@@ -314,7 +330,7 @@
 
 <div id="libraryBackdrop" class="backdrop hidden"></div>
 
-<section id="libraryPanel" class="floating-panel library-panel hidden">
+<section id="libraryPanel" class="floating-panel hidden">
 
   <div class="floating-header">
 
@@ -344,7 +360,10 @@
       + Add
     </button>
 
-    <div id="libraryList" class="library-list"></div>
+    <div
+      id="libraryList"
+      class="library-list"
+    ></div>
 
   </div>
 
@@ -366,13 +385,8 @@
   <div class="panel-header">
 
     <div>
-      <p id="libraryEditorEyebrow" class="eyebrow">
-        Genetics Library
-      </p>
-
-      <h2 id="libraryEditorTitle">
-        New Race
-      </h2>
+      <p class="eyebrow">Genetics Library</p>
+      <h2 id="libraryEditorTitle">New Race</h2>
     </div>
 
     <button
@@ -589,7 +603,10 @@
         Cancel
       </button>
 
-      <button class="save-button" type="submit">
+      <button
+        class="save-button"
+        type="submit"
+      >
         Save Character
       </button>
 
@@ -784,8 +801,22 @@
         </span>
 
         <div
-          id="profileRace"
-          class="box-value centered-value"
+          id="profileRaceAncestry"
+          class="ancestry-profile-list"
+        ></div>
+
+      </section>
+
+
+      <section class="profile-box species-box">
+
+        <span class="box-label">
+          Species
+        </span>
+
+        <div
+          id="profileSpeciesAncestry"
+          class="ancestry-profile-list"
         ></div>
 
       </section>
@@ -1024,18 +1055,148 @@
       </label>
 
 
+      <!-- ANCESTRY -->
+
+      <div class="editor-heading">
+        Ancestry
+      </div>
+
+
+      <div class="ancestry-mode-card">
+
+        <strong id="ancestryModeTitle">
+          Founder Ancestry
+        </strong>
+
+        <p id="ancestryModeDescription">
+          No parents are assigned, so Race and Species are entered manually.
+        </p>
+
+        <label
+          id="ancestryOverrideWrap"
+          class="ancestry-override-row hidden"
+        >
+
+          <input
+            id="editAncestryOverride"
+            type="checkbox"
+          >
+
+          <span>
+            Override inherited ancestry
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <div
+        id="automaticAncestryPreview"
+        class="automatic-ancestry-preview hidden"
+      >
+
+        <div class="automatic-preview-box">
+
+          <span>Automatic Race</span>
+
+          <div
+            id="automaticRacePreview"
+            class="ancestry-profile-list"
+          ></div>
+
+        </div>
+
+
+        <div class="automatic-preview-box">
+
+          <span>Automatic Species</span>
+
+          <div
+            id="automaticSpeciesPreview"
+            class="ancestry-profile-list"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="manualAncestryEditor"
+        class="manual-ancestry-editor"
+      >
+
+        <div class="ancestry-editor-section">
+
+          <h3>Race</h3>
+
+          <p class="genetics-helper">
+            Add one or more saved Races. If used, the percentages must total 100%.
+          </p>
+
+          <div
+            id="raceAncestryRows"
+            class="ancestry-editor-rows"
+          ></div>
+
+          <button
+            id="addRaceAncestryButton"
+            class="add-distribution-button"
+            type="button"
+          >
+            + Add Race
+          </button>
+
+          <div
+            id="raceAncestryTotal"
+            class="distribution-total"
+          >
+            Total: 0%
+          </div>
+
+        </div>
+
+
+        <div class="ancestry-editor-section">
+
+          <h3>Species</h3>
+
+          <p class="genetics-helper">
+            Add one or more saved Species. If used, the percentages must total 100%.
+          </p>
+
+          <div
+            id="speciesAncestryRows"
+            class="ancestry-editor-rows"
+          ></div>
+
+          <button
+            id="addSpeciesAncestryButton"
+            class="add-distribution-button"
+            type="button"
+          >
+            + Add Species
+          </button>
+
+          <div
+            id="speciesAncestryTotal"
+            class="distribution-total"
+          >
+            Total: 0%
+          </div>
+
+        </div>
+
+      </div>
+
+
       <div class="editor-heading">
         Appearance
       </div>
 
 
-      <label class="field">
-        <span>Race</span>
-        <input id="editRace" type="text">
-      </label>
-
-
-      <!-- HAIR PRESET -->
+      <!-- HAIR -->
 
       <div class="appearance-preset">
 
@@ -1066,7 +1227,7 @@
       </div>
 
 
-      <!-- EYES PRESET -->
+      <!-- EYES -->
 
       <div class="appearance-preset">
 
@@ -1097,7 +1258,7 @@
       </div>
 
 
-      <!-- SKIN PRESET -->
+      <!-- SKIN -->
 
       <div class="appearance-preset">
 
@@ -1172,7 +1333,10 @@
         Cancel
       </button>
 
-      <button class="save-button" type="submit">
+      <button
+        class="save-button"
+        type="submit"
+      >
         Save Changes
       </button>
 
