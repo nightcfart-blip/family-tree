@@ -21,15 +21,32 @@
 
     <header class="topbar">
 
-      <div>
+      <div class="topbar-title">
         <p class="eyebrow">Private Archive</p>
         <h1>Family Tree</h1>
       </div>
 
-      <button id="addCharacterButton" class="add-button" type="button">
-        <span class="plus">+</span>
-        <span>Add</span>
-      </button>
+      <div class="topbar-actions">
+
+        <button
+          id="searchButton"
+          class="top-icon-button"
+          type="button"
+          aria-label="Search characters"
+        >
+          ⌕
+        </button>
+
+        <button
+          id="addCharacterButton"
+          class="add-button"
+          type="button"
+        >
+          <span class="plus">+</span>
+          <span>Add</span>
+        </button>
+
+      </div>
 
     </header>
 
@@ -58,9 +75,7 @@
 
       <div id="emptyState" class="empty-state">
 
-        <div class="empty-symbol">
-          ✦
-        </div>
+        <div class="empty-symbol">✦</div>
 
         <h2>Your tree is empty</h2>
 
@@ -85,7 +100,6 @@
           id="zoomOutButton"
           class="canvas-control-button"
           type="button"
-          aria-label="Zoom out"
         >
           −
         </button>
@@ -102,7 +116,6 @@
           id="zoomInButton"
           class="canvas-control-button"
           type="button"
-          aria-label="Zoom in"
         >
           +
         </button>
@@ -118,6 +131,48 @@
 
   </div>
 
+
+  <!-- SEARCH -->
+
+  <div id="searchBackdrop" class="backdrop hidden"></div>
+
+  <section id="searchPanel" class="search-panel hidden">
+
+    <div class="search-header">
+
+      <div>
+        <p class="eyebrow">Find Person</p>
+        <h2>Search</h2>
+      </div>
+
+      <button
+        id="closeSearchButton"
+        class="icon-button"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="search-body">
+
+      <input
+        id="searchInput"
+        class="search-input"
+        type="search"
+        autocomplete="off"
+      >
+
+      <div
+        id="searchResults"
+        class="search-results"
+      ></div>
+
+    </div>
+
+  </section>
 
 
   <!-- ADD CHARACTER -->
@@ -191,6 +246,7 @@
 
       </div>
 
+
       <div class="form-footer">
 
         <button
@@ -210,7 +266,6 @@
     </form>
 
   </section>
-
 
 
   <!-- PROFILE -->
@@ -339,14 +394,22 @@
     </div>
 
 
-    <div class="profile-footer">
+    <div class="profile-footer profile-footer-three">
 
       <button
         id="editCharacterButton"
         class="edit-button"
         type="button"
       >
-        Edit Character
+        Edit
+      </button>
+
+      <button
+        id="deleteCharacterButton"
+        class="delete-button"
+        type="button"
+      >
+        Delete
       </button>
 
       <button
@@ -360,7 +423,6 @@
     </div>
 
   </section>
-
 
 
   <!-- EDIT CHARACTER -->
@@ -419,6 +481,7 @@
           <span>Family Name *</span>
           <input id="editFamilyName" type="text" required>
         </label>
+
 
         <div class="editor-heading">Dates</div>
 
@@ -505,9 +568,7 @@
         </label>
 
 
-        <div class="editor-heading">
-          Life
-        </div>
+        <div class="editor-heading">Life</div>
 
         <label class="field">
           <textarea id="editLife" class="life-editor" rows="15"></textarea>
