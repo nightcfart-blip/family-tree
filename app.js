@@ -17,7 +17,11 @@ const UNKNOWN_ANCESTRY_ID =
   "__unknown__";
 
 const COLOR_PRESETS =
-  window.COLOR_PRESETS;
+  window.COLOR_PRESETS || {
+    hair: [],
+    eyes: [],
+    skin: []
+  };
 
 
 /* =========================================================
@@ -25,50 +29,30 @@ const COLOR_PRESETS =
 ========================================================= */
 
 const DEFAULT_GENETIC_MODEL = {
-
-  family:
-    70,
-
-  race:
-    20,
-
-  species:
-    10,
-
-  parentGenetic:
-    60,
-
-  parentActual:
-    40
-
+  family: 70,
+  race: 20,
+  species: 10,
+  parentGenetic: 60,
+  parentActual: 40
 };
-
 
 let geneticModel =
   loadGeneticModel();
 
 
 /* =========================================================
-   TREE SETTINGS
+   TREE
 ========================================================= */
 
-const NODE_GAP_X =
-  235;
+const NODE_GAP_X = 235;
+const GENERATION_GAP_Y = 235;
+const WORLD_SIZE = 6000;
 
-const GENERATION_GAP_Y =
-  235;
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.15;
 
-const WORLD_SIZE =
-  6000;
-
-const MIN_ZOOM =
-  0.2;
-
-const MAX_ZOOM =
-  2.5;
-
-const ZOOM_STEP =
-  0.15;
+const CIRCLE_RADIUS = 42;
 
 
 /* =========================================================
@@ -119,13 +103,17 @@ let pinchWorldY = 0;
 
 let lastLayout = null;
 
+let focusState = {
+  distances: new Map(),
+  directAncestors: new Set()
+};
+
 
 /* =========================================================
    TEMP
 ========================================================= */
 
-let pendingPortraitData =
-  null;
+let pendingPortraitData = null;
 
 let activeLibraryType =
   "race";
@@ -311,7 +299,7 @@ const importWorldFile =
   );
 
 
-/* GENETIC MODEL SETTINGS */
+/* GENETIC MODEL */
 
 const familyWeightInput =
   document.getElementById(
@@ -581,6 +569,11 @@ const editMother =
 const editFather =
   document.getElementById(
     "editFather"
+  );
+
+const editSiblings =
+  document.getElementById(
+    "editSiblings"
   );
 
 const editAncestryOverride =
@@ -866,12 +859,22 @@ function normalizeGeneticModel(
 
 function saveGeneticModel() {
 
-  localStorage.setItem(
-    GENETIC_MODEL_KEY,
-    JSON.stringify(
-      geneticModel
-    )
-  );
+  try {
+
+    localStorage.setItem(
+      GENETIC_MODEL_KEY,
+      JSON.stringify(
+        geneticModel
+      )
+    );
+
+  } catch {
+
+    showToast(
+      "Browser storage is full"
+    );
+
+  }
 
 }
 
@@ -1091,24 +1094,15 @@ saveGeneticModelButton.addEventListener(
 
 
     geneticModel = {
-
       family,
-
       race,
-
       species,
-
       parentGenetic,
-
       parentActual
-
     };
 
 
     saveGeneticModel();
-
-    updateGeneticModelTotals();
-
 
     showToast(
       "Genetic model saved"
@@ -1165,7 +1159,9 @@ function saveCharacters() {
 
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify(characters)
+      JSON.stringify(
+        characters
+      )
     );
 
   } catch {
@@ -1389,6 +1385,11 @@ function normalizeCharacter(
         character.fatherId
       ),
 
+    siblingIds:
+      normalizeIdArray(
+        character.siblingIds
+      ),
+
     spouseIds:
       normalizeIdArray(
         character.spouseIds
@@ -1566,11 +1567,20 @@ function normalizeIdArray(
   values
 ) {
 
-  return Array.isArray(values)
-    ? values
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+
+  return [
+    ...new Set(
+      values
         .map(Number)
-        .filter(Number.isFinite)
-    : [];
+        .filter(
+          Number.isFinite
+        )
+    )
+  ];
 
 }
 
@@ -1606,11 +1616,13 @@ function normalizeGender(
 
 
 function formatGender(
-  value
+  gender
 ) {
 
   switch (
-    normalizeGender(value)
+    normalizeGender(
+      gender
+    )
   ) {
 
     case "female":
@@ -1646,18 +1658,14 @@ function genderedTerm(
   if (
     gender === "female"
   ) {
-
     return femaleTerm;
-
   }
 
 
   if (
     gender === "male"
   ) {
-
     return maleTerm;
-
   }
 
 
@@ -1769,7 +1777,7 @@ function migrateLegacyRaceFields() {
 
 
 /* =========================================================
-   COLOR PRESETS
+   COLORS
 ========================================================= */
 
 function migrateColor(
@@ -1813,7 +1821,7 @@ function migrateColor(
             preset.hex
               .toLowerCase()
             ===
-            hex
+            String(hex)
               .toLowerCase()
         );
 
@@ -1948,7 +1956,9 @@ function calculateAncestryInternal(
     `${kind}:${characterId}`;
 
 
-  if (memo.has(key)) {
+  if (
+    memo.has(key)
+  ) {
 
     return cloneEntries(
       memo.get(key)
@@ -1957,7 +1967,9 @@ function calculateAncestryInternal(
   }
 
 
-  if (visiting.has(key)) {
+  if (
+    visiting.has(key)
+  ) {
 
     return [
       {
@@ -2186,7 +2198,7 @@ function ancestryWithUnknown(
 
 
 /* =========================================================
-   GENETIC APPEARANCE ENGINE
+   GENETIC APPEARANCE
 ========================================================= */
 
 function calculateTraitProbabilities(
@@ -2215,7 +2227,9 @@ function calculateTraitInternal(
     `${trait}:${characterId}`;
 
 
-  if (memo.has(key)) {
+  if (
+    memo.has(key)
+  ) {
 
     return cloneEntries(
       memo.get(key)
@@ -2224,7 +2238,9 @@ function calculateTraitInternal(
   }
 
 
-  if (visiting.has(key)) {
+  if (
+    visiting.has(key)
+  ) {
     return [];
   }
 
@@ -2282,10 +2298,6 @@ function calculateTraitInternal(
     );
 
 
-  /*
-    FOUNDERS
-  */
-
   if (
     !hasMother &&
     !hasFather
@@ -2295,7 +2307,9 @@ function calculateTraitInternal(
       background;
 
 
-    if (!founder.length) {
+    if (
+      !founder.length
+    ) {
 
       founder =
         actualColorDistribution(
@@ -2332,10 +2346,6 @@ function calculateTraitInternal(
     new Map();
 
 
-  /*
-    FAMILY
-  */
-
   const perParentWeight =
     (
       geneticModel.family /
@@ -2365,20 +2375,12 @@ function calculateTraitInternal(
   );
 
 
-  /*
-    RACE
-  */
-
   addWeightedEntries(
     finalMap,
     raceBaseline,
     geneticModel.race / 100
   );
 
-
-  /*
-    SPECIES
-  */
 
   addWeightedEntries(
     finalMap,
@@ -2393,7 +2395,9 @@ function calculateTraitInternal(
     );
 
 
-  if (!result.length) {
+  if (
+    !result.length
+  ) {
 
     result =
       actualColorDistribution(
@@ -2449,12 +2453,6 @@ function addFamilyContribution(
     );
 
 
-  /*
-    Missing parent:
-    use the child's ancestry
-    background for that half.
-  */
-
   if (!parent) {
 
     addWeightedEntries(
@@ -2491,14 +2489,16 @@ function addFamilyContribution(
   addWeightedEntries(
     parentMap,
     parentGenetics,
-    geneticModel.parentGenetic / 100
+    geneticModel.parentGenetic /
+    100
   );
 
 
   addWeightedEntries(
     parentMap,
     parentActual,
-    geneticModel.parentActual / 100
+    geneticModel.parentActual /
+    100
   );
 
 
@@ -2508,7 +2508,9 @@ function addFamilyContribution(
     );
 
 
-  if (!parentBlend.length) {
+  if (
+    !parentBlend.length
+  ) {
 
     parentBlend =
       fallbackBackground;
@@ -2532,7 +2534,7 @@ function addFamilyContribution(
 
 
 /* =========================================================
-   RACE / SPECIES TRAIT BASELINE
+   RACE / SPECIES BASELINES
 ========================================================= */
 
 function calculateAncestryTraitBaseline(
@@ -2558,7 +2560,7 @@ function calculateAncestryTraitBaseline(
     new Map();
 
 
-  let usableAncestryWeight =
+  let usable =
     0;
 
 
@@ -2593,16 +2595,19 @@ function calculateAncestryTraitBaseline(
         );
 
 
-      if (!distribution.length) {
+      if (
+        !distribution.length
+      ) {
         return;
       }
 
 
       const ancestryWeight =
-        ancestryEntry.percent / 100;
+        ancestryEntry.percent /
+        100;
 
 
-      usableAncestryWeight +=
+      usable +=
         ancestryWeight;
 
 
@@ -2625,7 +2630,7 @@ function calculateAncestryTraitBaseline(
 
 
   if (
-    usableAncestryWeight <= 0
+    usable <= 0
   ) {
     return [];
   }
@@ -2810,7 +2815,10 @@ function actualColorDistribution(
   }
 
 
-  if (!id && !hex) {
+  if (
+    !id &&
+    !hex
+  ) {
     return [];
   }
 
@@ -2827,9 +2835,7 @@ function actualColorDistribution(
     return [
       {
         id,
-
-        percent:
-          100
+        percent: 100
       }
     ];
 
@@ -3031,7 +3037,9 @@ function normalizeProbabilityEntries(
   entries
 ) {
 
-  if (!entries.length) {
+  if (
+    !entries.length
+  ) {
     return [];
   }
 
@@ -3137,7 +3145,8 @@ function addMapValue(
   map.set(
     id,
     (
-      map.get(id) || 0
+      map.get(id) ||
+      0
     ) + amount
   );
 
@@ -3224,7 +3233,9 @@ function renderProbabilityList(
     "";
 
 
-  if (!probabilities.length) {
+  if (
+    !probabilities.length
+  ) {
 
     const empty =
       document.createElement(
@@ -3359,11 +3370,9 @@ function renderProbabilityList(
         swatch
       );
 
-
       row.appendChild(
         name
       );
-
 
       row.appendChild(
         percent
@@ -3472,9 +3481,7 @@ function getAncestryName(
     id ===
     UNKNOWN_ANCESTRY_ID
   ) {
-
     return "Unknown";
-
   }
 
 
@@ -3566,7 +3573,6 @@ function renderAncestryList(
           name
         );
 
-
         row.appendChild(
           percent
         );
@@ -3631,7 +3637,9 @@ function addAncestryEditorRow(
     );
 
 
-  if (!library.length) {
+  if (
+    !library.length
+  ) {
 
     showToast(
       kind === "race"
@@ -3684,7 +3692,6 @@ function addAncestryEditorRow(
 
         option.value =
           item.id;
-
 
         option.textContent =
           item.name;
@@ -3783,11 +3790,23 @@ function addAncestryEditorRow(
   );
 
 
-  row.appendChild(select);
-  row.appendChild(percent);
-  row.appendChild(remove);
+  row.appendChild(
+    select
+  );
 
-  container.appendChild(row);
+  row.appendChild(
+    percent
+  );
+
+  row.appendChild(
+    remove
+  );
+
+
+  container.appendChild(
+    row
+  );
+
 
   updateAncestryTotals();
 
@@ -3889,10 +3908,8 @@ function updateOneAncestryTotal(
 
 
   const total =
-    ancestry.reduce(
-      (sum,entry) =>
-        sum + entry.percent,
-      0
+    sumPercent(
+      ancestry
     );
 
 
@@ -3906,7 +3923,9 @@ function updateOneAncestryTotal(
   );
 
 
-  if (!ancestry.length) {
+  if (
+    !ancestry.length
+  ) {
     return;
   }
 
@@ -3929,12 +3948,10 @@ editMother.addEventListener(
   refreshAncestryMode
 );
 
-
 editFather.addEventListener(
   "change",
   refreshAncestryMode
 );
-
 
 editAncestryOverride.addEventListener(
   "change",
@@ -3944,7 +3961,9 @@ editAncestryOverride.addEventListener(
 
 function refreshAncestryMode() {
 
-  if (!selectedCharacterId) {
+  if (
+    !selectedCharacterId
+  ) {
     return;
   }
 
@@ -3968,7 +3987,9 @@ function refreshAncestryMode() {
     );
 
 
-  if (!hasParents) {
+  if (
+    !hasParents
+  ) {
 
     ancestryModeTitle.textContent =
       "Founder Ancestry";
@@ -4093,7 +4114,9 @@ function calculateEditorPreviewAncestry(
     .forEach(
       parentId => {
 
-        if (!parentId) {
+        if (
+          !parentId
+        ) {
 
           addMapValue(
             map,
@@ -4149,12 +4172,10 @@ function setupCharacterColorEditors() {
     "hair"
   );
 
-
   populateCharacterColorSelect(
     editEyePreset,
     "eyes"
   );
-
 
   populateCharacterColorSelect(
     editSkinPreset,
@@ -4234,7 +4255,6 @@ function populateCharacterColorSelect(
         option.value =
           preset.id;
 
-
         option.textContent =
           preset.name;
 
@@ -4255,7 +4275,6 @@ function populateCharacterColorSelect(
 
   custom.value =
     "custom";
-
 
   custom.textContent =
     "Custom Color…";
@@ -4450,7 +4469,6 @@ function closeLibrary() {
     "hidden"
   );
 
-
   libraryPanel.classList.add(
     "hidden"
   );
@@ -4492,7 +4510,9 @@ function renderLibraryList() {
     "";
 
 
-  if (!library.length) {
+  if (
+    !library.length
+  ) {
 
     const empty =
       document.createElement(
@@ -4540,95 +4560,163 @@ function renderLibraryList() {
           "library-card";
 
 
-        card.innerHTML = `
+        const header =
+          document.createElement(
+            "div"
+          );
 
-          <div class="library-card-header">
 
-            <strong class="library-card-name">
-              ${escapeHTML(item.name)}
-            </strong>
+        header.className =
+          "library-card-header";
 
-            <div class="library-card-actions">
 
-              <button
-                class="library-mini-button edit-library-item"
-                type="button"
-              >
-                Edit
-              </button>
+        const name =
+          document.createElement(
+            "strong"
+          );
 
-              <button
-                class="library-mini-button delete-library-item"
-                type="button"
-              >
-                Delete
-              </button>
 
-            </div>
+        name.className =
+          "library-card-name";
 
-          </div>
+        name.textContent =
+          item.name;
 
-          ${
-            item.info
-              ? `
-                <div class="library-info">
-                  ${escapeHTML(item.info)}
-                </div>
-              `
-              : ""
+
+        const actions =
+          document.createElement(
+            "div"
+          );
+
+
+        actions.className =
+          "library-card-actions";
+
+
+        const edit =
+          document.createElement(
+            "button"
+          );
+
+
+        edit.className =
+          "library-mini-button";
+
+        edit.type =
+          "button";
+
+        edit.textContent =
+          "Edit";
+
+
+        edit.addEventListener(
+          "click",
+          () =>
+            openLibraryEditor(
+              item.id
+            )
+        );
+
+
+        const remove =
+          document.createElement(
+            "button"
+          );
+
+
+        remove.className =
+          "library-mini-button";
+
+        remove.type =
+          "button";
+
+        remove.textContent =
+          "Delete";
+
+
+        remove.addEventListener(
+          "click",
+
+          () => {
+
+            openConfirmation(
+              `Delete ${item.name}?`,
+              "This removes it from the library. Character records will remain.",
+              () =>
+                deleteLibraryItem(
+                  item.id
+                ),
+              "Delete"
+            );
+
           }
-
-          <div class="library-summary">
-
-            Hair:
-            ${item.hairDistribution.length}
-
-            · Eyes:
-            ${item.eyeDistribution.length}
-
-            · Skin:
-            ${item.skinDistribution.length}
-
-          </div>
-
-        `;
+        );
 
 
-        card
-          .querySelector(
-            ".edit-library-item"
-          )
-          .addEventListener(
-            "click",
+        actions.appendChild(
+          edit
+        );
 
-            () =>
-              openLibraryEditor(
-                item.id
-              )
+        actions.appendChild(
+          remove
+        );
+
+
+        header.appendChild(
+          name
+        );
+
+        header.appendChild(
+          actions
+        );
+
+
+        card.appendChild(
+          header
+        );
+
+
+        if (
+          item.info
+        ) {
+
+          const info =
+            document.createElement(
+              "div"
+            );
+
+
+          info.className =
+            "library-info";
+
+          info.textContent =
+            item.info;
+
+
+          card.appendChild(
+            info
+          );
+
+        }
+
+
+        const summary =
+          document.createElement(
+            "div"
           );
 
 
-        card
-          .querySelector(
-            ".delete-library-item"
-          )
-          .addEventListener(
-            "click",
+        summary.className =
+          "library-summary";
 
-            function() {
 
-              openConfirmation(
-                `Delete ${item.name}?`,
-                "This removes it from the library. Character records will remain.",
-                () =>
-                  deleteLibraryItem(
-                    item.id
-                  ),
-                "Delete"
-              );
+        summary.textContent =
+          `Hair: ${item.hairDistribution.length} · Eyes: ${item.eyeDistribution.length} · Skin: ${item.skinDistribution.length}`;
 
-            }
-          );
+
+        card.appendChild(
+          summary
+        );
 
 
         libraryList.appendChild(
@@ -4739,7 +4827,6 @@ function openLibraryEditor(
     "hidden"
   );
 
-
   libraryPanel.classList.add(
     "hidden"
   );
@@ -4748,7 +4835,6 @@ function openLibraryEditor(
   libraryEditorBackdrop.classList.remove(
     "hidden"
   );
-
 
   libraryEditorPanel.classList.remove(
     "hidden"
@@ -4763,7 +4849,6 @@ function closeLibraryEditor() {
     "hidden"
   );
 
-
   libraryEditorPanel.classList.add(
     "hidden"
   );
@@ -4772,7 +4857,6 @@ function closeLibraryEditor() {
   libraryBackdrop.classList.remove(
     "hidden"
   );
-
 
   libraryPanel.classList.remove(
     "hidden"
@@ -4805,7 +4889,6 @@ document
 
       button.addEventListener(
         "click",
-
         () =>
           addDistributionRow(
             button.dataset.trait
@@ -4857,7 +4940,6 @@ function addDistributionRow(
 
         option.value =
           preset.id;
-
 
         option.textContent =
           preset.name;
@@ -4941,11 +5023,23 @@ function addDistributionRow(
   );
 
 
-  row.appendChild(select);
-  row.appendChild(percent);
-  row.appendChild(remove);
+  row.appendChild(
+    select
+  );
 
-  container.appendChild(row);
+  row.appendChild(
+    percent
+  );
+
+  row.appendChild(
+    remove
+  );
+
+
+  container.appendChild(
+    row
+  );
+
 
   updateAllDistributionTotals();
 
@@ -5030,7 +5124,8 @@ function updateDistributionTotal(
   const total =
     values.reduce(
       (sum,item) =>
-        sum + item.percent,
+        sum +
+        item.percent,
       0
     );
 
@@ -5045,7 +5140,9 @@ function updateDistributionTotal(
   );
 
 
-  if (!values.length) {
+  if (
+    !values.length
+  ) {
     return;
   }
 
@@ -5100,7 +5197,8 @@ function saveLibraryItem() {
 
 
   for (
-    const distribution of
+    const distribution
+    of
     [
       hair,
       eyes,
@@ -5111,7 +5209,8 @@ function saveLibraryItem() {
     const total =
       distribution.reduce(
         (sum,item) =>
-          sum + item.percent,
+          sum +
+          item.percent,
         0
       );
 
@@ -5157,7 +5256,9 @@ function saveLibraryItem() {
     getActiveLibrary();
 
 
-  if (editingLibraryId) {
+  if (
+    editingLibraryId
+  ) {
 
     const item =
       library.find(
@@ -5175,19 +5276,15 @@ function saveLibraryItem() {
     item.name =
       name;
 
-
     item.info =
       libraryInfoInput.value
         .trim();
 
-
     item.hairDistribution =
       hair;
 
-
     item.eyeDistribution =
       eyes;
-
 
     item.skinDistribution =
       skin;
@@ -5299,7 +5396,6 @@ function openWorldPanel() {
     "hidden"
   );
 
-
   worldPanel.classList.remove(
     "hidden"
   );
@@ -5312,7 +5408,6 @@ function closeWorldPanel() {
   worldBackdrop.classList.add(
     "hidden"
   );
-
 
   worldPanel.classList.add(
     "hidden"
@@ -5371,12 +5466,10 @@ function populateVantageSelect() {
         option.value =
           person.id;
 
-
         option.textContent =
           getTreeName(
             person
           );
-
 
         option.selected =
           person.id ===
@@ -5452,10 +5545,11 @@ exportWorldButton.addEventListener(
         "Fantasy Family Tree",
 
       version:
-        6,
+        7,
 
       exportedAt:
-        new Date().toISOString(),
+        new Date()
+          .toISOString(),
 
       vantageCharacterId,
 
@@ -5591,6 +5685,7 @@ importWorldFile.addEventListener(
       openConfirmation(
         "Restore this world?",
         "Your current browser world will be replaced by the backup.",
+
         function() {
 
           raceLibrary =
@@ -5644,6 +5739,8 @@ importWorldFile.addEventListener(
 
           cleanBrokenRelationships();
 
+          makeReciprocalRelationships();
+
           migrateLegacyRaceFields();
 
 
@@ -5672,6 +5769,7 @@ importWorldFile.addEventListener(
           );
 
         },
+
         "Restore"
       );
 
@@ -5723,7 +5821,6 @@ function closeSearch() {
   searchBackdrop.classList.add(
     "hidden"
   );
-
 
   searchPanel.classList.add(
     "hidden"
@@ -5828,7 +5925,9 @@ function renderSearchResults(
     "";
 
 
-  if (!people.length) {
+  if (
+    !people.length
+  ) {
 
     searchResults.textContent =
       "No characters found.";
@@ -5853,7 +5952,6 @@ function renderSearchResults(
 
         button.className =
           "search-result";
-
 
         button.type =
           "button";
@@ -5915,7 +6013,6 @@ function renderSearchResults(
         name.className =
           "search-result-name";
 
-
         name.textContent =
           getTreeName(
             person
@@ -5940,7 +6037,6 @@ function renderSearchResults(
           name
         );
 
-
         info.appendChild(
           meta
         );
@@ -5949,7 +6045,6 @@ function renderSearchResults(
         button.appendChild(
           circle
         );
-
 
         button.appendChild(
           info
@@ -5992,7 +6087,9 @@ function applyViewTransform() {
 
 
   zoomIndicator.textContent =
-    `${Math.round(zoom * 100)}%`;
+    `${Math.round(
+      zoom * 100
+    )}%`;
 
 
   treeCanvas.classList.toggle(
@@ -6024,6 +6121,7 @@ function centerTree() {
   zoom =
     Math.min(
       1,
+
       Math.max(
         MIN_ZOOM,
 
@@ -6046,14 +6144,16 @@ function centerTree() {
 
   viewX =
     rect.width / 2 -
-    layout.centerX * zoom;
+    layout.centerX *
+    zoom;
 
 
   viewY =
     Math.max(
       40,
       rect.height * 0.12 -
-      layout.topY * zoom
+      layout.topY *
+      zoom
     );
 
 
@@ -6069,18 +6169,23 @@ function zoomAtPoint(
 ) {
 
   const worldX =
-    (x - viewX) /
-    zoom;
+    (
+      x -
+      viewX
+    ) / zoom;
 
 
   const worldY =
-    (y - viewY) /
-    zoom;
+    (
+      y -
+      viewY
+    ) / zoom;
 
 
   zoom =
     Math.max(
       MIN_ZOOM,
+
       Math.min(
         MAX_ZOOM,
         newZoom
@@ -6090,12 +6195,14 @@ function zoomAtPoint(
 
   viewX =
     x -
-    worldX * zoom;
+    worldX *
+    zoom;
 
 
   viewY =
     y -
-    worldY * zoom;
+    worldY *
+    zoom;
 
 
   applyViewTransform();
@@ -6114,7 +6221,8 @@ zoomInButton.addEventListener(
 
 
     zoomAtPoint(
-      zoom + ZOOM_STEP,
+      zoom +
+      ZOOM_STEP,
       rect.width / 2,
       rect.height / 2
     );
@@ -6134,7 +6242,8 @@ zoomOutButton.addEventListener(
 
 
     zoomAtPoint(
-      zoom - ZOOM_STEP,
+      zoom -
+      ZOOM_STEP,
       rect.width / 2,
       rect.height / 2
     );
@@ -6306,6 +6415,7 @@ treeCanvas.addEventListener(
       zoom =
         Math.max(
           MIN_ZOOM,
+
           Math.min(
             MAX_ZOOM,
 
@@ -6367,15 +6477,14 @@ treeCanvas.addEventListener(
 );
 
 
-/* DESKTOP PAN */
-
 treeCanvas.addEventListener(
   "pointerdown",
 
   function(event) {
 
     if (
-      event.pointerType === "touch"
+      event.pointerType ===
+      "touch"
     ) {
       return;
     }
@@ -6407,9 +6516,10 @@ treeCanvas.addEventListener(
       viewY;
 
 
-    treeCanvas.setPointerCapture?.(
-      event.pointerId
-    );
+    treeCanvas
+      .setPointerCapture?.(
+        event.pointerId
+      );
 
   }
 );
@@ -6421,7 +6531,8 @@ treeCanvas.addEventListener(
   function(event) {
 
     if (
-      event.pointerType === "touch" ||
+      event.pointerType ===
+      "touch" ||
       !isPanning
     ) {
       return;
@@ -6483,7 +6594,6 @@ function openCharacterForm() {
     "hidden"
   );
 
-
   characterFormPanel.classList.remove(
     "hidden"
   );
@@ -6496,7 +6606,6 @@ function closeCharacterForm() {
   formBackdrop.classList.add(
     "hidden"
   );
-
 
   characterFormPanel.classList.add(
     "hidden"
@@ -6605,6 +6714,7 @@ characterForm.addEventListener(
 
     closeCharacterForm();
 
+
     showToast(
       "Character added"
     );
@@ -6626,7 +6736,13 @@ function renderTree() {
     "";
 
 
-  if (!characters.length) {
+  focusState =
+    buildFocusState();
+
+
+  if (
+    !characters.length
+  ) {
 
     emptyState.classList.remove(
       "hidden"
@@ -6719,7 +6835,9 @@ function calculateTreeLayout() {
 
       rows
         .get(generation)
-        .push(person);
+        .push(
+          person
+        );
 
     }
   );
@@ -6750,7 +6868,7 @@ function calculateTreeLayout() {
       generation => {
 
         const row =
-          clusterSpouses(
+          clusterPartners(
             rows.get(
               generation
             )
@@ -6892,12 +7010,16 @@ function calculateGeneration(
   visiting
 ) {
 
-  if (memo.has(id)) {
+  if (
+    memo.has(id)
+  ) {
     return memo.get(id);
   }
 
 
-  if (visiting.has(id)) {
+  if (
+    visiting.has(id)
+  ) {
     return 0;
   }
 
@@ -6922,7 +7044,9 @@ function calculateGeneration(
       .filter(Boolean);
 
 
-  if (!parents.length) {
+  if (
+    !parents.length
+  ) {
 
     memo.set(
       id,
@@ -6931,6 +7055,7 @@ function calculateGeneration(
 
 
     visiting.delete(id);
+
 
     return 0;
 
@@ -6964,13 +7089,11 @@ function calculateGeneration(
 }
 
 
-function clusterSpouses(
+function clusterPartners(
   row
 ) {
 
-  const result =
-    [];
-
+  const result = [];
   const visited =
     new Set();
 
@@ -6987,38 +7110,48 @@ function clusterSpouses(
       }
 
 
-      result.push(person);
+      result.push(
+        person
+      );
+
 
       visited.add(
         person.id
       );
 
 
-      person.spouseIds.forEach(
-        spouseId => {
+      const partnerIds =
+        [
+          ...person.spouseIds,
+          ...person.loverIds
+        ];
 
-          const spouse =
+
+      partnerIds.forEach(
+        partnerId => {
+
+          const partner =
             row.find(
               item =>
                 item.id ===
-                spouseId
+                partnerId
             );
 
 
           if (
-            spouse &&
+            partner &&
             !visited.has(
-              spouse.id
+              partner.id
             )
           ) {
 
             result.push(
-              spouse
+              partner
             );
 
 
             visited.add(
-              spouse.id
+              partner.id
             );
 
           }
@@ -7050,6 +7183,13 @@ function renderCharacterNode(
     "character-node";
 
 
+  node.classList.add(
+    getFocusClass(
+      character.id
+    )
+  );
+
+
   if (
     character.id ===
     vantageCharacterId
@@ -7062,13 +7202,26 @@ function renderCharacterNode(
   }
 
 
+  if (
+    focusState.directAncestors
+      .has(
+        character.id
+      )
+  ) {
+
+    node.classList.add(
+      "direct-ancestor-node"
+    );
+
+  }
+
+
   node.type =
     "button";
 
 
   node.style.left =
     `${position.x}px`;
-
 
   node.style.top =
     `${position.y}px`;
@@ -7127,7 +7280,6 @@ function renderCharacterNode(
   name.className =
     "character-name";
 
-
   name.textContent =
     getTreeName(
       character
@@ -7143,7 +7295,6 @@ function renderCharacterNode(
   years.className =
     "character-years";
 
-
   years.textContent =
     makeYearText(
       character
@@ -7154,11 +7305,9 @@ function renderCharacterNode(
     circle
   );
 
-
   node.appendChild(
     name
   );
-
 
   node.appendChild(
     years
@@ -7183,12 +7332,522 @@ function renderCharacterNode(
 
 
 /* =========================================================
-   LINES
+   VANTAGE FOCUS
+========================================================= */
+
+function buildFocusState() {
+
+  const distances =
+    new Map();
+
+  const directAncestors =
+    new Set();
+
+
+  const vantage =
+    getCharacter(
+      vantageCharacterId
+    );
+
+
+  if (!vantage) {
+
+    characters.forEach(
+      person =>
+        distances.set(
+          person.id,
+          0
+        )
+    );
+
+
+    return {
+      distances,
+      directAncestors
+    };
+
+  }
+
+
+  collectDirectAncestors(
+    vantage.id,
+    directAncestors,
+    new Set()
+  );
+
+
+  const graph =
+    buildRelationshipGraph();
+
+
+  const queue =
+    [
+      {
+        id:
+          vantage.id,
+
+        distance:
+          0
+      }
+    ];
+
+
+  distances.set(
+    vantage.id,
+    0
+  );
+
+
+  while (
+    queue.length
+  ) {
+
+    const current =
+      queue.shift();
+
+
+    const neighbours =
+      graph.get(
+        current.id
+      ) || new Set();
+
+
+    neighbours.forEach(
+      id => {
+
+        if (
+          distances.has(id)
+        ) {
+          return;
+        }
+
+
+        const distance =
+          current.distance +
+          1;
+
+
+        distances.set(
+          id,
+          distance
+        );
+
+
+        queue.push({
+          id,
+          distance
+        });
+
+      }
+    );
+
+  }
+
+
+  return {
+    distances,
+    directAncestors
+  };
+
+}
+
+
+function collectDirectAncestors(
+  id,
+  result,
+  visiting
+) {
+
+  if (
+    visiting.has(id)
+  ) {
+    return;
+  }
+
+
+  visiting.add(id);
+
+
+  const person =
+    getCharacter(id);
+
+
+  if (!person) {
+    return;
+  }
+
+
+  [
+    person.motherId,
+    person.fatherId
+  ]
+    .filter(Boolean)
+    .forEach(
+      parentId => {
+
+        if (
+          result.has(
+            parentId
+          )
+        ) {
+          return;
+        }
+
+
+        result.add(
+          parentId
+        );
+
+
+        collectDirectAncestors(
+          parentId,
+          result,
+          visiting
+        );
+
+      }
+    );
+
+
+  visiting.delete(id);
+
+}
+
+
+function buildRelationshipGraph() {
+
+  const graph =
+    new Map();
+
+
+  function ensure(
+    id
+  ) {
+
+    if (
+      !graph.has(id)
+    ) {
+
+      graph.set(
+        id,
+        new Set()
+      );
+
+    }
+
+
+    return graph.get(id);
+
+  }
+
+
+  function connect(
+    first,
+    second
+  ) {
+
+    if (
+      !first ||
+      !second ||
+      first === second
+    ) {
+      return;
+    }
+
+
+    ensure(first).add(
+      second
+    );
+
+    ensure(second).add(
+      first
+    );
+
+  }
+
+
+  characters.forEach(
+    person => {
+
+      ensure(
+        person.id
+      );
+
+
+      connect(
+        person.id,
+        person.motherId
+      );
+
+
+      connect(
+        person.id,
+        person.fatherId
+      );
+
+
+      person.siblingIds
+        .forEach(
+          id =>
+            connect(
+              person.id,
+              id
+            )
+        );
+
+
+      person.spouseIds
+        .forEach(
+          id =>
+            connect(
+              person.id,
+              id
+            )
+        );
+
+
+      person.loverIds
+        .forEach(
+          id =>
+            connect(
+              person.id,
+              id
+            )
+        );
+
+    }
+  );
+
+
+  return graph;
+
+}
+
+
+function getFocusClass(
+  id
+) {
+
+  if (
+    !vantageCharacterId
+  ) {
+    return "focus-clear";
+  }
+
+
+  if (
+    id ===
+    vantageCharacterId
+  ) {
+    return "focus-clear";
+  }
+
+
+  if (
+    focusState.directAncestors
+      .has(id)
+  ) {
+    return "focus-clear";
+  }
+
+
+  const distance =
+    focusState.distances
+      .get(id);
+
+
+  if (
+    distance === undefined
+  ) {
+    return "focus-remote";
+  }
+
+
+  if (
+    distance <= 3
+  ) {
+    return "focus-clear";
+  }
+
+
+  if (
+    distance === 4
+  ) {
+    return "focus-near";
+  }
+
+
+  if (
+    distance <= 6
+  ) {
+    return "focus-distant";
+  }
+
+
+  return "focus-remote";
+
+}
+
+
+function focusRank(
+  className
+) {
+
+  switch (
+    className
+  ) {
+
+    case "focus-clear":
+      return 0;
+
+    case "focus-near":
+      return 1;
+
+    case "focus-distant":
+      return 2;
+
+    default:
+      return 3;
+
+  }
+
+}
+
+
+function getLineFocusClass(
+  ids
+) {
+
+  const validIds =
+    ids.filter(Boolean);
+
+
+  if (
+    !vantageCharacterId ||
+    !validIds.length
+  ) {
+    return "focus-clear";
+  }
+
+
+  let worstRank =
+    0;
+
+
+  validIds.forEach(
+    id => {
+
+      worstRank =
+        Math.max(
+          worstRank,
+          focusRank(
+            getFocusClass(id)
+          )
+        );
+
+    }
+  );
+
+
+  if (
+    worstRank === 0
+  ) {
+    return "focus-clear";
+  }
+
+
+  if (
+    worstRank === 1
+  ) {
+    return "focus-near";
+  }
+
+
+  if (
+    worstRank === 2
+  ) {
+    return "focus-distant";
+  }
+
+
+  return "focus-remote";
+
+}
+
+
+function isDirectAncestorEdge(
+  firstId,
+  secondId
+) {
+
+  if (
+    !vantageCharacterId
+  ) {
+    return false;
+  }
+
+
+  const spine =
+    new Set([
+      vantageCharacterId,
+      ...focusState.directAncestors
+    ]);
+
+
+  if (
+    !spine.has(firstId) ||
+    !spine.has(secondId)
+  ) {
+    return false;
+  }
+
+
+  const first =
+    getCharacter(
+      firstId
+    );
+
+
+  const second =
+    getCharacter(
+      secondId
+    );
+
+
+  if (
+    !first ||
+    !second
+  ) {
+    return false;
+  }
+
+
+  return (
+    first.motherId === secondId ||
+    first.fatherId === secondId ||
+    second.motherId === firstId ||
+    second.fatherId === firstId
+  );
+
+}
+
+
+/* =========================================================
+   CLEAN FAMILY CONNECTIONS
 ========================================================= */
 
 function drawRelationshipLines(
   positions
 ) {
+
+  /*
+    Romantic / partner relationships
+    are independent of genealogy.
+
+    This means a spouse/lover line
+    can still exist even when the pair
+    are also parent + child.
+  */
 
   drawPartnerLines(
     positions,
@@ -7204,202 +7863,573 @@ function drawRelationshipLines(
   );
 
 
-  characters.forEach(
-    child => {
+  /*
+    Optional manual sibling lines.
 
-      const childPosition =
-        positions.get(
-          child.id
-        );
+    We only draw these when the pair
+    DO NOT already share a known parent,
+    because automatic siblings already
+    visually share their family branch.
+  */
 
+  drawManualSiblingLines(
+    positions
+  );
 
-      if (!childPosition) {
-        return;
-      }
 
+  /*
+    Group children by their exact
+    parent combination.
 
-      const motherPosition =
-        child.motherId
-          ? positions.get(
-              child.motherId
-            )
-          : null;
+    One pair of parents gets ONE
+    parent bond and ONE child branch,
+    instead of separate diagonal lines.
+  */
 
+  const groups =
+    buildChildGroups();
 
-      const fatherPosition =
-        child.fatherId
-          ? positions.get(
-              child.fatherId
-            )
-          : null;
 
+  groups.forEach(
+    group => {
 
-      /*
-        BOTH PARENTS KNOWN
-
-        Connect parents horizontally,
-        then start the child line
-        from the midpoint of that bond.
-      */
-
-      if (
-        motherPosition &&
-        fatherPosition
-      ) {
-
-        const parentY =
-          (
-            motherPosition.y +
-            fatherPosition.y
-          ) / 2 + 42;
-
-
-        const midpointX =
-          (
-            motherPosition.x +
-            fatherPosition.x
-          ) / 2;
-
-
-        /*
-          Parent bond
-        */
-
-        addSvgLine(
-          motherPosition.x,
-          parentY,
-
-          fatherPosition.x,
-          parentY,
-
-          "tree-line partner-line"
-        );
-
-
-        /*
-          Vertical line down from
-          the center of the bond
-        */
-
-        const childTopY =
-          childPosition.y;
-
-
-        const elbowY =
-          childTopY - 55;
-
-
-        addSvgLine(
-          midpointX,
-          parentY,
-
-          midpointX,
-          elbowY,
-
-          "tree-line"
-        );
-
-
-        /*
-          Horizontal branch toward child
-        */
-
-        addSvgLine(
-          midpointX,
-          elbowY,
-
-          childPosition.x,
-          elbowY,
-
-          "tree-line"
-        );
-
-
-        /*
-          Final short vertical
-          into child
-        */
-
-        addSvgLine(
-          childPosition.x,
-          elbowY,
-
-          childPosition.x,
-          childTopY,
-
-          "tree-line"
-        );
-
-
-        return;
-
-      }
-
-
-      /*
-        ONLY ONE PARENT KNOWN
-      */
-
-      const singleParent =
-        motherPosition ||
-        fatherPosition;
-
-
-      if (
-        singleParent
-      ) {
-
-        const parentBottomY =
-          singleParent.y + 42;
-
-
-        const childTopY =
-          childPosition.y;
-
-
-        const elbowY =
-          childTopY - 55;
-
-
-        addSvgLine(
-          singleParent.x,
-          parentBottomY,
-
-          singleParent.x,
-          elbowY,
-
-          "tree-line"
-        );
-
-
-        addSvgLine(
-          singleParent.x,
-          elbowY,
-
-          childPosition.x,
-          elbowY,
-
-          "tree-line"
-        );
-
-
-        addSvgLine(
-          childPosition.x,
-          elbowY,
-
-          childPosition.x,
-          childTopY,
-
-          "tree-line"
-        );
-
-      }
+      drawChildGroup(
+        group,
+        positions
+      );
 
     }
   );
 
 }
 
+
+function buildChildGroups() {
+
+  const groups =
+    new Map();
+
+
+  characters.forEach(
+    child => {
+
+      const motherId =
+        getCharacter(
+          child.motherId
+        )
+          ? child.motherId
+          : null;
+
+
+      const fatherId =
+        getCharacter(
+          child.fatherId
+        )
+          ? child.fatherId
+          : null;
+
+
+      if (
+        !motherId &&
+        !fatherId
+      ) {
+        return;
+      }
+
+
+      let key;
+
+
+      if (
+        motherId &&
+        fatherId
+      ) {
+
+        const pair =
+          [
+            motherId,
+            fatherId
+          ]
+            .sort(
+              (a,b) =>
+                a - b
+            );
+
+
+        key =
+          `pair:${pair[0]}:${pair[1]}`;
+
+      } else {
+
+        key =
+          `single:${
+            motherId ||
+            fatherId
+          }`;
+
+      }
+
+
+      if (
+        !groups.has(key)
+      ) {
+
+        groups.set(
+          key,
+          {
+            motherId,
+            fatherId,
+            children: []
+          }
+        );
+
+      }
+
+
+      groups
+        .get(key)
+        .children
+        .push(
+          child
+        );
+
+    }
+  );
+
+
+  return Array.from(
+    groups.values()
+  );
+
+}
+
+
+function drawChildGroup(
+  group,
+  positions
+) {
+
+  const children =
+    group.children
+      .map(
+        child => ({
+          child,
+          position:
+            positions.get(
+              child.id
+            )
+        })
+      )
+      .filter(
+        entry =>
+          entry.position
+      );
+
+
+  if (
+    !children.length
+  ) {
+    return;
+  }
+
+
+  const motherPosition =
+    group.motherId
+      ? positions.get(
+          group.motherId
+        )
+      : null;
+
+
+  const fatherPosition =
+    group.fatherId
+      ? positions.get(
+          group.fatherId
+        )
+      : null;
+
+
+  let anchorX;
+  let anchorY;
+
+  let parentIds =
+    [];
+
+
+  /*
+    BOTH PARENTS
+  */
+
+  if (
+    motherPosition &&
+    fatherPosition
+  ) {
+
+    const motherCenter =
+      getCircleCenter(
+        motherPosition
+      );
+
+
+    const fatherCenter =
+      getCircleCenter(
+        fatherPosition
+      );
+
+
+    parentIds =
+      [
+        group.motherId,
+        group.fatherId
+      ];
+
+
+    /*
+      Parent bond.
+
+      This touches the circle edges
+      instead of floating nearby.
+    */
+
+    addCircleConnection(
+      motherPosition,
+      fatherPosition,
+      "tree-line parent-bond-line",
+      parentIds
+    );
+
+
+    /*
+      Children descend from the
+      MIDPOINT OF THE PARENT BOND.
+    */
+
+    anchorX =
+      (
+        motherCenter.x +
+        fatherCenter.x
+      ) / 2;
+
+
+    anchorY =
+      (
+        motherCenter.y +
+        fatherCenter.y
+      ) / 2;
+
+  }
+
+  /*
+    ONE PARENT
+  */
+
+  else {
+
+    const parentPosition =
+      motherPosition ||
+      fatherPosition;
+
+
+    const parentId =
+      group.motherId ||
+      group.fatherId;
+
+
+    if (
+      !parentPosition
+    ) {
+      return;
+    }
+
+
+    parentIds =
+      [
+        parentId
+      ];
+
+
+    anchorX =
+      parentPosition.x;
+
+
+    anchorY =
+      parentPosition.y +
+      CIRCLE_RADIUS * 2;
+
+  }
+
+
+  const topChildY =
+    Math.min(
+      ...children.map(
+        entry =>
+          entry.position.y
+      )
+    );
+
+
+  /*
+    Put the sibling branch shortly
+    above the child circles.
+  */
+
+  let branchY =
+    topChildY -
+    55;
+
+
+  /*
+    Prevent the branch from landing
+    above the parent anchor in strange
+    cross-generation fantasy pairings.
+  */
+
+  if (
+    branchY <
+    anchorY + 25
+  ) {
+
+    branchY =
+      anchorY + 25;
+
+  }
+
+
+  const childIds =
+    children.map(
+      entry =>
+        entry.child.id
+    );
+
+
+  const wholeGroupIds =
+    [
+      ...parentIds,
+      ...childIds
+    ];
+
+
+  /*
+    Is this shared trunk part of the
+    Vantage's direct ancestor spine?
+  */
+
+  const ancestralChild =
+    children.find(
+      entry =>
+        entry.child.id ===
+          vantageCharacterId
+        ||
+        focusState
+          .directAncestors
+          .has(
+            entry.child.id
+          )
+    );
+
+
+  const directSpineTrunk =
+    ancestralChild &&
+    parentIds.some(
+      parentId =>
+        focusState
+          .directAncestors
+          .has(
+            parentId
+          )
+    );
+
+
+  const trunkExtraClass =
+    directSpineTrunk
+      ? " direct-ancestor-line"
+      : "";
+
+
+  const trunkFocus =
+    directSpineTrunk
+      ? "focus-clear"
+      : getLineFocusClass(
+          wholeGroupIds
+        );
+
+
+  /*
+    Main vertical trunk from parent
+    or parent-bond to the children.
+  */
+
+  addSvgLine(
+    anchorX,
+    anchorY,
+
+    anchorX,
+    branchY,
+
+    `tree-line parent-child-line ${trunkFocus}${trunkExtraClass}`
+  );
+
+
+  /*
+    ONE CHILD
+  */
+
+  if (
+    children.length === 1
+  ) {
+
+    const entry =
+      children[0];
+
+
+    const childX =
+      entry.position.x;
+
+
+    const childY =
+      entry.position.y;
+
+
+    if (
+      Math.abs(
+        childX -
+        anchorX
+      ) > 1
+    ) {
+
+      addSvgLine(
+        anchorX,
+        branchY,
+
+        childX,
+        branchY,
+
+        makeChildLineClass(
+          entry.child.id,
+          parentIds
+        )
+      );
+
+    }
+
+
+    addSvgLine(
+      childX,
+      branchY,
+
+      childX,
+      childY,
+
+      makeChildLineClass(
+        entry.child.id,
+        parentIds
+      )
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    MULTIPLE CHILDREN
+
+         parents
+            |
+       -------------
+       |     |     |
+      kid   kid   kid
+  */
+
+  const minX =
+    Math.min(
+      ...children.map(
+        entry =>
+          entry.position.x
+      )
+    );
+
+
+  const maxX =
+    Math.max(
+      ...children.map(
+        entry =>
+          entry.position.x
+      )
+    );
+
+
+  addSvgLine(
+    minX,
+    branchY,
+
+    maxX,
+    branchY,
+
+    `tree-line parent-child-line ${trunkFocus}${trunkExtraClass}`
+  );
+
+
+  children.forEach(
+    entry => {
+
+      addSvgLine(
+        entry.position.x,
+        branchY,
+
+        entry.position.x,
+        entry.position.y,
+
+        makeChildLineClass(
+          entry.child.id,
+          parentIds
+        )
+      );
+
+    }
+  );
+
+}
+
+
+function makeChildLineClass(
+  childId,
+  parentIds
+) {
+
+  const direct =
+    parentIds.some(
+      parentId =>
+        isDirectAncestorEdge(
+          parentId,
+          childId
+        )
+    );
+
+
+  if (direct) {
+
+    return "tree-line parent-child-line focus-clear direct-ancestor-line";
+
+  }
+
+
+  return `tree-line parent-child-line ${
+    getLineFocusClass(
+      [
+        childId,
+        ...parentIds
+      ]
+    )
+  }`;
+
+}
+
+
+/* =========================================================
+   PARTNER CONNECTIONS
+========================================================= */
 
 function drawPartnerLines(
   positions,
@@ -7414,62 +8444,296 @@ function drawPartnerLines(
   characters.forEach(
     person => {
 
-      person[field].forEach(
-        otherId => {
+      person[field]
+        .forEach(
+          otherId => {
 
-          const key =
-            [
-              person.id,
-              otherId
-            ]
-              .sort(
-                (a,b) =>
-                  a - b
-              )
-              .join("-");
+            const key =
+              [
+                person.id,
+                otherId
+              ]
+                .sort(
+                  (a,b) =>
+                    a - b
+                )
+                .join("-");
 
 
-          if (drawn.has(key)) {
-            return;
+            if (
+              drawn.has(key)
+            ) {
+              return;
+            }
+
+
+            drawn.add(key);
+
+
+            const first =
+              positions.get(
+                person.id
+              );
+
+
+            const second =
+              positions.get(
+                otherId
+              );
+
+
+            if (
+              !first ||
+              !second
+            ) {
+              return;
+            }
+
+
+            /*
+              Circle edge → circle edge.
+
+              Works horizontally,
+              vertically or diagonally,
+              including parent/child pairs.
+            */
+
+            addCircleConnection(
+              first,
+              second,
+              className,
+              [
+                person.id,
+                otherId
+              ]
+            );
+
           }
-
-
-          drawn.add(key);
-
-
-          const first =
-            positions.get(
-              person.id
-            );
-
-
-          const second =
-            positions.get(
-              otherId
-            );
-
-
-          if (
-            first &&
-            second
-          ) {
-
-            addSvgLine(
-              first.x,
-              first.y + 42,
-
-              second.x,
-              second.y + 42,
-
-              className
-            );
-
-          }
-
-        }
-      );
+        );
 
     }
+  );
+
+}
+
+
+/* =========================================================
+   MANUAL SIBLING LINES
+========================================================= */
+
+function drawManualSiblingLines(
+  positions
+) {
+
+  const drawn =
+    new Set();
+
+
+  characters.forEach(
+    person => {
+
+      person.siblingIds
+        .forEach(
+          siblingId => {
+
+            const sibling =
+              getCharacter(
+                siblingId
+              );
+
+
+            if (!sibling) {
+              return;
+            }
+
+
+            /*
+              If parents already prove
+              the sibling relationship,
+              no separate dotted line.
+            */
+
+            if (
+              shareKnownParent(
+                person,
+                sibling
+              )
+            ) {
+              return;
+            }
+
+
+            const key =
+              [
+                person.id,
+                sibling.id
+              ]
+                .sort(
+                  (a,b) =>
+                    a - b
+                )
+                .join("-");
+
+
+            if (
+              drawn.has(key)
+            ) {
+              return;
+            }
+
+
+            drawn.add(key);
+
+
+            const first =
+              positions.get(
+                person.id
+              );
+
+
+            const second =
+              positions.get(
+                sibling.id
+              );
+
+
+            if (
+              first &&
+              second
+            ) {
+
+              addCircleConnection(
+                first,
+                second,
+                "tree-line sibling-line",
+                [
+                  person.id,
+                  sibling.id
+                ]
+              );
+
+            }
+
+          }
+        );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   LINE DRAWING HELPERS
+========================================================= */
+
+function getCircleCenter(
+  position
+) {
+
+  return {
+    x:
+      position.x,
+
+    y:
+      position.y +
+      CIRCLE_RADIUS
+  };
+
+}
+
+
+function addCircleConnection(
+  firstPosition,
+  secondPosition,
+  className,
+  ids = []
+) {
+
+  const first =
+    getCircleCenter(
+      firstPosition
+    );
+
+
+  const second =
+    getCircleCenter(
+      secondPosition
+    );
+
+
+  const dx =
+    second.x -
+    first.x;
+
+
+  const dy =
+    second.y -
+    first.y;
+
+
+  const distance =
+    Math.hypot(
+      dx,
+      dy
+    );
+
+
+  if (
+    distance < 1
+  ) {
+    return;
+  }
+
+
+  const unitX =
+    dx /
+    distance;
+
+
+  const unitY =
+    dy /
+    distance;
+
+
+  const startX =
+    first.x +
+    unitX *
+    CIRCLE_RADIUS;
+
+
+  const startY =
+    first.y +
+    unitY *
+    CIRCLE_RADIUS;
+
+
+  const endX =
+    second.x -
+    unitX *
+    CIRCLE_RADIUS;
+
+
+  const endY =
+    second.y -
+    unitY *
+    CIRCLE_RADIUS;
+
+
+  const focusClass =
+    getLineFocusClass(
+      ids
+    );
+
+
+  addSvgLine(
+    startX,
+    startY,
+
+    endX,
+    endY,
+
+    `${className} ${focusClass}`
   );
 
 }
@@ -7495,24 +8759,20 @@ function addSvgLine(
     x1
   );
 
-
   line.setAttribute(
     "y1",
     y1
   );
-
 
   line.setAttribute(
     "x2",
     x2
   );
 
-
   line.setAttribute(
     "y2",
     y2
   );
-
 
   line.setAttribute(
     "class",
@@ -7710,7 +8970,6 @@ function openProfile(
     "hidden"
   );
 
-
   profilePanel.classList.remove(
     "hidden"
   );
@@ -7837,7 +9096,9 @@ function renderRelationshipButtons(
     "";
 
 
-  if (!people.length) {
+  if (
+    !people.length
+  ) {
 
     container.textContent =
       "—";
@@ -7847,45 +9108,48 @@ function renderRelationshipButtons(
   }
 
 
-  people.forEach(
-    person => {
+  people
+    .slice()
+    .sort(
+      compareCharacterNames
+    )
+    .forEach(
+      person => {
 
-      const button =
-        document.createElement(
-          "button"
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.type =
+          "button";
+
+        button.className =
+          "relationship-button";
+
+        button.textContent =
+          getTreeName(
+            person
+          );
+
+
+        button.addEventListener(
+          "click",
+
+          () =>
+            openProfile(
+              person.id
+            )
         );
 
 
-      button.type =
-        "button";
-
-
-      button.className =
-        "relationship-button";
-
-
-      button.textContent =
-        getTreeName(
-          person
+        container.appendChild(
+          button
         );
 
-
-      button.addEventListener(
-        "click",
-
-        () =>
-          openProfile(
-            person.id
-          )
-      );
-
-
-      container.appendChild(
-        button
-      );
-
-    }
-  );
+      }
+    );
 
 }
 
@@ -7906,7 +9170,7 @@ function getChildren(
 }
 
 
-function getSiblings(
+function getAutomaticSiblings(
   id
 ) {
 
@@ -7923,26 +9187,152 @@ function getSiblings(
     other =>
       other.id !== id
       &&
-      (
-        (
-          person.motherId &&
-          person.motherId ===
-          other.motherId
-        )
-        ||
-        (
-          person.fatherId &&
-          person.fatherId ===
-          other.fatherId
-        )
+      shareKnownParent(
+        person,
+        other
       )
   );
 
 }
 
 
+function getSiblings(
+  id
+) {
+
+  const person =
+    getCharacter(id);
+
+
+  if (!person) {
+    return [];
+  }
+
+
+  const result =
+    new Map();
+
+
+  getAutomaticSiblings(
+    id
+  )
+    .forEach(
+      sibling =>
+        result.set(
+          sibling.id,
+          sibling
+        )
+    );
+
+
+  person.siblingIds
+    .forEach(
+      siblingId => {
+
+        const sibling =
+          getCharacter(
+            siblingId
+          );
+
+
+        if (sibling) {
+
+          result.set(
+            sibling.id,
+            sibling
+          );
+
+        }
+
+      }
+    );
+
+
+  return Array.from(
+    result.values()
+  );
+
+}
+
+
+function shareKnownParent(
+  first,
+  second
+) {
+
+  if (
+    !first ||
+    !second
+  ) {
+    return false;
+  }
+
+
+  const firstParents =
+    [
+      first.motherId,
+      first.fatherId
+    ]
+      .filter(Boolean);
+
+
+  const secondParents =
+    new Set(
+      [
+        second.motherId,
+        second.fatherId
+      ]
+        .filter(Boolean)
+    );
+
+
+  return firstParents.some(
+    id =>
+      secondParents.has(id)
+  );
+
+}
+
+
+function sharedParentCount(
+  first,
+  second
+) {
+
+  if (
+    !first ||
+    !second
+  ) {
+    return 0;
+  }
+
+
+  const secondParents =
+    new Set(
+      [
+        second.motherId,
+        second.fatherId
+      ]
+        .filter(Boolean)
+    );
+
+
+  return [
+    first.motherId,
+    first.fatherId
+  ]
+    .filter(Boolean)
+    .filter(
+      id =>
+        secondParents.has(id)
+    )
+    .length;
+
+}
+
+
 /* =========================================================
-   VANTAGE
+   VANTAGE RELATION
 ========================================================= */
 
 setVantageButton.addEventListener(
@@ -8011,7 +9401,8 @@ function describeRelationship(
 ) {
 
   if (
-    vantageId === subjectId
+    vantageId ===
+    subjectId
   ) {
     return "Vantage Point";
   }
@@ -8037,6 +9428,12 @@ function describeRelationship(
   }
 
 
+  /*
+    Spouse / lover remains visible
+    even if there is also a blood
+    relationship.
+  */
+
   if (
     vantage.spouseIds.includes(
       subject.id
@@ -8056,7 +9453,52 @@ function describeRelationship(
 
 
   /*
-    SUBJECT IS AN ANCESTOR
+    Manual or automatic sibling.
+  */
+
+  if (
+    getSiblings(
+      vantage.id
+    )
+      .some(
+        sibling =>
+          sibling.id ===
+          subject.id
+      )
+  ) {
+
+    const shared =
+      sharedParentCount(
+        vantage,
+        subject
+      );
+
+
+    const base =
+      genderedTerm(
+        subject,
+        "Sister",
+        "Brother",
+        "Sibling"
+      );
+
+
+    if (
+      shared === 1
+    ) {
+
+      return `Half ${base}`;
+
+    }
+
+
+    return base;
+
+  }
+
+
+  /*
+    Subject is ancestor.
   */
 
   const ancestorDepth =
@@ -8079,7 +9521,7 @@ function describeRelationship(
 
 
   /*
-    SUBJECT IS A DESCENDANT
+    Subject is descendant.
   */
 
   const descendantDepth =
@@ -8129,7 +9571,9 @@ function describeRelationship(
           vantageDepth,
 
           subjectDepth:
-            subjectAncestors.get(id)
+            subjectAncestors.get(
+              id
+            )
 
         });
 
@@ -8139,7 +9583,9 @@ function describeRelationship(
   );
 
 
-  if (!common.length) {
+  if (
+    !common.length
+  ) {
     return "No known relation";
   }
 
@@ -8162,7 +9608,8 @@ function describeRelationship(
 
 
       if (
-        firstMax !== secondMax
+        firstMax !==
+        secondMax
       ) {
 
         return firstMax -
@@ -8189,29 +9636,6 @@ function describeRelationship(
     common[0];
 
 
-  /*
-    SIBLING
-  */
-
-  if (
-    nearest.vantageDepth === 1 &&
-    nearest.subjectDepth === 1
-  ) {
-
-    return genderedTerm(
-      subject,
-      "Sister",
-      "Brother",
-      "Sibling"
-    );
-
-  }
-
-
-  /*
-    AUNT / UNCLE
-  */
-
   if (
     nearest.vantageDepth === 2 &&
     nearest.subjectDepth === 1
@@ -8227,10 +9651,6 @@ function describeRelationship(
   }
 
 
-  /*
-    NIECE / NEPHEW
-  */
-
   if (
     nearest.vantageDepth === 1 &&
     nearest.subjectDepth === 2
@@ -8245,10 +9665,6 @@ function describeRelationship(
 
   }
 
-
-  /*
-    COUSINS
-  */
 
   if (
     nearest.vantageDepth >= 2 &&
@@ -8307,8 +9723,7 @@ function getAncestorMap(
     [
       {
         id,
-        depth:
-          0
+        depth: 0
       }
     ];
 
@@ -8317,7 +9732,9 @@ function getAncestorMap(
     new Map();
 
 
-  while (queue.length) {
+  while (
+    queue.length
+  ) {
 
     const current =
       queue.shift();
@@ -8343,12 +9760,18 @@ function getAncestorMap(
         parentId => {
 
           const depth =
-            current.depth + 1;
+            current.depth +
+            1;
 
 
           if (
-            visited.has(parentId) &&
-            visited.get(parentId) <=
+            visited.has(
+              parentId
+            )
+            &&
+            visited.get(
+              parentId
+            ) <=
             depth
           ) {
             return;
@@ -8368,12 +9791,10 @@ function getAncestorMap(
 
 
           queue.push({
-
             id:
               parentId,
 
             depth
-
           });
 
         }
@@ -8516,7 +9937,7 @@ function makeDescendantTerm(
 
 
 /* =========================================================
-   EDIT PROFILE
+   EDIT
 ========================================================= */
 
 editCharacterButton.addEventListener(
@@ -8656,7 +10077,6 @@ function openEditor() {
     "hidden"
   );
 
-
   profilePanel.classList.add(
     "hidden"
   );
@@ -8665,7 +10085,6 @@ function openEditor() {
   editBackdrop.classList.remove(
     "hidden"
   );
-
 
   editPanel.classList.remove(
     "hidden"
@@ -8689,6 +10108,13 @@ function populateRelationshipSelectors(
     "editFather",
     character.id,
     character.fatherId
+  );
+
+
+  populateMultiSelect(
+    "editSiblings",
+    character.id,
+    character.siblingIds
   );
 
 
@@ -8748,12 +10174,10 @@ function populateSingleSelect(
         option.value =
           person.id;
 
-
         option.textContent =
           getTreeName(
             person
           );
-
 
         option.selected =
           person.id ===
@@ -8810,12 +10234,10 @@ function populateMultiSelect(
         option.value =
           person.id;
 
-
         option.textContent =
           getTreeName(
             person
           );
-
 
         option.selected =
           selectedIds.includes(
@@ -8871,7 +10293,8 @@ editCharacterForm.addEventListener(
     if (
       motherId &&
       fatherId &&
-      motherId === fatherId
+      motherId ===
+      fatherId
     ) {
 
       showToast(
@@ -8983,12 +10406,22 @@ editCharacterForm.addEventListener(
     }
 
 
+    const oldSiblings =
+      [
+        ...character.siblingIds
+      ];
+
+
     const oldSpouses =
-      [...character.spouseIds];
+      [
+        ...character.spouseIds
+      ];
 
 
     const oldLovers =
-      [...character.loverIds];
+      [
+        ...character.loverIds
+      ];
 
 
     character.title =
@@ -9047,6 +10480,12 @@ editCharacterForm.addEventListener(
 
     character.fatherId =
       fatherId;
+
+
+    character.siblingIds =
+      getSelectedMultipleIds(
+        "editSiblings"
+      );
 
 
     character.spouseIds =
@@ -9115,6 +10554,14 @@ editCharacterForm.addEventListener(
 
     syncTwoWay(
       character.id,
+      oldSiblings,
+      character.siblingIds,
+      "siblingIds"
+    );
+
+
+    syncTwoWay(
+      character.id,
       oldSpouses,
       character.spouseIds,
       "spouseIds"
@@ -9137,7 +10584,6 @@ editCharacterForm.addEventListener(
     editBackdrop.classList.add(
       "hidden"
     );
-
 
     editPanel.classList.add(
       "hidden"
@@ -9645,7 +11091,7 @@ function loadImage(
 
 
 /* =========================================================
-   RELATIONSHIP SYNC
+   RECIPROCAL RELATIONSHIPS
 ========================================================= */
 
 function syncTwoWay(
@@ -9711,6 +11157,55 @@ function syncTwoWay(
 }
 
 
+function makeReciprocalRelationships() {
+
+  characters.forEach(
+    person => {
+
+      [
+        "siblingIds",
+        "spouseIds",
+        "loverIds"
+      ]
+        .forEach(
+          field => {
+
+            person[field]
+              .forEach(
+                otherId => {
+
+                  const other =
+                    getCharacter(
+                      otherId
+                    );
+
+
+                  if (
+                    other &&
+                    !other[field]
+                      .includes(
+                        person.id
+                      )
+                  ) {
+
+                    other[field].push(
+                      person.id
+                    );
+
+                  }
+
+                }
+              );
+
+          }
+        );
+
+    }
+  );
+
+}
+
+
 /* =========================================================
    CLOSE / DELETE
 ========================================================= */
@@ -9720,7 +11215,6 @@ function closeProfile() {
   profileBackdrop.classList.add(
     "hidden"
   );
-
 
   profilePanel.classList.add(
     "hidden"
@@ -9750,7 +11244,6 @@ function cancelEditor() {
   editBackdrop.classList.add(
     "hidden"
   );
-
 
   editPanel.classList.add(
     "hidden"
@@ -9801,6 +11294,7 @@ deleteCharacterButton.addEventListener(
     openConfirmation(
       `Delete ${getTreeName(character)}?`,
       "Their record and relationship links will be removed.",
+
       function() {
 
         const id =
@@ -9831,6 +11325,14 @@ deleteCharacterButton.addEventListener(
               person.fatherId =
                 null;
             }
+
+
+            person.siblingIds =
+              person.siblingIds
+                .filter(
+                  value =>
+                    value !== id
+                );
 
 
             person.spouseIds =
@@ -9870,11 +11372,13 @@ deleteCharacterButton.addEventListener(
 
         renderTree();
 
+
         showToast(
           "Character deleted"
         );
 
       },
+
       "Delete"
     );
 
@@ -9913,7 +11417,6 @@ function openConfirmation(
     "hidden"
   );
 
-
   confirmPanel.classList.remove(
     "hidden"
   );
@@ -9926,7 +11429,6 @@ function closeConfirmation() {
   confirmBackdrop.classList.add(
     "hidden"
   );
-
 
   confirmPanel.classList.add(
     "hidden"
@@ -10093,7 +11595,8 @@ function getTreeName(
       .trim();
 
 
-  return name || "Unnamed";
+  return name ||
+    "Unnamed";
 
 }
 
@@ -10121,7 +11624,8 @@ function getProfileName(
       .trim();
 
 
-  return name || "Unnamed";
+  return name ||
+    "Unnamed";
 
 }
 
@@ -10221,28 +11725,10 @@ function isHexColor(
   value
 ) {
 
-  return /^#[0-9A-Fa-f]{6}$/.test(
-    value || ""
-  );
-
-}
-
-
-function escapeHTML(
-  value
-) {
-
-  const element =
-    document.createElement(
-      "div"
+  return /^#[0-9A-Fa-f]{6}$/
+    .test(
+      value || ""
     );
-
-
-  element.textContent =
-    value || "";
-
-
-  return element.innerHTML;
 
 }
 
@@ -10417,8 +11903,10 @@ function cleanBrokenRelationships() {
           person.motherId
         )
       ) {
+
         person.motherId =
           null;
+
       }
 
 
@@ -10428,15 +11916,29 @@ function cleanBrokenRelationships() {
           person.fatherId
         )
       ) {
+
         person.fatherId =
           null;
+
       }
+
+
+      person.siblingIds =
+        person.siblingIds
+          .filter(
+            id =>
+              id !==
+              person.id &&
+              valid.has(id)
+          );
 
 
       person.spouseIds =
         person.spouseIds
           .filter(
             id =>
+              id !==
+              person.id &&
               valid.has(id)
           );
 
@@ -10445,6 +11947,8 @@ function cleanBrokenRelationships() {
         person.loverIds
           .filter(
             id =>
+              id !==
+              person.id &&
               valid.has(id)
           );
 
@@ -10524,6 +12028,7 @@ function focusCharacter(
     zoom =
       Math.max(
         0.9,
+
         Math.min(
           zoom,
           1.15
@@ -10533,12 +12038,14 @@ function focusCharacter(
 
     viewX =
       rect.width / 2 -
-      position.x * zoom;
+      position.x *
+      zoom;
 
 
     viewY =
       rect.height / 2 -
-      position.y * zoom;
+      position.y *
+      zoom;
 
 
     applyViewTransform();
@@ -10562,6 +12069,8 @@ function focusCharacter(
 setupCharacterColorEditors();
 
 cleanBrokenRelationships();
+
+makeReciprocalRelationships();
 
 migrateLegacyRaceFields();
 
