@@ -1,6 +1,11 @@
 const STORAGE_KEY =
   "fantasyFamilyTreeCharacters";
 
+const VANTAGE_KEY =
+  "fantasyFamilyTreeVantage";
+
+
+/* TREE SETTINGS */
 
 const NODE_GAP_X = 230;
 const GENERATION_GAP_Y = 230;
@@ -10,6 +15,8 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.15;
 
+
+/* CANVAS */
 
 let viewX = 0;
 let viewY = 0;
@@ -32,16 +39,13 @@ let pinchWorldY = 0;
 let lastLayout = null;
 
 
-/* MAIN */
+/* MAIN ELEMENTS */
 
 const treeCanvas =
   document.getElementById("treeCanvas");
 
 const treeViewport =
   document.getElementById("treeViewport");
-
-const treeWorld =
-  document.getElementById("treeWorld");
 
 const treeLines =
   document.getElementById("treeLines");
@@ -92,6 +96,36 @@ const searchResults =
   document.getElementById("searchResults");
 
 
+/* WORLD */
+
+const worldButton =
+  document.getElementById("worldButton");
+
+const worldBackdrop =
+  document.getElementById("worldBackdrop");
+
+const worldPanel =
+  document.getElementById("worldPanel");
+
+const closeWorldButton =
+  document.getElementById("closeWorldButton");
+
+const vantageSelect =
+  document.getElementById("vantageSelect");
+
+const vantageStatus =
+  document.getElementById("vantageStatus");
+
+const exportWorldButton =
+  document.getElementById("exportWorldButton");
+
+const importWorldButton =
+  document.getElementById("importWorldButton");
+
+const importWorldFile =
+  document.getElementById("importWorldFile");
+
+
 /* CREATE */
 
 const formBackdrop =
@@ -130,6 +164,15 @@ const editCharacterButton =
 const deleteCharacterButton =
   document.getElementById("deleteCharacterButton");
 
+const vantageRelation =
+  document.getElementById("vantageRelation");
+
+const vantageRelationLabel =
+  document.getElementById("vantageRelationLabel");
+
+const vantageRelationText =
+  document.getElementById("vantageRelationText");
+
 
 /* EDIT */
 
@@ -149,14 +192,21 @@ const cancelEditButton =
   document.getElementById("cancelEditButton");
 
 
+/* DATA */
+
 let characters =
   loadCharacters();
 
 let selectedCharacterId =
   null;
 
+let vantageCharacterId =
+  loadVantage();
 
-/* STORAGE */
+
+/* =========================================================
+   STORAGE
+========================================================= */
 
 function loadCharacters() {
 
@@ -167,16 +217,20 @@ function loadCharacters() {
         STORAGE_KEY
       );
 
+
     if (!saved) {
       return [];
     }
 
+
     const parsed =
       JSON.parse(saved);
+
 
     if (!Array.isArray(parsed)) {
       return [];
     }
+
 
     return parsed.map(
       normalizeCharacter
@@ -184,7 +238,10 @@ function loadCharacters() {
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Could not load characters:",
+      error
+    );
 
     return [];
 
@@ -203,12 +260,61 @@ function saveCharacters() {
 }
 
 
-function normalizeCharacter(character) {
+function loadVantage() {
+
+  const saved =
+    localStorage.getItem(
+      VANTAGE_KEY
+    );
+
+
+  if (!saved) {
+    return null;
+  }
+
+
+  const id =
+    Number(saved);
+
+
+  return Number.isFinite(id)
+    ? id
+    : null;
+
+}
+
+
+function saveVantage() {
+
+  if (
+    vantageCharacterId === null
+  ) {
+
+    localStorage.removeItem(
+      VANTAGE_KEY
+    );
+
+    return;
+
+  }
+
+
+  localStorage.setItem(
+    VANTAGE_KEY,
+    String(vantageCharacterId)
+  );
+
+}
+
+
+function normalizeCharacter(
+  character
+) {
 
   return {
 
     id:
-      character.id,
+      Number(character.id),
 
     title:
       character.title || "",
@@ -217,7 +323,9 @@ function normalizeCharacter(character) {
       character.givenName || "",
 
     aliases:
-      Array.isArray(character.aliases)
+      Array.isArray(
+        character.aliases
+      )
         ? character.aliases
         : [],
 
@@ -255,27 +363,520 @@ function normalizeCharacter(character) {
       character.achievements || "",
 
     motherId:
-      character.motherId || null,
+      normalizeId(
+        character.motherId
+      ),
 
     fatherId:
-      character.fatherId || null,
+      normalizeId(
+        character.fatherId
+      ),
 
     spouseIds:
-      Array.isArray(character.spouseIds)
-        ? character.spouseIds
-        : [],
+      normalizeIdArray(
+        character.spouseIds
+      ),
 
     loverIds:
-      Array.isArray(character.loverIds)
-        ? character.loverIds
-        : []
+      normalizeIdArray(
+        character.loverIds
+      )
 
   };
 
 }
 
 
-/* SEARCH */
+function normalizeId(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+
+    return null;
+
+  }
+
+
+  const number =
+    Number(value);
+
+
+  return Number.isFinite(number)
+    ? number
+    : null;
+
+}
+
+
+function normalizeIdArray(
+  values
+) {
+
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+
+  return values
+    .map(Number)
+    .filter(Number.isFinite);
+
+}
+
+
+/* =========================================================
+   WORLD PANEL
+========================================================= */
+
+function openWorldPanel() {
+
+  populateVantageSelect();
+
+
+  worldBackdrop.classList.remove(
+    "hidden"
+  );
+
+  worldPanel.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+function closeWorldPanel() {
+
+  worldBackdrop.classList.add(
+    "hidden"
+  );
+
+  worldPanel.classList.add(
+    "hidden"
+  );
+
+}
+
+
+worldButton.addEventListener(
+  "click",
+  openWorldPanel
+);
+
+closeWorldButton.addEventListener(
+  "click",
+  closeWorldPanel
+);
+
+worldBackdrop.addEventListener(
+  "click",
+  closeWorldPanel
+);
+
+
+/* -------------------------
+   VANTAGE SELECTION
+------------------------- */
+
+function populateVantageSelect() {
+
+  vantageSelect.innerHTML =
+    "";
+
+
+  const noneOption =
+    document.createElement(
+      "option"
+    );
+
+
+  noneOption.value =
+    "";
+
+
+  noneOption.textContent =
+    "— No Vantage Point —";
+
+
+  vantageSelect.appendChild(
+    noneOption
+  );
+
+
+  const sorted =
+    [...characters]
+      .sort(
+        (a,b) =>
+          getTreeName(a)
+            .localeCompare(
+              getTreeName(b)
+            )
+      );
+
+
+  sorted.forEach(
+    character => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        String(
+          character.id
+        );
+
+
+      option.textContent =
+        getTreeName(
+          character
+        );
+
+
+      if (
+        character.id ===
+        vantageCharacterId
+      ) {
+
+        option.selected =
+          true;
+
+      }
+
+
+      vantageSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  updateVantageStatus();
+
+}
+
+
+vantageSelect.addEventListener(
+  "change",
+
+  function() {
+
+    const value =
+      vantageSelect.value;
+
+
+    vantageCharacterId =
+      value
+        ? Number(value)
+        : null;
+
+
+    saveVantage();
+
+    updateVantageStatus();
+
+
+    if (
+      selectedCharacterId &&
+      !profilePanel.classList.contains(
+        "hidden"
+      )
+    ) {
+
+      renderVantageRelation(
+        getCharacter(
+          selectedCharacterId
+        )
+      );
+
+    }
+
+  }
+);
+
+
+function updateVantageStatus() {
+
+  const person =
+    getCharacter(
+      vantageCharacterId
+    );
+
+
+  if (!person) {
+
+    vantageStatus.textContent =
+      "No vantage point selected.";
+
+    return;
+
+  }
+
+
+  vantageStatus.textContent =
+    `Current center: ${getTreeName(person)}`;
+
+}
+
+
+/* =========================================================
+   BACKUP EXPORT
+========================================================= */
+
+exportWorldButton.addEventListener(
+  "click",
+  exportWorld
+);
+
+
+function exportWorld() {
+
+  const backup = {
+
+    app:
+      "Fantasy Family Tree",
+
+    version:
+      1,
+
+    exportedAt:
+      new Date().toISOString(),
+
+    vantageCharacterId:
+      vantageCharacterId,
+
+    characters:
+      characters
+
+  };
+
+
+  const json =
+    JSON.stringify(
+      backup,
+      null,
+      2
+    );
+
+
+  const blob =
+    new Blob(
+      [json],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  const date =
+    new Date()
+      .toISOString()
+      .slice(0,10);
+
+
+  link.href =
+    url;
+
+
+  link.download =
+    `fantasy-world-${date}.json`;
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
+
+
+  setTimeout(
+    function() {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
+  );
+
+}
+
+
+/* =========================================================
+   BACKUP IMPORT
+========================================================= */
+
+importWorldButton.addEventListener(
+  "click",
+
+  function() {
+
+    importWorldFile.value =
+      "";
+
+    importWorldFile.click();
+
+  }
+);
+
+
+importWorldFile.addEventListener(
+  "change",
+
+  async function() {
+
+    const file =
+      importWorldFile.files[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    try {
+
+      const text =
+        await file.text();
+
+
+      const data =
+        JSON.parse(text);
+
+
+      const importedCharacters =
+        Array.isArray(data)
+          ? data
+          : data.characters;
+
+
+      if (
+        !Array.isArray(
+          importedCharacters
+        )
+      ) {
+
+        throw new Error(
+          "No character list found."
+        );
+
+      }
+
+
+      const confirmed =
+        confirm(
+          "Import this world?\n\nYour current browser world will be replaced by the backup."
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      characters =
+        importedCharacters
+          .map(
+            normalizeCharacter
+          )
+          .filter(
+            character =>
+              Number.isFinite(
+                character.id
+              )
+          );
+
+
+      const importedVantage =
+        Array.isArray(data)
+          ? null
+          : normalizeId(
+              data.vantageCharacterId
+            );
+
+
+      vantageCharacterId =
+        characters.some(
+          character =>
+            character.id ===
+            importedVantage
+        )
+          ? importedVantage
+          : null;
+
+
+      cleanBrokenRelationships();
+
+
+      saveCharacters();
+
+      saveVantage();
+
+
+      selectedCharacterId =
+        null;
+
+
+      renderTree();
+
+      populateVantageSelect();
+
+      closeWorldPanel();
+
+
+      setTimeout(
+        centerTree,
+        80
+      );
+
+
+      alert(
+        `World restored. ${characters.length} characters imported.`
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      alert(
+        "That file could not be imported as a valid world backup."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
 
 function openSearch() {
 
@@ -287,15 +888,19 @@ function openSearch() {
     "hidden"
   );
 
+
   searchInput.value =
     "";
+
 
   renderSearchResults(
     characters
   );
 
+
   setTimeout(
-    () => searchInput.focus(),
+    () =>
+      searchInput.focus(),
     100
   );
 
@@ -359,10 +964,10 @@ searchInput.addEventListener(
 
           const searchable =
             [
+              character.title,
               character.givenName,
               character.familyName,
               character.maidenName,
-              character.title,
               ...character.aliases
             ]
               .join(" ")
@@ -421,8 +1026,7 @@ function renderSearchResults(
   }
 
 
-  people
-    .slice()
+  [...people]
     .sort(
       (a,b) =>
         getTreeName(a)
@@ -459,7 +1063,7 @@ function renderSearchResults(
             ${escapeHTML(initial)}
           </span>
 
-          <span class="search-result-text">
+          <span>
 
             <span class="search-result-name">
               ${escapeHTML(
@@ -503,82 +1107,9 @@ function renderSearchResults(
 }
 
 
-/* MOVE TREE TO PERSON */
-
-function focusCharacter(
-  characterId
-) {
-
-  if (!lastLayout) {
-
-    lastLayout =
-      calculateTreeLayout();
-
-  }
-
-
-  const position =
-    lastLayout.positions.get(
-      characterId
-    );
-
-
-  if (!position) {
-
-    openProfile(
-      characterId
-    );
-
-    return;
-
-  }
-
-
-  const rect =
-    treeCanvas
-      .getBoundingClientRect();
-
-
-  zoom =
-    Math.max(
-      0.85,
-      Math.min(
-        1.25,
-        zoom
-      )
-    );
-
-
-  viewX =
-    rect.width / 2
-    -
-    position.x * zoom;
-
-
-  viewY =
-    rect.height / 2
-    -
-    position.y * zoom;
-
-
-  applyViewTransform();
-
-
-  setTimeout(
-    function() {
-
-      openProfile(
-        characterId
-      );
-
-    },
-    220
-  );
-
-}
-
-
-/* PAN + ZOOM */
+/* =========================================================
+   CANVAS
+========================================================= */
 
 function applyViewTransform() {
 
@@ -595,10 +1126,11 @@ function applyViewTransform() {
 function centerTree() {
 
   const layout =
+    lastLayout ||
     calculateTreeLayout();
 
 
-  const canvasRect =
+  const rect =
     treeCanvas.getBoundingClientRect();
 
 
@@ -608,38 +1140,100 @@ function centerTree() {
       Math.max(
         MIN_ZOOM,
         Math.min(
-          canvasRect.width /
-            Math.max(
-              layout.contentWidth,
-              600
-            ),
+          rect.width /
+          Math.max(
+            layout.contentWidth,
+            600
+          ),
 
-          canvasRect.height /
-            Math.max(
-              layout.contentHeight,
-              500
-            )
+          rect.height /
+          Math.max(
+            layout.contentHeight,
+            500
+          )
         ) * 0.82
       )
     );
 
 
   viewX =
-    canvasRect.width / 2
-    -
+    rect.width / 2 -
     layout.centerX * zoom;
 
 
   viewY =
     Math.max(
       40,
-      canvasRect.height * 0.12
-      -
+      rect.height * 0.12 -
       layout.topY * zoom
     );
 
 
   applyViewTransform();
+
+}
+
+
+function focusCharacter(
+  characterId
+) {
+
+  const position =
+    lastLayout
+      ? lastLayout.positions.get(
+          characterId
+        )
+      : null;
+
+
+  if (!position) {
+
+    openProfile(
+      characterId
+    );
+
+    return;
+
+  }
+
+
+  const rect =
+    treeCanvas.getBoundingClientRect();
+
+
+  zoom =
+    Math.max(
+      0.85,
+      Math.min(
+        1.25,
+        zoom
+      )
+    );
+
+
+  viewX =
+    rect.width / 2 -
+    position.x * zoom;
+
+
+  viewY =
+    rect.height / 2 -
+    position.y * zoom;
+
+
+  applyViewTransform();
+
+
+  setTimeout(
+    function() {
+
+      openProfile(
+        characterId
+      );
+
+    },
+    180
+  );
 
 }
 
@@ -691,11 +1285,11 @@ function zoomAtPoint(
 
 zoomInButton.addEventListener(
   "click",
+
   function() {
 
     const rect =
-      treeCanvas
-        .getBoundingClientRect();
+      treeCanvas.getBoundingClientRect();
 
 
     zoomAtPoint(
@@ -710,11 +1304,11 @@ zoomInButton.addEventListener(
 
 zoomOutButton.addEventListener(
   "click",
+
   function() {
 
     const rect =
-      treeCanvas
-        .getBoundingClientRect();
+      treeCanvas.getBoundingClientRect();
 
 
     zoomAtPoint(
@@ -733,10 +1327,11 @@ resetViewButton.addEventListener(
 );
 
 
-/* MOUSE PAN */
+/* POINTER PAN */
 
 treeCanvas.addEventListener(
   "pointerdown",
+
   function(event) {
 
     if (
@@ -756,7 +1351,9 @@ treeCanvas.addEventListener(
     }
 
 
-    isPanning = true;
+    isPanning =
+      true;
+
 
     panStartX =
       event.clientX;
@@ -776,6 +1373,7 @@ treeCanvas.addEventListener(
 
 treeCanvas.addEventListener(
   "pointermove",
+
   function(event) {
 
     if (!isPanning) {
@@ -803,24 +1401,33 @@ treeCanvas.addEventListener(
 
 treeCanvas.addEventListener(
   "pointerup",
-  () => {
-    isPanning = false;
+
+  function() {
+
+    isPanning =
+      false;
+
   }
 );
 
 
 treeCanvas.addEventListener(
   "pointercancel",
-  () => {
-    isPanning = false;
+
+  function() {
+
+    isPanning =
+      false;
+
   }
 );
 
 
-/* TOUCH PAN + PINCH */
+/* TOUCH */
 
 treeCanvas.addEventListener(
   "touchstart",
+
   function(event) {
 
     if (
@@ -836,6 +1443,7 @@ treeCanvas.addEventListener(
 
       panStartY =
         touch.clientY;
+
 
       startViewX =
         viewX;
@@ -909,14 +1517,14 @@ treeCanvas.addEventListener(
 
 treeCanvas.addEventListener(
   "touchmove",
+
   function(event) {
 
     event.preventDefault();
 
 
     if (
-      event.touches.length === 1
-      &&
+      event.touches.length === 1 &&
       isPanning
     ) {
 
@@ -959,18 +1567,16 @@ treeCanvas.addEventListener(
         );
 
 
-      const scaleChange =
-        distance /
-        pinchStartDistance;
-
-
       const newZoom =
         Math.max(
           MIN_ZOOM,
           Math.min(
             MAX_ZOOM,
             pinchStartZoom *
-            scaleChange
+            (
+              distance /
+              pinchStartDistance
+            )
           )
         );
 
@@ -1011,6 +1617,7 @@ treeCanvas.addEventListener(
 
 treeCanvas.addEventListener(
   "touchend",
+
   function(event) {
 
     if (
@@ -1066,11 +1673,14 @@ function getTouchMidpoint(
 }
 
 
-/* CHARACTER CREATION */
+/* =========================================================
+   CREATE CHARACTER
+========================================================= */
 
 function openCharacterForm() {
 
   characterForm.reset();
+
 
   formBackdrop.classList.remove(
     "hidden"
@@ -1136,14 +1746,20 @@ characterForm.addEventListener(
         Date.now(),
 
       title:
-        getInputValue("title"),
+        getInputValue(
+          "title"
+        ),
 
       givenName:
-        getInputValue("givenName"),
+        getInputValue(
+          "givenName"
+        ),
 
       aliases:
         makeAliasArray(
-          getInputValue("aliases")
+          getInputValue(
+            "aliases"
+          )
         ),
 
       maidenName:
@@ -1206,7 +1822,9 @@ characterForm.addEventListener(
 );
 
 
-/* TREE */
+/* =========================================================
+   TREE
+========================================================= */
 
 function renderTree() {
 
@@ -1217,6 +1835,9 @@ function renderTree() {
     "";
 
 
+  cleanInvalidVantage();
+
+
   if (
     characters.length === 0
   ) {
@@ -1225,8 +1846,10 @@ function renderTree() {
       "hidden"
     );
 
+
     lastLayout =
       calculateTreeLayout();
+
 
     return;
 
@@ -1322,7 +1945,8 @@ function calculateTreeLayout() {
       rows.keys()
     )
       .sort(
-        (a,b) => a - b
+        (a,b) =>
+          a - b
       );
 
 
@@ -1521,6 +2145,7 @@ function calculateAllGenerations() {
               shared
             );
 
+
             memo.set(
               spouseId,
               shared
@@ -1567,7 +2192,8 @@ function calculateAllGenerations() {
             )
             .filter(
               level =>
-                level !== undefined
+                level !==
+                undefined
             );
 
 
@@ -1589,8 +2215,7 @@ function calculateAllGenerations() {
             memo.get(
               character.id
             ) || 0
-          )
-          <
+          ) <
           minimum
         ) {
 
@@ -1675,9 +2300,11 @@ function calculateGeneration(
       0
     );
 
+
     visiting.delete(
       characterId
     );
+
 
     return 0;
 
@@ -1724,8 +2351,8 @@ function clusterSpouses(
   const rowIds =
     new Set(
       row.map(
-        character =>
-          character.id
+        person =>
+          person.id
       )
     );
 
@@ -1739,11 +2366,11 @@ function clusterSpouses(
 
 
   row.forEach(
-    character => {
+    person => {
 
       if (
         visited.has(
-          character.id
+          person.id
         )
       ) {
         return;
@@ -1753,8 +2380,9 @@ function clusterSpouses(
       const group =
         [];
 
+
       const queue =
-        [character];
+        [person];
 
 
       while (
@@ -1895,6 +2523,7 @@ function renderCharacterNode(
 
       event.stopPropagation();
 
+
       openProfile(
         character.id
       );
@@ -1910,7 +2539,9 @@ function renderCharacterNode(
 }
 
 
-/* LINES */
+/* =========================================================
+   TREE LINES
+========================================================= */
 
 function drawRelationshipLines(
   positions
@@ -1956,7 +2587,8 @@ function drawSpouseLines(
               spouseId
             ]
               .sort(
-                (a,b) => a - b
+                (a,b) =>
+                  a - b
               )
               .join("-");
 
@@ -1975,6 +2607,7 @@ function drawSpouseLines(
             positions.get(
               character.id
             );
+
 
           const second =
             positions.get(
@@ -2025,7 +2658,8 @@ function buildParentChildGroups() {
         ]
           .filter(Boolean)
           .sort(
-            (a,b) => a - b
+            (a,b) =>
+              a - b
           );
 
 
@@ -2097,8 +2731,7 @@ function drawParentChildGroup(
 
 
   if (
-    parents.length === 0
-    ||
+    parents.length === 0 ||
     children.length === 0
   ) {
     return;
@@ -2173,10 +2806,16 @@ function drawParentChildGroup(
   ) {
 
     addSvgLine(
-      Math.min(...childXs),
+      Math.min(
+        ...childXs
+      ),
+
       branchY,
 
-      Math.max(...childXs),
+      Math.max(
+        ...childXs
+      ),
+
       branchY,
 
       "tree-line"
@@ -2252,7 +2891,9 @@ function addSvgLine(
 }
 
 
-/* PROFILE */
+/* =========================================================
+   PROFILE
+========================================================= */
 
 function openProfile(
   characterId
@@ -2371,9 +3012,15 @@ function openProfile(
   );
 
 
+  renderVantageRelation(
+    character
+  );
+
+
   profileBackdrop.classList.remove(
     "hidden"
   );
+
 
   profilePanel.classList.remove(
     "hidden"
@@ -2381,6 +3028,899 @@ function openProfile(
 
 }
 
+
+/* =========================================================
+   VANTAGE RELATIONSHIP
+========================================================= */
+
+function renderVantageRelation(
+  subject
+) {
+
+  const vantage =
+    getCharacter(
+      vantageCharacterId
+    );
+
+
+  if (!vantage) {
+
+    vantageRelation.classList.add(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  vantageRelation.classList.remove(
+    "hidden"
+  );
+
+
+  vantageRelationLabel.textContent =
+    `Relation to ${getTreeName(vantage)}`;
+
+
+  vantageRelationText.textContent =
+    describeRelationship(
+      vantage.id,
+      subject.id
+    );
+
+}
+
+
+/*
+  IMPORTANT:
+
+  This describes SUBJECT
+  in relation to VANTAGE.
+
+  Example:
+
+  vantage = Alice
+  subject = Alice's grandmother
+
+  result = Grandmother
+*/
+
+function describeRelationship(
+  vantageId,
+  subjectId
+) {
+
+  if (
+    vantageId === subjectId
+  ) {
+
+    return "Vantage Point";
+
+  }
+
+
+  const vantage =
+    getCharacter(
+      vantageId
+    );
+
+
+  const subject =
+    getCharacter(
+      subjectId
+    );
+
+
+  if (
+    !vantage ||
+    !subject
+  ) {
+
+    return "Unknown";
+
+  }
+
+
+  const bloodRelation =
+    describeBloodRelationship(
+      vantage,
+      subject
+    );
+
+
+  const extras =
+    [];
+
+
+  if (
+    vantage.spouseIds.includes(
+      subject.id
+    )
+  ) {
+
+    extras.push(
+      "Spouse"
+    );
+
+  }
+
+
+  if (
+    vantage.loverIds.includes(
+      subject.id
+    )
+  ) {
+
+    extras.push(
+      "Lover"
+    );
+
+  }
+
+
+  if (
+    bloodRelation &&
+    extras.length
+  ) {
+
+    return `${extras.join(" · ")} · ${bloodRelation}`;
+
+  }
+
+
+  if (
+    extras.length
+  ) {
+
+    return extras.join(
+      " · "
+    );
+
+  }
+
+
+  return bloodRelation ||
+    "No known relation";
+
+}
+
+
+/* -------------------------
+   BLOOD RELATIONSHIP
+------------------------- */
+
+function describeBloodRelationship(
+  vantage,
+  subject
+) {
+
+  /*
+    Is subject an ancestor
+    of vantage?
+  */
+
+  const subjectAncestorDepth =
+    getAncestorDepth(
+      vantage.id,
+      subject.id
+    );
+
+
+  if (
+    subjectAncestorDepth !== null
+  ) {
+
+    return makeAncestorTerm(
+      subject,
+      subjectAncestorDepth
+    );
+
+  }
+
+
+  /*
+    Is subject a descendant
+    of vantage?
+  */
+
+  const subjectDescendantDepth =
+    getAncestorDepth(
+      subject.id,
+      vantage.id
+    );
+
+
+  if (
+    subjectDescendantDepth !== null
+  ) {
+
+    return makeDescendantTerm(
+      subjectDescendantDepth
+    );
+
+  }
+
+
+  /*
+    Full / half siblings.
+  */
+
+  const sharedParents =
+    [
+      vantage.motherId,
+      vantage.fatherId
+    ]
+      .filter(Boolean)
+      .filter(
+        parentId =>
+          parentId ===
+          subject.motherId ||
+          parentId ===
+          subject.fatherId
+      );
+
+
+  if (
+    sharedParents.length >= 2
+  ) {
+
+    return "Sibling";
+
+  }
+
+
+  if (
+    sharedParents.length === 1
+  ) {
+
+    return "Half-Sibling";
+
+  }
+
+
+  /*
+    Find nearest common ancestor.
+  */
+
+  const vantageAncestors =
+    getAncestorMap(
+      vantage.id
+    );
+
+
+  const subjectAncestors =
+    getAncestorMap(
+      subject.id
+    );
+
+
+  const common =
+    [];
+
+
+  vantageAncestors.forEach(
+    (vantageDepth, ancestorId) => {
+
+      if (
+        !subjectAncestors.has(
+          ancestorId
+        )
+      ) {
+        return;
+      }
+
+
+      common.push({
+
+        ancestorId,
+
+        vantageDepth,
+
+        subjectDepth:
+          subjectAncestors.get(
+            ancestorId
+          )
+
+      });
+
+    }
+  );
+
+
+  if (
+    common.length === 0
+  ) {
+
+    return null;
+
+  }
+
+
+  common.sort(
+    (a,b) => {
+
+      const aMax =
+        Math.max(
+          a.vantageDepth,
+          a.subjectDepth
+        );
+
+
+      const bMax =
+        Math.max(
+          b.vantageDepth,
+          b.subjectDepth
+        );
+
+
+      if (
+        aMax !== bMax
+      ) {
+
+        return aMax - bMax;
+
+      }
+
+
+      return (
+        a.vantageDepth +
+        a.subjectDepth
+      )
+      -
+      (
+        b.vantageDepth +
+        b.subjectDepth
+      );
+
+    }
+  );
+
+
+  const nearest =
+    common[0];
+
+
+  const a =
+    nearest.vantageDepth;
+
+
+  const b =
+    nearest.subjectDepth;
+
+
+  /*
+    Subject is aunt/uncle.
+  */
+
+  if (
+    b === 1 &&
+    a >= 2
+  ) {
+
+    return makeAuntUncleTerm(
+      subject,
+      a - 2
+    );
+
+  }
+
+
+  /*
+    Subject is niece/nephew.
+  */
+
+  if (
+    a === 1 &&
+    b >= 2
+  ) {
+
+    return makeNieceNephewTerm(
+      subject,
+      b - 2
+    );
+
+  }
+
+
+  /*
+    Cousins.
+  */
+
+  if (
+    a >= 2 &&
+    b >= 2
+  ) {
+
+    const degree =
+      Math.min(
+        a,
+        b
+      ) - 1;
+
+
+    const removed =
+      Math.abs(
+        a - b
+      );
+
+
+    let text =
+      `${ordinal(degree)} Cousin`;
+
+
+    if (
+      removed > 0
+    ) {
+
+      text +=
+        ` ${removed} ${removed === 1 ? "Time" : "Times"} Removed`;
+
+    }
+
+
+    return text;
+
+  }
+
+
+  return null;
+
+}
+
+
+/* -------------------------
+   ANCESTOR MAP
+------------------------- */
+
+function getAncestorMap(
+  personId
+) {
+
+  const result =
+    new Map();
+
+
+  const queue =
+    [
+      {
+        id:
+          personId,
+
+        depth:
+          0
+      }
+    ];
+
+
+  const visited =
+    new Set(
+      [personId]
+    );
+
+
+  while (
+    queue.length
+  ) {
+
+    const current =
+      queue.shift();
+
+
+    const person =
+      getCharacter(
+        current.id
+      );
+
+
+    if (!person) {
+      continue;
+    }
+
+
+    const parents =
+      [
+        person.motherId,
+        person.fatherId
+      ]
+        .filter(Boolean);
+
+
+    parents.forEach(
+      parentId => {
+
+        const depth =
+          current.depth + 1;
+
+
+        if (
+          !result.has(
+            parentId
+          )
+          ||
+          depth <
+          result.get(
+            parentId
+          )
+        ) {
+
+          result.set(
+            parentId,
+            depth
+          );
+
+        }
+
+
+        if (
+          !visited.has(
+            parentId
+          )
+        ) {
+
+          visited.add(
+            parentId
+          );
+
+
+          queue.push({
+
+            id:
+              parentId,
+
+            depth
+
+          });
+
+        }
+
+      }
+    );
+
+  }
+
+
+  return result;
+
+}
+
+
+function getAncestorDepth(
+  personId,
+  ancestorId
+) {
+
+  const map =
+    getAncestorMap(
+      personId
+    );
+
+
+  if (
+    !map.has(
+      ancestorId
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  return map.get(
+    ancestorId
+  );
+
+}
+
+
+/* -------------------------
+   FAMILY TERM HELPERS
+------------------------- */
+
+function makeAncestorTerm(
+  person,
+  depth
+) {
+
+  const role =
+    inferParentRole(
+      person.id
+    );
+
+
+  if (
+    depth === 1
+  ) {
+
+    if (
+      role === "mother"
+    ) {
+      return "Mother";
+    }
+
+
+    if (
+      role === "father"
+    ) {
+      return "Father";
+    }
+
+
+    return "Parent";
+
+  }
+
+
+  if (
+    depth === 2
+  ) {
+
+    if (
+      role === "mother"
+    ) {
+      return "Grandmother";
+    }
+
+
+    if (
+      role === "father"
+    ) {
+      return "Grandfather";
+    }
+
+
+    return "Grandparent";
+
+  }
+
+
+  const greats =
+    depth - 2;
+
+
+  if (
+    role === "mother"
+  ) {
+
+    return `${ordinal(greats)} Great Grandmother`;
+
+  }
+
+
+  if (
+    role === "father"
+  ) {
+
+    return `${ordinal(greats)} Great Grandfather`;
+
+  }
+
+
+  return `${ordinal(greats)} Great Grandparent`;
+
+}
+
+
+function makeDescendantTerm(
+  depth
+) {
+
+  if (
+    depth === 1
+  ) {
+    return "Child";
+  }
+
+
+  if (
+    depth === 2
+  ) {
+    return "Grandchild";
+  }
+
+
+  return `${ordinal(depth - 2)} Great Grandchild`;
+
+}
+
+
+function makeAuntUncleTerm(
+  person,
+  greatCount
+) {
+
+  const role =
+    inferParentRole(
+      person.id
+    );
+
+
+  let base;
+
+
+  if (
+    role === "mother"
+  ) {
+    base = "Aunt";
+  }
+  else if (
+    role === "father"
+  ) {
+    base = "Uncle";
+  }
+  else {
+    base = "Aunt/Uncle";
+  }
+
+
+  if (
+    greatCount === 0
+  ) {
+    return base;
+  }
+
+
+  return `${ordinal(greatCount)} Great ${base}`;
+
+}
+
+
+function makeNieceNephewTerm(
+  person,
+  greatCount
+) {
+
+  const role =
+    inferParentRole(
+      person.id
+    );
+
+
+  let base;
+
+
+  if (
+    role === "mother"
+  ) {
+    base = "Niece";
+  }
+  else if (
+    role === "father"
+  ) {
+    base = "Nephew";
+  }
+  else {
+    base = "Niece/Nephew";
+  }
+
+
+  if (
+    greatCount === 0
+  ) {
+    return base;
+  }
+
+
+  return `${ordinal(greatCount)} Great ${base}`;
+
+}
+
+
+/*
+  Since we do not have a separate
+  gender field, this infers a role
+  from whether the person is used
+  as Mother or Father anywhere.
+*/
+
+function inferParentRole(
+  personId
+) {
+
+  let usedAsMother =
+    false;
+
+
+  let usedAsFather =
+    false;
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        character.motherId ===
+        personId
+      ) {
+
+        usedAsMother =
+          true;
+
+      }
+
+
+      if (
+        character.fatherId ===
+        personId
+      ) {
+
+        usedAsFather =
+          true;
+
+      }
+
+    }
+  );
+
+
+  if (
+    usedAsMother &&
+    !usedAsFather
+  ) {
+
+    return "mother";
+
+  }
+
+
+  if (
+    usedAsFather &&
+    !usedAsMother
+  ) {
+
+    return "father";
+
+  }
+
+
+  return "unknown";
+
+}
+
+
+function ordinal(
+  number
+) {
+
+  const remainder100 =
+    number % 100;
+
+
+  if (
+    remainder100 >= 11 &&
+    remainder100 <= 13
+  ) {
+
+    return `${number}th`;
+
+  }
+
+
+  switch (
+    number % 10
+  ) {
+
+    case 1:
+      return `${number}st`;
+
+    case 2:
+      return `${number}nd`;
+
+    case 3:
+      return `${number}rd`;
+
+    default:
+      return `${number}th`;
+
+  }
+
+}
+
+
+/* =========================================================
+   PROFILE FAMILY
+========================================================= */
 
 function renderRelationshipProfile(
   character
@@ -2400,13 +3940,17 @@ function renderRelationshipProfile(
 
   renderRelationshipButtons(
     "profileMother",
-    mother ? [mother] : []
+    mother
+      ? [mother]
+      : []
   );
 
 
   renderRelationshipButtons(
     "profileFather",
-    father ? [father] : []
+    father
+      ? [father]
+      : []
   );
 
 
@@ -2539,9 +4083,11 @@ function getChildren(
 
   return characters.filter(
     character =>
-      character.motherId === parentId
+      character.motherId ===
+        parentId
       ||
-      character.fatherId === parentId
+      character.fatherId ===
+        parentId
   );
 
 }
@@ -2574,17 +4120,15 @@ function getSiblings(
 
 
       const sameMother =
-        character.motherId
-        &&
+        character.motherId &&
         other.motherId ===
-          character.motherId;
+        character.motherId;
 
 
       const sameFather =
-        character.fatherId
-        &&
+        character.fatherId &&
         other.fatherId ===
-          character.fatherId;
+        character.fatherId;
 
 
       return Boolean(
@@ -2598,6 +4142,8 @@ function getSiblings(
 }
 
 
+/* PROFILE CLOSE */
+
 function closeProfile() {
 
   profileBackdrop.classList.add(
@@ -2607,6 +4153,7 @@ function closeProfile() {
   profilePanel.classList.add(
     "hidden"
   );
+
 
   selectedCharacterId =
     null;
@@ -2630,7 +4177,9 @@ profileBackdrop.addEventListener(
 );
 
 
-/* DELETE */
+/* =========================================================
+   DELETE
+========================================================= */
 
 deleteCharacterButton.addEventListener(
   "click",
@@ -2705,22 +4254,37 @@ function deleteCharacter(
 
 
       character.spouseIds =
-        character.spouseIds.filter(
-          id =>
-            id !==
-            characterId
-        );
+        character.spouseIds
+          .filter(
+            id =>
+              id !==
+              characterId
+          );
 
 
       character.loverIds =
-        character.loverIds.filter(
-          id =>
-            id !==
-            characterId
-        );
+        character.loverIds
+          .filter(
+            id =>
+              id !==
+              characterId
+          );
 
     }
   );
+
+
+  if (
+    vantageCharacterId ===
+    characterId
+  ) {
+
+    vantageCharacterId =
+      null;
+
+    saveVantage();
+
+  }
 
 
   saveCharacters();
@@ -2750,7 +4314,9 @@ function deleteCharacter(
 }
 
 
-/* EDITOR */
+/* =========================================================
+   EDITOR
+========================================================= */
 
 editCharacterButton.addEventListener(
   "click",
@@ -2786,7 +4352,9 @@ function openEditor() {
   document.getElementById(
     "editAliases"
   ).value =
-    character.aliases.join(", ");
+    character.aliases.join(
+      ", "
+    );
 
 
   document.getElementById(
@@ -3239,6 +4807,7 @@ editCharacterForm.addEventListener(
 
     saveCharacters();
 
+
     renderTree();
 
 
@@ -3335,45 +4904,9 @@ function syncTwoWayRelationship(
 }
 
 
-/* SELECTS */
-
-function getSelectedSingleId(
-  selectId
-) {
-
-  const value =
-    document.getElementById(
-      selectId
-    ).value;
-
-
-  return value
-    ? Number(value)
-    : null;
-
-}
-
-
-function getSelectedMultipleIds(
-  selectId
-) {
-
-  return Array.from(
-    document.getElementById(
-      selectId
-    ).selectedOptions
-  )
-    .map(
-      option =>
-        Number(
-          option.value
-        )
-    );
-
-}
-
-
-/* COLORS */
+/* =========================================================
+   COLORS
+========================================================= */
 
 setupColorInput(
   "editHairColor",
@@ -3422,9 +4955,101 @@ function setupColorInput(
 }
 
 
-/* HELPERS */
+/* =========================================================
+   CLEANUP
+========================================================= */
 
-function getCharacter(id) {
+function cleanBrokenRelationships() {
+
+  const validIds =
+    new Set(
+      characters.map(
+        character =>
+          character.id
+      )
+    );
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        !validIds.has(
+          character.motherId
+        )
+      ) {
+
+        character.motherId =
+          null;
+
+      }
+
+
+      if (
+        !validIds.has(
+          character.fatherId
+        )
+      ) {
+
+        character.fatherId =
+          null;
+
+      }
+
+
+      character.spouseIds =
+        character.spouseIds
+          .filter(
+            id =>
+              validIds.has(id)
+          );
+
+
+      character.loverIds =
+        character.loverIds
+          .filter(
+            id =>
+              validIds.has(id)
+          );
+
+    }
+  );
+
+}
+
+
+function cleanInvalidVantage() {
+
+  if (
+    vantageCharacterId === null
+  ) {
+    return;
+  }
+
+
+  if (
+    !getCharacter(
+      vantageCharacterId
+    )
+  ) {
+
+    vantageCharacterId =
+      null;
+
+    saveVantage();
+
+  }
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getCharacter(
+  id
+) {
 
   return characters.find(
     character =>
@@ -3444,6 +5069,42 @@ function getCharactersFromIds(
         getCharacter(id)
     )
     .filter(Boolean);
+
+}
+
+
+function getSelectedSingleId(
+  selectId
+) {
+
+  const value =
+    document.getElementById(
+      selectId
+    ).value;
+
+
+  return value
+    ? Number(value)
+    : null;
+
+}
+
+
+function getSelectedMultipleIds(
+  selectId
+) {
+
+  return Array.from(
+    document.getElementById(
+      selectId
+    ).selectedOptions
+  )
+    .map(
+      option =>
+        Number(
+          option.value
+        )
+    );
 
 }
 
@@ -3523,7 +5184,9 @@ function makeYearText(
     birth &&
     death
   ) {
+
     return `${birth} – ${death}`;
+
   }
 
 
@@ -3594,7 +5257,9 @@ function setEditColor(
 }
 
 
-function isHexColor(value) {
+function isHexColor(
+  value
+) {
 
   return /^#[0-9A-Fa-f]{6}$/.test(
     value
@@ -3617,7 +5282,9 @@ function getInputValue(
 }
 
 
-function escapeHTML(value) {
+function escapeHTML(
+  value
+) {
 
   const element =
     document.createElement(
@@ -3634,17 +5301,27 @@ function escapeHTML(value) {
 }
 
 
+/* RESIZE */
+
 window.addEventListener(
   "resize",
+
   function() {
+
     renderTree();
+
   }
 );
 
 
 /* START */
 
+cleanBrokenRelationships();
+
+cleanInvalidVantage();
+
 renderTree();
+
 
 setTimeout(
   centerTree,
