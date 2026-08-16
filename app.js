@@ -20,27 +20,9 @@ const COLOR_PRESETS =
   window.COLOR_PRESETS;
 
 
-/*
-  FANTASY GENETIC MODEL
-
-  Final child probability:
-
-  70% family
-  20% Race
-  10% Species
-
-  Family:
-  35% Mother
-  35% Father
-
-  Parent genetic contribution:
-  60% parent's inherited possibilities
-  40% parent's actual phenotype
-
-  Earlier ancestors survive recursively
-  through the parent's inherited
-  possibility distribution.
-*/
+/* =========================================================
+   GENETIC MODEL
+========================================================= */
 
 const DEFAULT_GENETIC_MODEL = {
 
@@ -66,7 +48,9 @@ let geneticModel =
   loadGeneticModel();
 
 
-/* TREE */
+/* =========================================================
+   TREE SETTINGS
+========================================================= */
 
 const NODE_GAP_X =
   235;
@@ -87,7 +71,9 @@ const ZOOM_STEP =
   0.15;
 
 
-/* DATA */
+/* =========================================================
+   DATA
+========================================================= */
 
 let raceLibrary =
   loadLibrary(
@@ -109,7 +95,9 @@ let selectedCharacterId =
   null;
 
 
-/* VIEW */
+/* =========================================================
+   VIEW
+========================================================= */
 
 let viewX = 0;
 let viewY = 0;
@@ -132,7 +120,9 @@ let pinchWorldY = 0;
 let lastLayout = null;
 
 
-/* TEMP */
+/* =========================================================
+   TEMP
+========================================================= */
 
 let pendingPortraitData =
   null;
@@ -320,6 +310,7 @@ const importWorldFile =
     "importWorldFile"
   );
 
+
 /* GENETIC MODEL SETTINGS */
 
 const familyWeightInput =
@@ -361,6 +352,7 @@ const saveGeneticModelButton =
   document.getElementById(
     "saveGeneticModelButton"
   );
+
 
 /* LIBRARY */
 
@@ -554,7 +546,7 @@ const vantageRelationText =
   );
 
 
-/* CHARACTER EDIT */
+/* EDIT */
 
 const editBackdrop =
   document.getElementById(
@@ -755,7 +747,7 @@ const toast =
 
 
 /* =========================================================
-   STORAGE
+   GENETIC MODEL STORAGE
 ========================================================= */
 
 function loadGeneticModel() {
@@ -777,43 +769,9 @@ function loadGeneticModel() {
     }
 
 
-    const parsed =
-      JSON.parse(saved);
-
-
-    return {
-
-      family:
-        safeWeight(
-          parsed.family,
-          DEFAULT_GENETIC_MODEL.family
-        ),
-
-      race:
-        safeWeight(
-          parsed.race,
-          DEFAULT_GENETIC_MODEL.race
-        ),
-
-      species:
-        safeWeight(
-          parsed.species,
-          DEFAULT_GENETIC_MODEL.species
-        ),
-
-      parentGenetic:
-        safeWeight(
-          parsed.parentGenetic,
-          DEFAULT_GENETIC_MODEL.parentGenetic
-        ),
-
-      parentActual:
-        safeWeight(
-          parsed.parentActual,
-          DEFAULT_GENETIC_MODEL.parentActual
-        )
-
-    };
+    return normalizeGeneticModel(
+      JSON.parse(saved)
+    );
 
   } catch {
 
@@ -822,6 +780,86 @@ function loadGeneticModel() {
     };
 
   }
+
+}
+
+
+function normalizeGeneticModel(
+  model
+) {
+
+  const result = {
+
+    family:
+      safeWeight(
+        model?.family,
+        DEFAULT_GENETIC_MODEL.family
+      ),
+
+    race:
+      safeWeight(
+        model?.race,
+        DEFAULT_GENETIC_MODEL.race
+      ),
+
+    species:
+      safeWeight(
+        model?.species,
+        DEFAULT_GENETIC_MODEL.species
+      ),
+
+    parentGenetic:
+      safeWeight(
+        model?.parentGenetic,
+        DEFAULT_GENETIC_MODEL.parentGenetic
+      ),
+
+    parentActual:
+      safeWeight(
+        model?.parentActual,
+        DEFAULT_GENETIC_MODEL.parentActual
+      )
+
+  };
+
+
+  if (
+    !approximately100(
+      result.family +
+      result.race +
+      result.species
+    )
+  ) {
+
+    result.family =
+      DEFAULT_GENETIC_MODEL.family;
+
+    result.race =
+      DEFAULT_GENETIC_MODEL.race;
+
+    result.species =
+      DEFAULT_GENETIC_MODEL.species;
+
+  }
+
+
+  if (
+    !approximately100(
+      result.parentGenetic +
+      result.parentActual
+    )
+  ) {
+
+    result.parentGenetic =
+      DEFAULT_GENETIC_MODEL.parentGenetic;
+
+    result.parentActual =
+      DEFAULT_GENETIC_MODEL.parentActual;
+
+  }
+
+
+  return result;
 
 }
 
@@ -872,18 +910,14 @@ function populateGeneticModelInputs() {
   familyWeightInput.value =
     geneticModel.family;
 
-
   raceWeightInput.value =
     geneticModel.race;
-
 
   speciesWeightInput.value =
     geneticModel.species;
 
-
   parentGeneticWeightInput.value =
     geneticModel.parentGenetic;
-
 
   parentActualWeightInput.value =
     geneticModel.parentActual;
@@ -1002,24 +1036,20 @@ saveGeneticModelButton.addEventListener(
         familyWeightInput
       );
 
-
     const race =
       getModelInputNumber(
         raceWeightInput
       );
-
 
     const species =
       getModelInputNumber(
         speciesWeightInput
       );
 
-
     const parentGenetic =
       getModelInputNumber(
         parentGeneticWeightInput
       );
-
 
     const parentActual =
       getModelInputNumber(
@@ -1052,7 +1082,7 @@ saveGeneticModelButton.addEventListener(
     ) {
 
       showToast(
-        "Parent Genetics + Actual Appearance must total 100%"
+        "Inherited Genetics + Actual Appearance must total 100%"
       );
 
       return;
@@ -1077,23 +1107,20 @@ saveGeneticModelButton.addEventListener(
 
     saveGeneticModel();
 
+    updateGeneticModelTotals();
+
 
     showToast(
       "Genetic model saved"
     );
 
-
-    /*
-      Nothing needs to be stored
-      on individual characters.
-
-      Their probabilities are
-      recalculated from this model
-      whenever profiles are opened.
-    */
-
   }
 );
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
 
 function loadCharacters() {
 
@@ -1190,20 +1217,30 @@ function loadLibrary(
 
 function saveLibraries() {
 
-  localStorage.setItem(
-    RACE_LIBRARY_KEY,
-    JSON.stringify(
-      raceLibrary
-    )
-  );
+  try {
+
+    localStorage.setItem(
+      RACE_LIBRARY_KEY,
+      JSON.stringify(
+        raceLibrary
+      )
+    );
 
 
-  localStorage.setItem(
-    SPECIES_LIBRARY_KEY,
-    JSON.stringify(
-      speciesLibrary
-    )
-  );
+    localStorage.setItem(
+      SPECIES_LIBRARY_KEY,
+      JSON.stringify(
+        speciesLibrary
+      )
+    );
+
+  } catch {
+
+    showToast(
+      "Browser storage is full"
+    );
+
+  }
 
 }
 
@@ -1312,6 +1349,11 @@ function normalizeCharacter(
 
     familyName:
       character.familyName || "",
+
+    gender:
+      normalizeGender(
+        character.gender
+      ),
 
     birthYear:
       character.birthYear || "",
@@ -1534,6 +1576,97 @@ function normalizeIdArray(
 
 
 /* =========================================================
+   GENDER
+========================================================= */
+
+function normalizeGender(
+  value
+) {
+
+  const gender =
+    String(
+      value || ""
+    ).toLowerCase();
+
+
+  if (
+    gender === "female" ||
+    gender === "male" ||
+    gender === "nonbinary"
+  ) {
+
+    return gender;
+
+  }
+
+
+  return "unknown";
+
+}
+
+
+function formatGender(
+  value
+) {
+
+  switch (
+    normalizeGender(value)
+  ) {
+
+    case "female":
+      return "Female";
+
+    case "male":
+      return "Male";
+
+    case "nonbinary":
+      return "Nonbinary";
+
+    default:
+      return "Unknown";
+
+  }
+
+}
+
+
+function genderedTerm(
+  person,
+  femaleTerm,
+  maleTerm,
+  neutralTerm
+) {
+
+  const gender =
+    normalizeGender(
+      person?.gender
+    );
+
+
+  if (
+    gender === "female"
+  ) {
+
+    return femaleTerm;
+
+  }
+
+
+  if (
+    gender === "male"
+  ) {
+
+    return maleTerm;
+
+  }
+
+
+  return neutralTerm;
+
+}
+
+
+/* =========================================================
    OLD RACE MIGRATION
 ========================================================= */
 
@@ -1583,13 +1716,17 @@ function migrateLegacyRaceFields() {
           name:
             oldRace,
 
-          info: "",
+          info:
+            "",
 
-          hairDistribution: [],
+          hairDistribution:
+            [],
 
-          eyeDistribution: [],
+          eyeDistribution:
+            [],
 
-          skinDistribution: []
+          skinDistribution:
+            []
 
         };
 
@@ -2147,12 +2284,6 @@ function calculateTraitInternal(
 
   /*
     FOUNDERS
-
-    No parents:
-    background genetics.
-
-    If no background exists,
-    actual phenotype becomes 100%.
   */
 
   if (
@@ -2202,19 +2333,18 @@ function calculateTraitInternal(
 
 
   /*
-    FAMILY — 70%
+    FAMILY
   */
 
-const perParentWeight =
-  (
-    geneticModel.family /
-    100
-  ) / 2;
+  const perParentWeight =
+    (
+      geneticModel.family /
+      100
+    ) / 2;
 
 
   addFamilyContribution(
     character.motherId,
-    character,
     trait,
     perParentWeight,
     background,
@@ -2226,7 +2356,6 @@ const perParentWeight =
 
   addFamilyContribution(
     character.fatherId,
-    character,
     trait,
     perParentWeight,
     background,
@@ -2237,32 +2366,26 @@ const perParentWeight =
 
 
   /*
-    RACE — 20%
+    RACE
   */
 
-addWeightedEntries(
-  finalMap,
-  raceBaseline,
-  geneticModel.race / 100
-);
-
-  /*
-    SPECIES — 10%
-  */
-
-addWeightedEntries(
-  finalMap,
-  speciesBaseline,
-  geneticModel.species / 100
-);
+  addWeightedEntries(
+    finalMap,
+    raceBaseline,
+    geneticModel.race / 100
+  );
 
 
   /*
-    If Race or Species had no
-    distribution, their missing
-    weight is redistributed over
-    everything that did contribute.
+    SPECIES
   */
+
+  addWeightedEntries(
+    finalMap,
+    speciesBaseline,
+    geneticModel.species / 100
+  );
+
 
   let result =
     mapToEntries(
@@ -2305,7 +2428,6 @@ addWeightedEntries(
 
 function addFamilyContribution(
   parentId,
-  child,
   trait,
   totalWeight,
   fallbackBackground,
@@ -2314,6 +2436,13 @@ function addFamilyContribution(
   visiting
 ) {
 
+  if (
+    totalWeight <= 0
+  ) {
+    return;
+  }
+
+
   const parent =
     getCharacter(
       parentId
@@ -2321,8 +2450,9 @@ function addFamilyContribution(
 
 
   /*
-    Unknown parent:
-    use child's ancestry baseline.
+    Missing parent:
+    use the child's ancestry
+    background for that half.
   */
 
   if (!parent) {
@@ -2358,26 +2488,18 @@ function addFamilyContribution(
     new Map();
 
 
-  /*
-    60% parent's inherited genetics
-  */
+  addWeightedEntries(
+    parentMap,
+    parentGenetics,
+    geneticModel.parentGenetic / 100
+  );
+
 
   addWeightedEntries(
-  parentMap,
-  parentGenetics,
-  geneticModel.parentGenetic / 100
-);
-
-
-  /*
-    40% parent's actual appearance
-  */
-
-addWeightedEntries(
-  parentMap,
-  parentActual,
-  geneticModel.parentActual / 100
-);
+    parentMap,
+    parentActual,
+    geneticModel.parentActual / 100
+  );
 
 
   let parentBlend =
@@ -2410,7 +2532,7 @@ addWeightedEntries(
 
 
 /* =========================================================
-   RACE / SPECIES BASELINE
+   RACE / SPECIES TRAIT BASELINE
 ========================================================= */
 
 function calculateAncestryTraitBaseline(
@@ -2556,17 +2678,50 @@ function combineBackgroundBaselines(
     species.length
   ) {
 
+    let raceWeight =
+      geneticModel.race;
+
+    let speciesWeight =
+      geneticModel.species;
+
+
+    const total =
+      raceWeight +
+      speciesWeight;
+
+
+    if (
+      total > 0
+    ) {
+
+      raceWeight /=
+        total;
+
+      speciesWeight /=
+        total;
+
+    } else {
+
+      raceWeight =
+        0.5;
+
+      speciesWeight =
+        0.5;
+
+    }
+
+
     addWeightedEntries(
       map,
       race,
-      2 / 3
+      raceWeight
     );
 
 
     addWeightedEntries(
       map,
       species,
-      1 / 3
+      speciesWeight
     );
 
   }
@@ -2604,7 +2759,7 @@ function combineBackgroundBaselines(
 
 
 /* =========================================================
-   ACTUAL PHENOTYPE CONTRIBUTION
+   ACTUAL PHENOTYPE
 ========================================================= */
 
 function actualColorDistribution(
@@ -2660,10 +2815,6 @@ function actualColorDistribution(
   }
 
 
-  /*
-    Standard preset.
-  */
-
   if (
     id &&
     id !== "custom" &&
@@ -2676,6 +2827,7 @@ function actualColorDistribution(
     return [
       {
         id,
+
         percent:
           100
       }
@@ -2683,15 +2835,6 @@ function actualColorDistribution(
 
   }
 
-
-  /*
-    Custom colors are approximated
-    to the nearest standard preset
-    ONLY for genetic calculation.
-
-    Their displayed actual color
-    remains custom.
-  */
 
   if (
     hex &&
@@ -3292,7 +3435,7 @@ function formatProbability(
 
 
   return value
-    .toFixed(5)
+    .toFixed(6)
     .replace(
       /0+$/,
       ""
@@ -3362,72 +3505,79 @@ function renderAncestryList(
     "";
 
 
-  ancestry.forEach(
-    entry => {
+  ancestry
+    .slice()
+    .sort(
+      (a,b) =>
+        b.percent -
+        a.percent
+    )
+    .forEach(
+      entry => {
 
-      const row =
-        document.createElement(
-          "div"
+        const row =
+          document.createElement(
+            "div"
+          );
+
+
+        row.className =
+          "ancestry-profile-row";
+
+
+        if (
+          entry.id ===
+          UNKNOWN_ANCESTRY_ID
+        ) {
+
+          row.classList.add(
+            "ancestry-unknown"
+          );
+
+        }
+
+
+        const name =
+          document.createElement(
+            "span"
+          );
+
+
+        name.textContent =
+          getAncestryName(
+            kind,
+            entry.id
+          );
+
+
+        const percent =
+          document.createElement(
+            "strong"
+          );
+
+
+        percent.textContent =
+          `${formatPercent(
+            entry.percent
+          )}%`;
+
+
+        row.appendChild(
+          name
         );
 
 
-      row.className =
-        "ancestry-profile-row";
+        row.appendChild(
+          percent
+        );
 
 
-      if (
-        entry.id ===
-        UNKNOWN_ANCESTRY_ID
-      ) {
-
-        row.classList.add(
-          "ancestry-unknown"
+        container.appendChild(
+          row
         );
 
       }
-
-
-      const name =
-        document.createElement(
-          "span"
-        );
-
-
-      name.textContent =
-        getAncestryName(
-          kind,
-          entry.id
-        );
-
-
-      const percent =
-        document.createElement(
-          "strong"
-        );
-
-
-      percent.textContent =
-        `${formatPercent(
-          entry.percent
-        )}%`;
-
-
-      row.appendChild(
-        name
-      );
-
-
-      row.appendChild(
-        percent
-      );
-
-
-      container.appendChild(
-        row
-      );
-
-    }
-  );
+    );
 
 }
 
@@ -5302,20 +5452,21 @@ exportWorldButton.addEventListener(
         "Fantasy Family Tree",
 
       version:
-        5,
+        6,
 
       exportedAt:
         new Date().toISOString(),
 
-vantageCharacterId,
+      vantageCharacterId,
 
-geneticModel,
+      geneticModel,
 
-characters,
+      characters,
 
-raceLibrary,
+      raceLibrary,
 
-speciesLibrary
+      speciesLibrary
+
     };
 
 
@@ -5416,15 +5567,21 @@ importWorldFile.addEventListener(
 
     try {
 
-      const data =
+      const parsed =
         JSON.parse(
           await file.text()
         );
 
 
+      const importedCharacters =
+        Array.isArray(parsed)
+          ? parsed
+          : parsed.characters;
+
+
       if (
         !Array.isArray(
-          data.characters
+          importedCharacters
         )
       ) {
         throw new Error();
@@ -5437,10 +5594,11 @@ importWorldFile.addEventListener(
         function() {
 
           raceLibrary =
+            !Array.isArray(parsed) &&
             Array.isArray(
-              data.raceLibrary
+              parsed.raceLibrary
             )
-              ? data.raceLibrary
+              ? parsed.raceLibrary
                   .map(
                     normalizeLibraryItem
                   )
@@ -5448,10 +5606,11 @@ importWorldFile.addEventListener(
 
 
           speciesLibrary =
+            !Array.isArray(parsed) &&
             Array.isArray(
-              data.speciesLibrary
+              parsed.speciesLibrary
             )
-              ? data.speciesLibrary
+              ? parsed.speciesLibrary
                   .map(
                     normalizeLibraryItem
                   )
@@ -5459,89 +5618,29 @@ importWorldFile.addEventListener(
 
 
           characters =
-            data.characters
+            importedCharacters
               .map(
                 normalizeCharacter
               );
 
 
           vantageCharacterId =
-            normalizeId(
-              data.vantageCharacterId
-            );
-
-          geneticModel = {
-
-  family:
-    safeWeight(
-      data.geneticModel?.family,
-      DEFAULT_GENETIC_MODEL.family
-    ),
-
-  race:
-    safeWeight(
-      data.geneticModel?.race,
-      DEFAULT_GENETIC_MODEL.race
-    ),
-
-  species:
-    safeWeight(
-      data.geneticModel?.species,
-      DEFAULT_GENETIC_MODEL.species
-    ),
-
-  parentGenetic:
-    safeWeight(
-      data.geneticModel?.parentGenetic,
-      DEFAULT_GENETIC_MODEL.parentGenetic
-    ),
-
-  parentActual:
-    safeWeight(
-      data.geneticModel?.parentActual,
-      DEFAULT_GENETIC_MODEL.parentActual
-    )
-
-};
+            !Array.isArray(parsed)
+              ? normalizeId(
+                  parsed.vantageCharacterId
+                )
+              : null;
 
 
-if (
-  !approximately100(
-    geneticModel.family +
-    geneticModel.race +
-    geneticModel.species
-  )
-) {
+          geneticModel =
+            !Array.isArray(parsed)
+              ? normalizeGeneticModel(
+                  parsed.geneticModel
+                )
+              : {
+                  ...DEFAULT_GENETIC_MODEL
+                };
 
-  geneticModel.family =
-    DEFAULT_GENETIC_MODEL.family;
-
-  geneticModel.race =
-    DEFAULT_GENETIC_MODEL.race;
-
-  geneticModel.species =
-    DEFAULT_GENETIC_MODEL.species;
-
-}
-
-
-if (
-  !approximately100(
-    geneticModel.parentGenetic +
-    geneticModel.parentActual
-  )
-) {
-
-  geneticModel.parentGenetic =
-    DEFAULT_GENETIC_MODEL.parentGenetic;
-
-  geneticModel.parentActual =
-    DEFAULT_GENETIC_MODEL.parentActual;
-
-}
-
-
-saveGeneticModel();
 
           cleanBrokenRelationships();
 
@@ -5553,6 +5652,8 @@ saveGeneticModel();
           saveLibraries();
 
           saveVantage();
+
+          saveGeneticModel();
 
 
           renderTree();
@@ -5658,13 +5759,46 @@ searchInput.addEventListener(
       characters.filter(
         person => {
 
+          const raceNames =
+            calculateAncestry(
+              person.id,
+              "race"
+            )
+              .map(
+                entry =>
+                  getAncestryName(
+                    "race",
+                    entry.id
+                  )
+              );
+
+
+          const speciesNames =
+            calculateAncestry(
+              person.id,
+              "species"
+            )
+              .map(
+                entry =>
+                  getAncestryName(
+                    "species",
+                    entry.id
+                  )
+              );
+
+
           const text =
             [
               person.title,
               person.givenName,
               person.familyName,
               person.maidenName,
-              ...person.aliases
+              formatGender(
+                person.gender
+              ),
+              ...person.aliases,
+              ...raceNames,
+              ...speciesNames
             ]
               .join(" ")
               .toLowerCase();
@@ -5725,37 +5859,101 @@ function renderSearchResults(
           "button";
 
 
-        button.innerHTML = `
+        const circle =
+          document.createElement(
+            "span"
+          );
 
-          <span class="search-result-circle">
 
-            ${
-              person.portraitData
-                ? `<img src="${person.portraitData}" alt="">`
-                : escapeHTML(
-                    getInitial(person)
-                  )
-            }
+        circle.className =
+          "search-result-circle";
 
-          </span>
 
-          <span>
+        if (
+          person.portraitData
+        ) {
 
-            <span class="search-result-name">
-              ${escapeHTML(
-                getTreeName(person)
-              )}
-            </span>
+          const image =
+            document.createElement(
+              "img"
+            );
 
-            <span class="search-result-meta">
-              ${escapeHTML(
-                makeYearText(person)
-              )}
-            </span>
 
-          </span>
+          image.src =
+            person.portraitData;
 
-        `;
+          image.alt =
+            "";
+
+
+          circle.appendChild(
+            image
+          );
+
+        } else {
+
+          circle.textContent =
+            getInitial(
+              person
+            );
+
+        }
+
+
+        const info =
+          document.createElement(
+            "span"
+          );
+
+
+        const name =
+          document.createElement(
+            "span"
+          );
+
+
+        name.className =
+          "search-result-name";
+
+
+        name.textContent =
+          getTreeName(
+            person
+          );
+
+
+        const meta =
+          document.createElement(
+            "span"
+          );
+
+
+        meta.className =
+          "search-result-meta";
+
+
+        meta.textContent =
+          `${makeYearText(person)} · ${formatGender(person.gender)}`;
+
+
+        info.appendChild(
+          name
+        );
+
+
+        info.appendChild(
+          meta
+        );
+
+
+        button.appendChild(
+          circle
+        );
+
+
+        button.appendChild(
+          info
+        );
 
 
         button.addEventListener(
@@ -6169,6 +6367,109 @@ treeCanvas.addEventListener(
 );
 
 
+/* DESKTOP PAN */
+
+treeCanvas.addEventListener(
+  "pointerdown",
+
+  function(event) {
+
+    if (
+      event.pointerType === "touch"
+    ) {
+      return;
+    }
+
+
+    if (
+      event.target.closest(
+        ".character-node"
+      )
+    ) {
+      return;
+    }
+
+
+    isPanning =
+      true;
+
+
+    panStartX =
+      event.clientX;
+
+    panStartY =
+      event.clientY;
+
+    startViewX =
+      viewX;
+
+    startViewY =
+      viewY;
+
+
+    treeCanvas.setPointerCapture?.(
+      event.pointerId
+    );
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointermove",
+
+  function(event) {
+
+    if (
+      event.pointerType === "touch" ||
+      !isPanning
+    ) {
+      return;
+    }
+
+
+    viewX =
+      startViewX +
+      event.clientX -
+      panStartX;
+
+
+    viewY =
+      startViewY +
+      event.clientY -
+      panStartY;
+
+
+    applyViewTransform();
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointerup",
+
+  function() {
+
+    isPanning =
+      false;
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointercancel",
+
+  function() {
+
+    isPanning =
+      false;
+
+  }
+);
+
+
 /* =========================================================
    CREATE CHARACTER
 ========================================================= */
@@ -6274,6 +6575,11 @@ characterForm.addEventListener(
           getInputValue(
             "familyName"
           ),
+
+        gender:
+          document.getElementById(
+            "gender"
+          ).value,
 
         birthYear:
           getInputValue(
@@ -6768,33 +7074,95 @@ function renderCharacterNode(
     `${position.y}px`;
 
 
-  node.innerHTML = `
+  const circle =
+    document.createElement(
+      "div"
+    );
 
-    <div class="character-circle">
 
-      ${
-        character.portraitData
-          ? `<img class="character-portrait" src="${character.portraitData}" alt="">`
-          : escapeHTML(
-              getInitial(character)
-            )
-      }
+  circle.className =
+    "character-circle";
 
-    </div>
 
-    <div class="character-name">
-      ${escapeHTML(
-        getTreeName(character)
-      )}
-    </div>
+  if (
+    character.portraitData
+  ) {
 
-    <div class="character-years">
-      ${escapeHTML(
-        makeYearText(character)
-      )}
-    </div>
+    const image =
+      document.createElement(
+        "img"
+      );
 
-  `;
+
+    image.className =
+      "character-portrait";
+
+    image.src =
+      character.portraitData;
+
+    image.alt =
+      "";
+
+
+    circle.appendChild(
+      image
+    );
+
+  } else {
+
+    circle.textContent =
+      getInitial(
+        character
+      );
+
+  }
+
+
+  const name =
+    document.createElement(
+      "div"
+    );
+
+
+  name.className =
+    "character-name";
+
+
+  name.textContent =
+    getTreeName(
+      character
+    );
+
+
+  const years =
+    document.createElement(
+      "div"
+    );
+
+
+  years.className =
+    "character-years";
+
+
+  years.textContent =
+    makeYearText(
+      character
+    );
+
+
+  node.appendChild(
+    circle
+  );
+
+
+  node.appendChild(
+    name
+  );
+
+
+  node.appendChild(
+    years
+  );
 
 
   node.addEventListener(
@@ -7067,6 +7435,14 @@ function openProfile(
     "profileAliases",
     character.aliases.join(
       "\n"
+    )
+  );
+
+
+  setProfileText(
+    "profileGender",
+    formatGender(
+      character.gender
     )
   );
 
@@ -7534,6 +7910,10 @@ function describeRelationship(
   }
 
 
+  /*
+    SUBJECT IS AN ANCESTOR
+  */
+
   const ancestorDepth =
     getAncestorDepth(
       vantage.id,
@@ -7553,6 +7933,10 @@ function describeRelationship(
   }
 
 
+  /*
+    SUBJECT IS A DESCENDANT
+  */
+
   const descendantDepth =
     getAncestorDepth(
       subject.id,
@@ -7565,19 +7949,20 @@ function describeRelationship(
   ) {
 
     return makeDescendantTerm(
+      subject,
       descendantDepth
     );
 
   }
 
 
-  const a =
+  const vantageAncestors =
     getAncestorMap(
       vantage.id
     );
 
 
-  const b =
+  const subjectAncestors =
     getAncestorMap(
       subject.id
     );
@@ -7587,18 +7972,19 @@ function describeRelationship(
     [];
 
 
-  a.forEach(
-    (aDepth,id) => {
+  vantageAncestors.forEach(
+    (vantageDepth,id) => {
 
-      if (b.has(id)) {
+      if (
+        subjectAncestors.has(id)
+      ) {
 
         common.push({
 
-          a:
-            aDepth,
+          vantageDepth,
 
-          b:
-            b.get(id)
+          subjectDepth:
+            subjectAncestors.get(id)
 
         });
 
@@ -7614,16 +8000,43 @@ function describeRelationship(
 
 
   common.sort(
-    (first,second) =>
-      Math.max(
-        first.a,
-        first.b
+    (first,second) => {
+
+      const firstMax =
+        Math.max(
+          first.vantageDepth,
+          first.subjectDepth
+        );
+
+
+      const secondMax =
+        Math.max(
+          second.vantageDepth,
+          second.subjectDepth
+        );
+
+
+      if (
+        firstMax !== secondMax
+      ) {
+
+        return firstMax -
+          secondMax;
+
+      }
+
+
+      return (
+        first.vantageDepth +
+        first.subjectDepth
       )
       -
-      Math.max(
-        second.a,
-        second.b
-      )
+      (
+        second.vantageDepth +
+        second.subjectDepth
+      );
+
+    }
   );
 
 
@@ -7631,30 +8044,83 @@ function describeRelationship(
     common[0];
 
 
+  /*
+    SIBLING
+  */
+
   if (
-    nearest.a === 1 &&
-    nearest.b === 1
+    nearest.vantageDepth === 1 &&
+    nearest.subjectDepth === 1
   ) {
-    return "Sibling";
+
+    return genderedTerm(
+      subject,
+      "Sister",
+      "Brother",
+      "Sibling"
+    );
+
   }
 
 
+  /*
+    AUNT / UNCLE
+  */
+
   if (
-    nearest.a >= 2 &&
-    nearest.b >= 2
+    nearest.vantageDepth === 2 &&
+    nearest.subjectDepth === 1
+  ) {
+
+    return genderedTerm(
+      subject,
+      "Aunt",
+      "Uncle",
+      "Aunt/Uncle"
+    );
+
+  }
+
+
+  /*
+    NIECE / NEPHEW
+  */
+
+  if (
+    nearest.vantageDepth === 1 &&
+    nearest.subjectDepth === 2
+  ) {
+
+    return genderedTerm(
+      subject,
+      "Niece",
+      "Nephew",
+      "Niece/Nephew"
+    );
+
+  }
+
+
+  /*
+    COUSINS
+  */
+
+  if (
+    nearest.vantageDepth >= 2 &&
+    nearest.subjectDepth >= 2
   ) {
 
     const degree =
       Math.min(
-        nearest.a,
-        nearest.b
+        nearest.vantageDepth,
+        nearest.subjectDepth
       ) - 1;
 
 
     const removed =
       Math.abs(
-        nearest.a -
-        nearest.b
+        nearest.vantageDepth -
+        nearest.subjectDepth
       );
 
 
@@ -7696,7 +8162,8 @@ function getAncestorMap(
     [
       {
         id,
-        depth: 0
+        depth:
+          0
       }
     ];
 
@@ -7802,116 +8269,103 @@ function makeAncestorTerm(
   depth
 ) {
 
-  const role =
-    inferParentRole(
-      person.id
+  if (
+    depth === 1
+  ) {
+
+    return genderedTerm(
+      person,
+      "Mother",
+      "Father",
+      "Parent"
     );
 
+  }
 
-  if (depth === 1) {
 
-    return role === "mother"
-      ? "Mother"
-      : role === "father"
-        ? "Father"
-        : "Parent";
+  if (
+    depth === 2
+  ) {
+
+    return genderedTerm(
+      person,
+      "Grandmother",
+      "Grandfather",
+      "Grandparent"
+    );
 
   }
 
 
-  if (depth === 2) {
-
-    return role === "mother"
-      ? "Grandmother"
-      : role === "father"
-        ? "Grandfather"
-        : "Grandparent";
-
-  }
+  const greatCount =
+    depth - 2;
 
 
-  return `${ordinal(
-    depth - 2
-  )} Great ${
-    role === "mother"
-      ? "Grandmother"
-      : role === "father"
-        ? "Grandfather"
-        : "Grandparent"
-  }`;
+  const greatText =
+    greatCount === 1
+      ? "Great"
+      : `${greatCount}× Great`;
+
+
+  return genderedTerm(
+    person,
+    `${greatText} Grandmother`,
+    `${greatText} Grandfather`,
+    `${greatText} Grandparent`
+  );
 
 }
 
 
 function makeDescendantTerm(
+  person,
   depth
 ) {
 
-  if (depth === 1) {
-    return "Child";
+  if (
+    depth === 1
+  ) {
+
+    return genderedTerm(
+      person,
+      "Daughter",
+      "Son",
+      "Child"
+    );
+
   }
 
 
-  if (depth === 2) {
-    return "Grandchild";
+  if (
+    depth === 2
+  ) {
+
+    return genderedTerm(
+      person,
+      "Granddaughter",
+      "Grandson",
+      "Grandchild"
+    );
+
   }
 
 
-  return `${ordinal(
-    depth - 2
-  )} Great Grandchild`;
-
-}
+  const greatCount =
+    depth - 2;
 
 
-function inferParentRole(
-  id
-) {
-
-  let mother =
-    false;
-
-  let father =
-    false;
+  const greatText =
+    greatCount === 1
+      ? "Great"
+      : `${greatCount}× Great`;
 
 
-  characters.forEach(
-    person => {
-
-      if (
-        person.motherId === id
-      ) {
-        mother = true;
-      }
-
-
-      if (
-        person.fatherId === id
-      ) {
-        father = true;
-      }
-
-    }
+  return genderedTerm(
+    person,
+    `${greatText} Granddaughter`,
+    `${greatText} Grandson`,
+    `${greatText} Grandchild`
   );
-
-
-  if (
-    mother &&
-    !father
-  ) {
-    return "mother";
-  }
-
-
-  if (
-    father &&
-    !mother
-  ) {
-    return "father";
-  }
-
-
-  return "unknown";
 
 }
 
@@ -7973,6 +8427,14 @@ function openEditor() {
     "editFamilyName",
     character.familyName
   );
+
+
+  document.getElementById(
+    "editGender"
+  ).value =
+    normalizeGender(
+      character.gender
+    );
 
 
   setInputValue(
@@ -8226,7 +8688,9 @@ function populateMultiSelect(
 }
 
 
-/* SAVE EDIT */
+/* =========================================================
+   SAVE EDIT
+========================================================= */
 
 editCharacterForm.addEventListener(
   "submit",
@@ -8307,6 +8771,36 @@ editCharacterForm.addEventListener(
     if (manualMode) {
 
       if (
+        hasDuplicateAncestry(
+          raceAncestry
+        )
+      ) {
+
+        showToast(
+          "Each Race can only appear once"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        hasDuplicateAncestry(
+          speciesAncestry
+        )
+      ) {
+
+        showToast(
+          "Each Species can only appear once"
+        );
+
+        return;
+
+      }
+
+
+      if (
         raceAncestry.length &&
         !approximately100(
           sumPercent(
@@ -8382,6 +8876,12 @@ editCharacterForm.addEventListener(
       getInputValue(
         "editFamilyName"
       );
+
+
+    character.gender =
+      document.getElementById(
+        "editGender"
+      ).value;
 
 
     character.birthYear =
@@ -8512,7 +9012,28 @@ editCharacterForm.addEventListener(
 );
 
 
-/* COLOR SAVE */
+function hasDuplicateAncestry(
+  entries
+) {
+
+  const ids =
+    entries.map(
+      entry =>
+        entry.id
+    );
+
+
+  return (
+    new Set(ids).size !==
+    ids.length
+  );
+
+}
+
+
+/* =========================================================
+   COLOR SAVE
+========================================================= */
 
 function setCharacterColorEditorValue(
   trait,
@@ -8789,7 +9310,8 @@ removePortraitButton.addEventListener(
           "editGivenName"
         ),
 
-      portraitData: ""
+      portraitData:
+        ""
 
     });
 
@@ -9185,6 +9707,18 @@ deleteCharacterButton.addEventListener(
         );
 
 
+        if (
+          vantageCharacterId === id
+        ) {
+
+          vantageCharacterId =
+            null;
+
+          saveVantage();
+
+        }
+
+
         saveCharacters();
 
         closeProfile();
@@ -9402,15 +9936,19 @@ function getTreeName(
   character
 ) {
 
-  return `
-    ${character.givenName || ""}
-    ${character.familyName || ""}
-  `
-    .replace(
-      /\s+/g,
-      " "
-    )
-    .trim();
+  const name =
+    `
+      ${character.givenName || ""}
+      ${character.familyName || ""}
+    `
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+
+  return name || "Unnamed";
 
 }
 
@@ -9425,16 +9963,20 @@ function getProfileName(
       : "";
 
 
-  return `
-    ${character.givenName || ""}
-    ${maiden}
-    ${character.familyName || ""}
-  `
-    .replace(
-      /\s+/g,
-      " "
-    )
-    .trim();
+  const name =
+    `
+      ${character.givenName || ""}
+      ${maiden}
+      ${character.familyName || ""}
+    `
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+
+  return name || "Unnamed";
 
 }
 
@@ -9445,6 +9987,7 @@ function getInitial(
 
   return (
     character.givenName ||
+    character.familyName ||
     "?"
   )
     .charAt(0)
@@ -9590,8 +10133,62 @@ function formatPercent(
   value
 ) {
 
-  return Number(value)
-    .toFixed(4)
+  const number =
+    Number(value);
+
+
+  if (
+    !Number.isFinite(number)
+  ) {
+    return "0";
+  }
+
+
+  if (
+    Number.isInteger(number)
+  ) {
+    return String(number);
+  }
+
+
+  if (
+    Math.abs(number) >= 1
+  ) {
+
+    return number
+      .toFixed(2)
+      .replace(
+        /0+$/,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      );
+
+  }
+
+
+  if (
+    Math.abs(number) >= 0.01
+  ) {
+
+    return number
+      .toFixed(4)
+      .replace(
+        /0+$/,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      );
+
+  }
+
+
+  return number
+    .toFixed(6)
     .replace(
       /0+$/,
       ""
@@ -9670,6 +10267,7 @@ function cleanBrokenRelationships() {
     person => {
 
       if (
+        person.motherId !== null &&
         !valid.has(
           person.motherId
         )
@@ -9680,6 +10278,7 @@ function cleanBrokenRelationships() {
 
 
       if (
+        person.fatherId !== null &&
         !valid.has(
           person.fatherId
         )
@@ -9706,6 +10305,21 @@ function cleanBrokenRelationships() {
 
     }
   );
+
+
+  if (
+    vantageCharacterId !== null &&
+    !valid.has(
+      vantageCharacterId
+    )
+  ) {
+
+    vantageCharacterId =
+      null;
+
+    saveVantage();
+
+  }
 
 }
 
@@ -9809,6 +10423,8 @@ migrateLegacyRaceFields();
 saveCharacters();
 
 saveLibraries();
+
+saveGeneticModel();
 
 renderTree();
 
