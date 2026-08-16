@@ -17,18 +17,66 @@ const COLOR_PRESETS =
   window.COLOR_PRESETS;
 
 
+/*
+  FANTASY GENETIC MODEL
+
+  Final child probability:
+
+  70% family
+  20% Race
+  10% Species
+
+  Family:
+  35% Mother
+  35% Father
+
+  Parent genetic contribution:
+  60% parent's inherited possibilities
+  40% parent's actual phenotype
+
+  Earlier ancestors survive recursively
+  through the parent's inherited
+  possibility distribution.
+*/
+
+const FAMILY_WEIGHT =
+  0.70;
+
+const RACE_WEIGHT =
+  0.20;
+
+const SPECIES_WEIGHT =
+  0.10;
+
+const PARENT_GENETIC_WEIGHT =
+  0.60;
+
+const PARENT_ACTUAL_WEIGHT =
+  0.40;
+
+
 /* TREE */
 
-const NODE_GAP_X = 235;
-const GENERATION_GAP_Y = 235;
-const WORLD_SIZE = 6000;
+const NODE_GAP_X =
+  235;
 
-const MIN_ZOOM = 0.2;
-const MAX_ZOOM = 2.5;
-const ZOOM_STEP = 0.15;
+const GENERATION_GAP_Y =
+  235;
+
+const WORLD_SIZE =
+  6000;
+
+const MIN_ZOOM =
+  0.2;
+
+const MAX_ZOOM =
+  2.5;
+
+const ZOOM_STEP =
+  0.15;
 
 
-/* DATA — libraries first for migration */
+/* DATA */
 
 let raceLibrary =
   loadLibrary(
@@ -73,7 +121,7 @@ let pinchWorldY = 0;
 let lastLayout = null;
 
 
-/* EDITOR TEMP */
+/* TEMP */
 
 let pendingPortraitData =
   null;
@@ -84,14 +132,16 @@ let activeLibraryType =
 let editingLibraryId =
   null;
 
-
-/* CONFIRM */
-
 let confirmAction =
   null;
 
+let toastTimer =
+  null;
 
-/* ELEMENTS */
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
 const treeCanvas =
   document.getElementById(
@@ -328,6 +378,11 @@ const saveLibraryItemButton =
 const libraryNameInput =
   document.getElementById(
     "libraryNameInput"
+  );
+
+const libraryInfoInput =
+  document.getElementById(
+    "libraryInfoInput"
   );
 
 const hairDistributionEditor =
@@ -646,9 +701,6 @@ const toast =
     "toast"
   );
 
-let toastTimer =
-  null;
-
 
 /* =========================================================
    STORAGE
@@ -817,7 +869,7 @@ function saveVantage() {
 
 
 /* =========================================================
-   NORMALIZATION
+   NORMALIZE
 ========================================================= */
 
 function normalizeCharacter(
@@ -877,11 +929,6 @@ function normalizeCharacter(
 
     deathYear:
       character.deathYear || "",
-
-    /*
-      Kept only so old worlds
-      can be migrated safely.
-    */
 
     race:
       character.race || "",
@@ -956,16 +1003,48 @@ function normalizeCharacter(
 }
 
 
+function normalizeLibraryItem(
+  item
+) {
+
+  return {
+
+    id:
+      item.id ||
+      createLibraryId(),
+
+    name:
+      item.name || "",
+
+    info:
+      item.info || "",
+
+    hairDistribution:
+      normalizeDistribution(
+        item.hairDistribution
+      ),
+
+    eyeDistribution:
+      normalizeDistribution(
+        item.eyeDistribution
+      ),
+
+    skinDistribution:
+      normalizeDistribution(
+        item.skinDistribution
+      )
+
+  };
+
+}
+
+
 function normalizeAncestry(
   values
 ) {
 
-  if (
-    !Array.isArray(values)
-  ) {
-
+  if (!Array.isArray(values)) {
     return [];
-
   }
 
 
@@ -994,51 +1073,16 @@ function normalizeAncestry(
 }
 
 
-function normalizeLibraryItem(
-  item
-) {
-
-  return {
-
-    id:
-      item.id ||
-      createLibraryId(),
-
-    name:
-      item.name || "",
-
-    hairDistribution:
-      normalizeDistribution(
-        item.hairDistribution
-      ),
-
-    eyeDistribution:
-      normalizeDistribution(
-        item.eyeDistribution
-      ),
-
-    skinDistribution:
-      normalizeDistribution(
-        item.skinDistribution
-      )
-
-  };
-
-}
-
-
 function normalizeDistribution(
-  distribution
+  values
 ) {
 
-  if (
-    !Array.isArray(distribution)
-  ) {
+  if (!Array.isArray(values)) {
     return [];
   }
 
 
-  return distribution
+  return values
     .map(
       entry => ({
 
@@ -1072,9 +1116,7 @@ function normalizeId(
     value === undefined ||
     value === ""
   ) {
-
     return null;
-
   }
 
 
@@ -1093,30 +1135,22 @@ function normalizeIdArray(
   values
 ) {
 
-  if (
-    !Array.isArray(values)
-  ) {
-    return [];
-  }
-
-
-  return values
-    .map(Number)
-    .filter(Number.isFinite);
+  return Array.isArray(values)
+    ? values
+        .map(Number)
+        .filter(Number.isFinite)
+    : [];
 
 }
 
 
 /* =========================================================
-   LEGACY RACE MIGRATION
+   OLD RACE MIGRATION
 ========================================================= */
 
 function migrateLegacyRaceFields() {
 
-  let libraryChanged =
-    false;
-
-  let characterChanged =
+  let changed =
     false;
 
 
@@ -1139,10 +1173,10 @@ function migrateLegacyRaceFields() {
       }
 
 
-      let matching =
+      let item =
         raceLibrary.find(
-          item =>
-            item.name
+          race =>
+            race.name
               .toLowerCase()
             ===
             oldRace
@@ -1150,15 +1184,17 @@ function migrateLegacyRaceFields() {
         );
 
 
-      if (!matching) {
+      if (!item) {
 
-        matching = {
+        item = {
 
           id:
             createLibraryId(),
 
           name:
             oldRace,
+
+          info: "",
 
           hairDistribution: [],
 
@@ -1170,28 +1206,17 @@ function migrateLegacyRaceFields() {
 
 
         raceLibrary.push(
-          matching
+          item
         );
-
-
-        libraryChanged =
-          true;
 
       }
 
-
-      /*
-        Only seed it as manual ancestry.
-
-        If this person has parents,
-        automatic ancestry still wins.
-      */
 
       character.raceAncestry =
         [
           {
             id:
-              matching.id,
+              item.id,
 
             percent:
               100
@@ -1199,39 +1224,153 @@ function migrateLegacyRaceFields() {
         ];
 
 
-      characterChanged =
+      changed =
         true;
 
     }
   );
 
 
-  if (libraryChanged) {
+  if (changed) {
+
     saveLibraries();
-  }
 
-
-  if (characterChanged) {
     saveCharacters();
+
   }
 
 }
 
 
 /* =========================================================
-   ANCESTRY ENGINE
+   COLOR PRESETS
 ========================================================= */
 
-/*
-  Founder:
-  manual ancestry.
+function migrateColor(
+  trait,
+  id,
+  hex
+) {
 
-  Has parent(s):
-  automatic ancestry.
+  if (
+    id &&
+    findColorPreset(
+      trait,
+      id
+    )
+  ) {
 
-  Override:
-  manual ancestry even with parents.
-*/
+    const preset =
+      findColorPreset(
+        trait,
+        id
+      );
+
+
+    return {
+      id:
+        preset.id,
+
+      hex:
+        preset.hex
+    };
+
+  }
+
+
+  if (hex) {
+
+    const match =
+      COLOR_PRESETS[trait]
+        .find(
+          preset =>
+            preset.hex
+              .toLowerCase()
+            ===
+            hex
+              .toLowerCase()
+        );
+
+
+    if (match) {
+
+      return {
+        id:
+          match.id,
+
+        hex:
+          match.hex
+      };
+
+    }
+
+
+    return {
+      id:
+        "custom",
+
+      hex
+    };
+
+  }
+
+
+  return {
+    id: "",
+    hex: ""
+  };
+
+}
+
+
+function findColorPreset(
+  trait,
+  id
+) {
+
+  return COLOR_PRESETS[trait]
+    .find(
+      preset =>
+        preset.id === id
+    );
+
+}
+
+
+function getColorName(
+  trait,
+  id
+) {
+
+  if (!id) {
+    return "—";
+  }
+
+
+  if (
+    id === "custom"
+  ) {
+    return "Custom";
+  }
+
+
+  const preset =
+    findColorPreset(
+      trait,
+      id
+    );
+
+
+  return preset
+    ? preset.name
+    : "Custom";
+
+}
+
+
+/* =========================================================
+   ANCESTRY
+========================================================= */
 
 function usesManualAncestry(
   character
@@ -1242,7 +1381,7 @@ function usesManualAncestry(
   }
 
 
-  const hasParent =
+  const hasParents =
     Boolean(
       character.motherId ||
       character.fatherId
@@ -1250,20 +1389,12 @@ function usesManualAncestry(
 
 
   return (
-    !hasParent ||
+    !hasParents ||
     character.ancestryOverride
   );
 
 }
 
-
-/*
-  Public function.
-
-  kind:
-  "race"
-  "species"
-*/
 
 function calculateAncestry(
   characterId,
@@ -1287,30 +1418,20 @@ function calculateAncestryInternal(
   visiting
 ) {
 
-  const memoKey =
+  const key =
     `${kind}:${characterId}`;
 
 
-  if (
-    memo.has(
-      memoKey
-    )
-  ) {
+  if (memo.has(key)) {
 
-    return cloneAncestry(
-      memo.get(
-        memoKey
-      )
+    return cloneEntries(
+      memo.get(key)
     );
 
   }
 
 
-  if (
-    visiting.has(
-      memoKey
-    )
-  ) {
+  if (visiting.has(key)) {
 
     return [
       {
@@ -1346,14 +1467,8 @@ function calculateAncestryInternal(
   }
 
 
-  visiting.add(
-    memoKey
-  );
+  visiting.add(key);
 
-
-  /*
-    FOUNDERS / OVERRIDES
-  */
 
   if (
     usesManualAncestry(
@@ -1368,100 +1483,86 @@ function calculateAncestryInternal(
 
 
     const result =
-      ancestryWithUnknownRemainder(
+      ancestryWithUnknown(
         source
       );
 
 
     memo.set(
-      memoKey,
+      key,
       result
     );
 
 
-    visiting.delete(
-      memoKey
-    );
+    visiting.delete(key);
 
 
-    return cloneAncestry(
+    return cloneEntries(
       result
     );
 
   }
 
 
-  /*
-    AUTOMATIC CHILD
-  */
-
-  const combined =
+  const map =
     new Map();
 
 
-  addParentContribution(
+  addParentAncestry(
     character.motherId,
     kind,
-    combined,
+    map,
     memo,
     visiting
   );
 
 
-  addParentContribution(
+  addParentAncestry(
     character.fatherId,
     kind,
-    combined,
+    map,
     memo,
     visiting
   );
 
 
   const result =
-    ancestryMapToArray(
-      combined
+    mapToEntries(
+      map
     );
 
 
   memo.set(
-    memoKey,
+    key,
     result
   );
 
 
-  visiting.delete(
-    memoKey
-  );
+  visiting.delete(key);
 
 
-  return cloneAncestry(
+  return cloneEntries(
     result
   );
 
 }
 
 
-function addParentContribution(
+function addParentAncestry(
   parentId,
   kind,
-  combined,
+  map,
   memo,
   visiting
 ) {
 
-  /*
-    Missing parent =
-    unknown half.
-  */
-
   if (!parentId) {
 
-    addAncestryValue(
-      combined,
+    addMapValue(
+      map,
       UNKNOWN_ANCESTRY_ID,
       50
     );
-
 
     return;
 
@@ -1476,19 +1577,18 @@ function addParentContribution(
 
   if (!parent) {
 
-    addAncestryValue(
-      combined,
+    addMapValue(
+      map,
       UNKNOWN_ANCESTRY_ID,
       50
     );
-
 
     return;
 
   }
 
 
-  const parentAncestry =
+  const ancestry =
     calculateAncestryInternal(
       parent.id,
       kind,
@@ -1497,11 +1597,11 @@ function addParentContribution(
     );
 
 
-  parentAncestry.forEach(
+  ancestry.forEach(
     entry => {
 
-      addAncestryValue(
-        combined,
+      addMapValue(
+        map,
         entry.id,
         entry.percent * 0.5
       );
@@ -1512,19 +1612,19 @@ function addParentContribution(
 }
 
 
-function ancestryWithUnknownRemainder(
+function ancestryWithUnknown(
   ancestry
 ) {
 
-  const combined =
+  const map =
     new Map();
 
 
   ancestry.forEach(
     entry => {
 
-      addAncestryValue(
-        combined,
+      addMapValue(
+        map,
         entry.id,
         entry.percent
       );
@@ -1534,22 +1634,17 @@ function ancestryWithUnknownRemainder(
 
 
   const total =
-    Array.from(
-      combined.values()
-    )
-      .reduce(
-        (sum,value) =>
-          sum + value,
-        0
-      );
+    sumMap(
+      map
+    );
 
 
   if (
     total < 100
   ) {
 
-    addAncestryValue(
-      combined,
+    addMapValue(
+      map,
       UNKNOWN_ANCESTRY_ID,
       100 - total
     );
@@ -1557,18 +1652,953 @@ function ancestryWithUnknownRemainder(
   }
 
 
-  return ancestryMapToArray(
-    combined
+  return mapToEntries(
+    map
   );
 
 }
 
 
-function addAncestryValue(
+/* =========================================================
+   GENETIC APPEARANCE ENGINE
+========================================================= */
+
+function calculateTraitProbabilities(
+  characterId,
+  trait
+) {
+
+  return calculateTraitInternal(
+    characterId,
+    trait,
+    new Map(),
+    new Set()
+  );
+
+}
+
+
+function calculateTraitInternal(
+  characterId,
+  trait,
+  memo,
+  visiting
+) {
+
+  const key =
+    `${trait}:${characterId}`;
+
+
+  if (memo.has(key)) {
+
+    return cloneEntries(
+      memo.get(key)
+    );
+
+  }
+
+
+  if (visiting.has(key)) {
+    return [];
+  }
+
+
+  const character =
+    getCharacter(
+      characterId
+    );
+
+
+  if (!character) {
+    return [];
+  }
+
+
+  visiting.add(key);
+
+
+  const raceBaseline =
+    calculateAncestryTraitBaseline(
+      character.id,
+      "race",
+      trait
+    );
+
+
+  const speciesBaseline =
+    calculateAncestryTraitBaseline(
+      character.id,
+      "species",
+      trait
+    );
+
+
+  const background =
+    combineBackgroundBaselines(
+      raceBaseline,
+      speciesBaseline
+    );
+
+
+  const hasMother =
+    Boolean(
+      getCharacter(
+        character.motherId
+      )
+    );
+
+
+  const hasFather =
+    Boolean(
+      getCharacter(
+        character.fatherId
+      )
+    );
+
+
+  /*
+    FOUNDERS
+
+    No parents:
+    background genetics.
+
+    If no background exists,
+    actual phenotype becomes 100%.
+  */
+
+  if (
+    !hasMother &&
+    !hasFather
+  ) {
+
+    let founder =
+      background;
+
+
+    if (!founder.length) {
+
+      founder =
+        actualColorDistribution(
+          character,
+          trait
+        );
+
+    }
+
+
+    founder =
+      normalizeProbabilityEntries(
+        founder
+      );
+
+
+    memo.set(
+      key,
+      founder
+    );
+
+
+    visiting.delete(key);
+
+
+    return cloneEntries(
+      founder
+    );
+
+  }
+
+
+  const finalMap =
+    new Map();
+
+
+  /*
+    FAMILY — 70%
+  */
+
+  const perParentWeight =
+    FAMILY_WEIGHT / 2;
+
+
+  addFamilyContribution(
+    character.motherId,
+    character,
+    trait,
+    perParentWeight,
+    background,
+    finalMap,
+    memo,
+    visiting
+  );
+
+
+  addFamilyContribution(
+    character.fatherId,
+    character,
+    trait,
+    perParentWeight,
+    background,
+    finalMap,
+    memo,
+    visiting
+  );
+
+
+  /*
+    RACE — 20%
+  */
+
+  addWeightedEntries(
+    finalMap,
+    raceBaseline,
+    RACE_WEIGHT
+  );
+
+
+  /*
+    SPECIES — 10%
+  */
+
+  addWeightedEntries(
+    finalMap,
+    speciesBaseline,
+    SPECIES_WEIGHT
+  );
+
+
+  /*
+    If Race or Species had no
+    distribution, their missing
+    weight is redistributed over
+    everything that did contribute.
+  */
+
+  let result =
+    mapToEntries(
+      finalMap
+    );
+
+
+  if (!result.length) {
+
+    result =
+      actualColorDistribution(
+        character,
+        trait
+      );
+
+  }
+
+
+  result =
+    normalizeProbabilityEntries(
+      result
+    );
+
+
+  memo.set(
+    key,
+    result
+  );
+
+
+  visiting.delete(key);
+
+
+  return cloneEntries(
+    result
+  );
+
+}
+
+
+function addFamilyContribution(
+  parentId,
+  child,
+  trait,
+  totalWeight,
+  fallbackBackground,
+  finalMap,
+  memo,
+  visiting
+) {
+
+  const parent =
+    getCharacter(
+      parentId
+    );
+
+
+  /*
+    Unknown parent:
+    use child's ancestry baseline.
+  */
+
+  if (!parent) {
+
+    addWeightedEntries(
+      finalMap,
+      fallbackBackground,
+      totalWeight
+    );
+
+    return;
+
+  }
+
+
+  const parentGenetics =
+    calculateTraitInternal(
+      parent.id,
+      trait,
+      memo,
+      visiting
+    );
+
+
+  const parentActual =
+    actualColorDistribution(
+      parent,
+      trait
+    );
+
+
+  const parentMap =
+    new Map();
+
+
+  /*
+    60% parent's inherited genetics
+  */
+
+  addWeightedEntries(
+    parentMap,
+    parentGenetics,
+    PARENT_GENETIC_WEIGHT
+  );
+
+
+  /*
+    40% parent's actual appearance
+  */
+
+  addWeightedEntries(
+    parentMap,
+    parentActual,
+    PARENT_ACTUAL_WEIGHT
+  );
+
+
+  let parentBlend =
+    mapToEntries(
+      parentMap
+    );
+
+
+  if (!parentBlend.length) {
+
+    parentBlend =
+      fallbackBackground;
+
+  }
+
+
+  parentBlend =
+    normalizeProbabilityEntries(
+      parentBlend
+    );
+
+
+  addWeightedEntries(
+    finalMap,
+    parentBlend,
+    totalWeight
+  );
+
+}
+
+
+/* =========================================================
+   RACE / SPECIES BASELINE
+========================================================= */
+
+function calculateAncestryTraitBaseline(
+  characterId,
+  kind,
+  trait
+) {
+
+  const ancestry =
+    calculateAncestry(
+      characterId,
+      kind
+    );
+
+
+  const library =
+    kind === "race"
+      ? raceLibrary
+      : speciesLibrary;
+
+
+  const map =
+    new Map();
+
+
+  let usableAncestryWeight =
+    0;
+
+
+  ancestry.forEach(
+    ancestryEntry => {
+
+      if (
+        ancestryEntry.id ===
+        UNKNOWN_ANCESTRY_ID
+      ) {
+        return;
+      }
+
+
+      const item =
+        library.find(
+          entry =>
+            entry.id ===
+            ancestryEntry.id
+        );
+
+
+      if (!item) {
+        return;
+      }
+
+
+      const distribution =
+        getLibraryTraitDistribution(
+          item,
+          trait
+        );
+
+
+      if (!distribution.length) {
+        return;
+      }
+
+
+      const ancestryWeight =
+        ancestryEntry.percent / 100;
+
+
+      usableAncestryWeight +=
+        ancestryWeight;
+
+
+      distribution.forEach(
+        colorEntry => {
+
+          addMapValue(
+            map,
+            colorEntry.colorId,
+            ancestryWeight *
+            colorEntry.percent /
+            100
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  if (
+    usableAncestryWeight <= 0
+  ) {
+    return [];
+  }
+
+
+  return normalizeProbabilityEntries(
+    mapToEntries(
+      map
+    )
+  );
+
+}
+
+
+function getLibraryTraitDistribution(
+  item,
+  trait
+) {
+
+  if (
+    trait === "hair"
+  ) {
+    return item.hairDistribution;
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+    return item.eyeDistribution;
+  }
+
+
+  return item.skinDistribution;
+
+}
+
+
+function combineBackgroundBaselines(
+  race,
+  species
+) {
+
+  const map =
+    new Map();
+
+
+  if (
+    race.length &&
+    species.length
+  ) {
+
+    addWeightedEntries(
+      map,
+      race,
+      2 / 3
+    );
+
+
+    addWeightedEntries(
+      map,
+      species,
+      1 / 3
+    );
+
+  }
+  else if (
+    race.length
+  ) {
+
+    addWeightedEntries(
+      map,
+      race,
+      1
+    );
+
+  }
+  else if (
+    species.length
+  ) {
+
+    addWeightedEntries(
+      map,
+      species,
+      1
+    );
+
+  }
+
+
+  return normalizeProbabilityEntries(
+    mapToEntries(
+      map
+    )
+  );
+
+}
+
+
+/* =========================================================
+   ACTUAL PHENOTYPE CONTRIBUTION
+========================================================= */
+
+function actualColorDistribution(
+  character,
+  trait
+) {
+
+  let id = "";
+  let hex = "";
+
+
+  if (
+    trait === "hair"
+  ) {
+
+    id =
+      character.hairColorId;
+
+    hex =
+      character.hairColor;
+
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+
+    id =
+      character.eyeColorId;
+
+    hex =
+      character.eyeColor;
+
+  }
+
+
+  if (
+    trait === "skin"
+  ) {
+
+    id =
+      character.skinColorId;
+
+    hex =
+      character.skinColor;
+
+  }
+
+
+  if (!id && !hex) {
+    return [];
+  }
+
+
+  /*
+    Standard preset.
+  */
+
+  if (
+    id &&
+    id !== "custom" &&
+    findColorPreset(
+      trait,
+      id
+    )
+  ) {
+
+    return [
+      {
+        id,
+        percent:
+          100
+      }
+    ];
+
+  }
+
+
+  /*
+    Custom colors are approximated
+    to the nearest standard preset
+    ONLY for genetic calculation.
+
+    Their displayed actual color
+    remains custom.
+  */
+
+  if (
+    hex &&
+    isHexColor(hex)
+  ) {
+
+    const nearest =
+      findNearestPreset(
+        trait,
+        hex
+      );
+
+
+    if (nearest) {
+
+      return [
+        {
+          id:
+            nearest.id,
+
+          percent:
+            100
+        }
+      ];
+
+    }
+
+  }
+
+
+  return [];
+
+}
+
+
+function findNearestPreset(
+  trait,
+  hex
+) {
+
+  const source =
+    hexToRgb(
+      hex
+    );
+
+
+  if (!source) {
+    return null;
+  }
+
+
+  let best =
+    null;
+
+  let bestDistance =
+    Infinity;
+
+
+  COLOR_PRESETS[trait]
+    .forEach(
+      preset => {
+
+        const rgb =
+          hexToRgb(
+            preset.hex
+          );
+
+
+        if (!rgb) {
+          return;
+        }
+
+
+        const distance =
+          Math.pow(
+            source.r - rgb.r,
+            2
+          )
+          +
+          Math.pow(
+            source.g - rgb.g,
+            2
+          )
+          +
+          Math.pow(
+            source.b - rgb.b,
+            2
+          );
+
+
+        if (
+          distance <
+          bestDistance
+        ) {
+
+          bestDistance =
+            distance;
+
+          best =
+            preset;
+
+        }
+
+      }
+    );
+
+
+  return best;
+
+}
+
+
+function hexToRgb(
+  hex
+) {
+
+  const match =
+    /^#([0-9A-Fa-f]{6})$/
+      .exec(
+        hex || ""
+      );
+
+
+  if (!match) {
+    return null;
+  }
+
+
+  const value =
+    parseInt(
+      match[1],
+      16
+    );
+
+
+  return {
+
+    r:
+      (
+        value >> 16
+      ) & 255,
+
+    g:
+      (
+        value >> 8
+      ) & 255,
+
+    b:
+      value & 255
+
+  };
+
+}
+
+
+/* =========================================================
+   PROBABILITY HELPERS
+========================================================= */
+
+function addWeightedEntries(
+  map,
+  entries,
+  weight
+) {
+
+  if (
+    !entries ||
+    !entries.length ||
+    weight <= 0
+  ) {
+    return;
+  }
+
+
+  entries.forEach(
+    entry => {
+
+      addMapValue(
+        map,
+        entry.id,
+        (
+          entry.percent /
+          100
+        ) * weight
+      );
+
+    }
+  );
+
+}
+
+
+function normalizeProbabilityEntries(
+  entries
+) {
+
+  if (!entries.length) {
+    return [];
+  }
+
+
+  const total =
+    entries.reduce(
+      (sum,entry) =>
+        sum +
+        Number(
+          entry.percent
+        ),
+      0
+    );
+
+
+  if (
+    total <= 0
+  ) {
+    return [];
+  }
+
+
+  return entries
+    .map(
+      entry => ({
+
+        id:
+          entry.id,
+
+        percent:
+          (
+            Number(
+              entry.percent
+            ) /
+            total
+          ) * 100
+
+      })
+    )
+    .filter(
+      entry =>
+        entry.percent >
+        0.000001
+    )
+    .sort(
+      (a,b) =>
+        b.percent -
+        a.percent
+    );
+
+}
+
+
+function mapToEntries(
+  map
+) {
+
+  return Array.from(
+    map.entries()
+  )
+    .map(
+      ([id,percent]) => ({
+        id,
+        percent
+      })
+    )
+    .filter(
+      entry =>
+        entry.percent >
+        0.00000001
+    );
+
+}
+
+
+function cloneEntries(
+  entries
+) {
+
+  return entries.map(
+    entry => ({
+      ...entry
+    })
+  );
+
+}
+
+
+function addMapValue(
   map,
   id,
   amount
 ) {
+
+  if (
+    !id ||
+    !Number.isFinite(amount)
+  ) {
+    return;
+  }
+
 
   map.set(
     id,
@@ -1580,65 +2610,312 @@ function addAncestryValue(
 }
 
 
-function ancestryMapToArray(
+function sumMap(
   map
 ) {
 
   return Array.from(
-    map.entries()
+    map.values()
   )
-    .map(
-      ([id,percent]) => ({
-
-        id,
-
-        percent:
-          cleanPercent(
-            percent
-          )
-
-      })
-    )
-    .filter(
-      entry =>
-        entry.percent >
-        0.0000001
-    )
-    .sort(
-      (a,b) =>
-        b.percent -
-        a.percent
+    .reduce(
+      (sum,value) =>
+        sum + value,
+      0
     );
 
 }
 
 
-function cloneAncestry(
-  ancestry
+/* =========================================================
+   GENETIC PROFILE DISPLAY
+========================================================= */
+
+function renderGeneticProbabilities(
+  character
 ) {
 
-  return ancestry.map(
-    entry => ({
-      ...entry
-    })
+  renderProbabilityList(
+    document.getElementById(
+      "profileHairProbabilities"
+    ),
+    "hair",
+    calculateTraitProbabilities(
+      character.id,
+      "hair"
+    ),
+    character.hairColorId,
+    character.hairColor
+  );
+
+
+  renderProbabilityList(
+    document.getElementById(
+      "profileEyeProbabilities"
+    ),
+    "eyes",
+    calculateTraitProbabilities(
+      character.id,
+      "eyes"
+    ),
+    character.eyeColorId,
+    character.eyeColor
+  );
+
+
+  renderProbabilityList(
+    document.getElementById(
+      "profileSkinProbabilities"
+    ),
+    "skin",
+    calculateTraitProbabilities(
+      character.id,
+      "skin"
+    ),
+    character.skinColorId,
+    character.skinColor
   );
 
 }
 
 
-function cleanPercent(
+function renderProbabilityList(
+  container,
+  trait,
+  probabilities,
+  actualId,
+  actualHex
+) {
+
+  container.innerHTML =
+    "";
+
+
+  if (!probabilities.length) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+
+    empty.className =
+      "probability-empty";
+
+
+    empty.textContent =
+      "Not enough genetic information yet. Add Race/Species base probabilities or family appearance data.";
+
+
+    container.appendChild(
+      empty
+    );
+
+
+    return;
+
+  }
+
+
+  let actualGeneticId =
+    actualId;
+
+
+  if (
+    actualId === "custom" &&
+    actualHex
+  ) {
+
+    const nearest =
+      findNearestPreset(
+        trait,
+        actualHex
+      );
+
+
+    actualGeneticId =
+      nearest
+        ? nearest.id
+        : "";
+
+  }
+
+
+  probabilities.forEach(
+    entry => {
+
+      const preset =
+        findColorPreset(
+          trait,
+          entry.id
+        );
+
+
+      if (!preset) {
+        return;
+      }
+
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "probability-row";
+
+
+      const swatch =
+        document.createElement(
+          "div"
+        );
+
+
+      swatch.className =
+        "probability-swatch";
+
+
+      swatch.style.background =
+        preset.hex;
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+
+      name.className =
+        "probability-name";
+
+
+      name.textContent =
+        preset.name;
+
+
+      if (
+        entry.id ===
+        actualGeneticId
+      ) {
+
+        name.classList.add(
+          "probability-actual"
+        );
+
+      }
+
+
+      const percent =
+        document.createElement(
+          "div"
+        );
+
+
+      percent.className =
+        "probability-percent";
+
+
+      percent.textContent =
+        `${formatProbability(
+          entry.percent
+        )}%`;
+
+
+      row.appendChild(
+        swatch
+      );
+
+
+      row.appendChild(
+        name
+      );
+
+
+      row.appendChild(
+        percent
+      );
+
+
+      container.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+function formatProbability(
   value
 ) {
 
-  return Math.round(
-    value * 100000000
-  ) / 100000000;
+  if (
+    value >= 10
+  ) {
+
+    return value
+      .toFixed(1)
+      .replace(
+        /\.0$/,
+        ""
+      );
+
+  }
+
+
+  if (
+    value >= 1
+  ) {
+
+    return value
+      .toFixed(2)
+      .replace(
+        /0+$/,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      );
+
+  }
+
+
+  if (
+    value >= 0.01
+  ) {
+
+    return value
+      .toFixed(3)
+      .replace(
+        /0+$/,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      );
+
+  }
+
+
+  return value
+    .toFixed(5)
+    .replace(
+      /0+$/,
+      ""
+    )
+    .replace(
+      /\.$/,
+      ""
+    );
 
 }
 
 
 /* =========================================================
-   ANCESTRY NAMES / DISPLAY
+   ANCESTRY DISPLAY
 ========================================================= */
 
 function getAncestryLibrary(
@@ -1692,32 +2969,6 @@ function renderAncestryList(
 
   container.innerHTML =
     "";
-
-
-  if (!ancestry.length) {
-
-    const empty =
-      document.createElement(
-        "div"
-      );
-
-
-    empty.className =
-      "ancestry-empty";
-
-
-    empty.textContent =
-      "Unknown";
-
-
-    container.appendChild(
-      empty
-    );
-
-
-    return;
-
-  }
 
 
   ancestry.forEach(
@@ -1790,75 +3041,6 @@ function renderAncestryList(
 }
 
 
-function formatPercent(
-  number
-) {
-
-  if (
-    Math.abs(
-      number -
-      Math.round(number)
-    ) <
-    0.0000001
-  ) {
-
-    return String(
-      Math.round(number)
-    );
-
-  }
-
-
-  if (
-    number >= 1
-  ) {
-
-    return number
-      .toFixed(2)
-      .replace(
-        /0+$/,
-        ""
-      )
-      .replace(
-        /\.$/,
-        ""
-      );
-
-  }
-
-
-  if (
-    number >= 0.01
-  ) {
-
-    return number
-      .toFixed(4)
-      .replace(
-        /0+$/,
-        ""
-      )
-      .replace(
-        /\.$/,
-        ""
-      );
-
-  }
-
-
-  return number
-    .toFixed(6)
-    .replace(
-      /0+$/,
-      ""
-    )
-    .replace(
-      /\.$/,
-      ""
-    );
-
-}
-
-
 /* =========================================================
    MANUAL ANCESTRY EDITOR
 ========================================================= */
@@ -1870,32 +3052,25 @@ function populateManualAncestryEditor(
   raceAncestryRows.innerHTML =
     "";
 
-
   speciesAncestryRows.innerHTML =
     "";
 
 
   character.raceAncestry.forEach(
-    entry => {
-
+    entry =>
       addAncestryEditorRow(
         "race",
         entry
-      );
-
-    }
+      )
   );
 
 
   character.speciesAncestry.forEach(
-    entry => {
-
+    entry =>
       addAncestryEditorRow(
         "species",
         entry
-      );
-
-    }
+      )
   );
 
 
@@ -1915,16 +3090,13 @@ function addAncestryEditorRow(
     );
 
 
-  if (
-    library.length === 0
-  ) {
+  if (!library.length) {
 
     showToast(
       kind === "race"
-        ? "Create a Race in the World library first"
-        : "Create a Species in the World library first"
+        ? "Create a Race first"
+        : "Create a Species first"
     );
-
 
     return;
 
@@ -1985,10 +3157,7 @@ function addAncestryEditorRow(
     );
 
 
-  if (
-    entry &&
-    entry.id
-  ) {
+  if (entry) {
 
     select.value =
       entry.id;
@@ -2005,22 +3174,17 @@ function addAncestryEditorRow(
   percent.type =
     "number";
 
-
   percent.min =
     "0";
-
 
   percent.max =
     "100";
 
-
   percent.step =
     "0.01";
 
-
   percent.inputMode =
     "decimal";
-
 
   percent.value =
     entry
@@ -2037,10 +3201,8 @@ function addAncestryEditorRow(
   remove.type =
     "button";
 
-
   remove.className =
     "remove-distribution-button";
-
 
   remove.textContent =
     "×";
@@ -2080,25 +3242,11 @@ function addAncestryEditorRow(
   );
 
 
-  row.appendChild(
-    select
-  );
+  row.appendChild(select);
+  row.appendChild(percent);
+  row.appendChild(remove);
 
-
-  row.appendChild(
-    percent
-  );
-
-
-  row.appendChild(
-    remove
-  );
-
-
-  container.appendChild(
-    row
-  );
-
+  container.appendChild(row);
 
   updateAncestryTotals();
 
@@ -2150,19 +3298,15 @@ function readManualAncestry(
       row => ({
 
         id:
-          row
-            .querySelector(
-              "select"
-            )
-            .value,
+          row.querySelector(
+            "select"
+          ).value,
 
         percent:
           Number(
-            row
-              .querySelector(
-                "input"
-              )
-              .value
+            row.querySelector(
+              "input"
+            ).value
           ) || 0
 
       })
@@ -2226,27 +3370,17 @@ function updateOneAncestryTotal(
   }
 
 
-  if (
+  element.classList.add(
     approximately100(total)
-  ) {
-
-    element.classList.add(
-      "valid"
-    );
-
-  } else {
-
-    element.classList.add(
-      "invalid"
-    );
-
-  }
+      ? "valid"
+      : "invalid"
+  );
 
 }
 
 
 /* =========================================================
-   EDITOR ANCESTRY MODE
+   ANCESTRY MODE
 ========================================================= */
 
 editMother.addEventListener(
@@ -2269,13 +3403,7 @@ editAncestryOverride.addEventListener(
 
 function refreshAncestryMode() {
 
-  const character =
-    getCharacter(
-      selectedCharacterId
-    );
-
-
-  if (!character) {
+  if (!selectedCharacterId) {
     return;
   }
 
@@ -2292,21 +3420,21 @@ function refreshAncestryMode() {
     );
 
 
-  const hasParent =
+  const hasParents =
     Boolean(
       motherId ||
       fatherId
     );
 
 
-  if (!hasParent) {
+  if (!hasParents) {
 
     ancestryModeTitle.textContent =
       "Founder Ancestry";
 
 
     ancestryModeDescription.textContent =
-      "No parents are assigned, so Race and Species are entered manually.";
+      "No parents are assigned. Race and Species are entered manually.";
 
 
     ancestryOverrideWrap.classList.add(
@@ -2338,18 +3466,16 @@ function refreshAncestryMode() {
   );
 
 
-  const override =
-    editAncestryOverride.checked;
-
-
-  if (override) {
+  if (
+    editAncestryOverride.checked
+  ) {
 
     ancestryModeTitle.textContent =
       "Manual Ancestry Override";
 
 
     ancestryModeDescription.textContent =
-      "This character has parents, but automatic ancestry has been overridden.";
+      "Parents remain linked, but Race and Species are being entered manually.";
 
 
     automaticAncestryPreview.classList.add(
@@ -2372,7 +3498,7 @@ function refreshAncestryMode() {
 
 
   ancestryModeDescription.textContent =
-    "Each recorded parent contributes 50%. Missing parent ancestry is shown as Unknown.";
+    "Each parent contributes 50%. A missing parent appears as Unknown ancestry.";
 
 
   manualAncestryEditor.classList.add(
@@ -2385,37 +3511,24 @@ function refreshAncestryMode() {
   );
 
 
-  /*
-    Preview with the CURRENT
-    unsaved parent selections.
-  */
-
-  const previewRace =
+  renderAncestryList(
+    automaticRacePreview,
     calculateEditorPreviewAncestry(
       motherId,
       fatherId,
       "race"
-    );
-
-
-  const previewSpecies =
-    calculateEditorPreviewAncestry(
-      motherId,
-      fatherId,
-      "species"
-    );
-
-
-  renderAncestryList(
-    automaticRacePreview,
-    previewRace,
+    ),
     "race"
   );
 
 
   renderAncestryList(
     automaticSpeciesPreview,
-    previewSpecies,
+    calculateEditorPreviewAncestry(
+      motherId,
+      fatherId,
+      "species"
+    ),
     "species"
   );
 
@@ -2441,171 +3554,101 @@ function calculateEditorPreviewAncestry(
 
         if (!parentId) {
 
-          addAncestryValue(
+          addMapValue(
             map,
             UNKNOWN_ANCESTRY_ID,
             50
           );
-
 
           return;
 
         }
 
 
-        const parentAncestry =
-          calculateAncestry(
-            parentId,
-            kind
+        calculateAncestry(
+          parentId,
+          kind
+        )
+          .forEach(
+            entry => {
+
+              addMapValue(
+                map,
+                entry.id,
+                entry.percent * 0.5
+              );
+
+            }
           );
-
-
-        parentAncestry.forEach(
-          entry => {
-
-            addAncestryValue(
-              map,
-              entry.id,
-              entry.percent * 0.5
-            );
-
-          }
-        );
 
       }
     );
 
 
-  return ancestryMapToArray(
+  return mapToEntries(
     map
-  );
+  )
+    .sort(
+      (a,b) =>
+        b.percent -
+        a.percent
+    );
 
 }
 
 
 /* =========================================================
-   COLORS
+   COLOR EDITOR
 ========================================================= */
 
-function migrateColor(
-  trait,
-  existingId,
-  existingHex
-) {
+function setupCharacterColorEditors() {
 
-  if (
-    existingId &&
-    findColorPreset(
-      trait,
-      existingId
-    )
-  ) {
-
-    const preset =
-      findColorPreset(
-        trait,
-        existingId
-      );
+  populateCharacterColorSelect(
+    editHairPreset,
+    "hair"
+  );
 
 
-    return {
-      id:
-        preset.id,
-
-      hex:
-        preset.hex
-    };
-
-  }
+  populateCharacterColorSelect(
+    editEyePreset,
+    "eyes"
+  );
 
 
-  if (existingHex) {
-
-    const matching =
-      COLOR_PRESETS[trait]
-        .find(
-          preset =>
-            preset.hex
-              .toLowerCase()
-            ===
-            existingHex
-              .toLowerCase()
-        );
+  populateCharacterColorSelect(
+    editSkinPreset,
+    "skin"
+  );
 
 
-    if (matching) {
-
-      return {
-        id:
-          matching.id,
-
-        hex:
-          matching.hex
-      };
-
-    }
+  setupOneColorEditor(
+    "hair",
+    editHairPreset,
+    editHairCustom,
+    "editHairCustomWrap",
+    "editHairPresetSwatch",
+    "editHairPresetName"
+  );
 
 
-    return {
-      id:
-        "custom",
-
-      hex:
-        existingHex
-    };
-
-  }
-
-
-  return {
-    id: "",
-    hex: ""
-  };
-
-}
+  setupOneColorEditor(
+    "eyes",
+    editEyePreset,
+    editEyeCustom,
+    "editEyeCustomWrap",
+    "editEyePresetSwatch",
+    "editEyePresetName"
+  );
 
 
-function findColorPreset(
-  trait,
-  id
-) {
-
-  return COLOR_PRESETS[trait]
-    .find(
-      preset =>
-        preset.id === id
-    );
-
-}
-
-
-function getColorName(
-  trait,
-  id
-) {
-
-  if (!id) {
-    return "—";
-  }
-
-
-  if (
-    id === "custom"
-  ) {
-    return "Custom";
-  }
-
-
-  const preset =
-    findColorPreset(
-      trait,
-      id
-    );
-
-
-  return preset
-    ? preset.name
-    : "Custom";
+  setupOneColorEditor(
+    "skin",
+    editSkinPreset,
+    editSkinCustom,
+    "editSkinCustomWrap",
+    "editSkinPresetSwatch",
+    "editSkinPresetName"
+  );
 
 }
 
@@ -2627,7 +3670,6 @@ function populateCharacterColorSelect(
 
   blank.value =
     "";
-
 
   blank.textContent =
     "— Not Set —";
@@ -2685,58 +3727,6 @@ function populateCharacterColorSelect(
 }
 
 
-function setupCharacterColorEditors() {
-
-  populateCharacterColorSelect(
-    editHairPreset,
-    "hair"
-  );
-
-
-  populateCharacterColorSelect(
-    editEyePreset,
-    "eyes"
-  );
-
-
-  populateCharacterColorSelect(
-    editSkinPreset,
-    "skin"
-  );
-
-
-  setupOneColorEditor(
-    "hair",
-    editHairPreset,
-    editHairCustom,
-    "editHairCustomWrap",
-    "editHairPresetSwatch",
-    "editHairPresetName"
-  );
-
-
-  setupOneColorEditor(
-    "eyes",
-    editEyePreset,
-    editEyeCustom,
-    "editEyeCustomWrap",
-    "editEyePresetSwatch",
-    "editEyePresetName"
-  );
-
-
-  setupOneColorEditor(
-    "skin",
-    editSkinPreset,
-    editSkinCustom,
-    "editSkinCustomWrap",
-    "editSkinPresetSwatch",
-    "editSkinPresetName"
-  );
-
-}
-
-
 function setupOneColorEditor(
   trait,
   select,
@@ -2752,7 +3742,7 @@ function setupOneColorEditor(
       select.value;
 
 
-    const customWrap =
+    const wrap =
       document.getElementById(
         customWrapId
       );
@@ -2772,7 +3762,7 @@ function setupOneColorEditor(
 
     if (!value) {
 
-      customWrap.classList.add(
+      wrap.classList.add(
         "hidden"
       );
 
@@ -2794,7 +3784,7 @@ function setupOneColorEditor(
       value === "custom"
     ) {
 
-      customWrap.classList.remove(
+      wrap.classList.remove(
         "hidden"
       );
 
@@ -2812,7 +3802,7 @@ function setupOneColorEditor(
     }
 
 
-    customWrap.classList.add(
+    wrap.classList.add(
       "hidden"
     );
 
@@ -2854,32 +3844,24 @@ function setupOneColorEditor(
 
 
 /* =========================================================
-   LIBRARY MANAGEMENT
+   LIBRARIES
 ========================================================= */
 
 manageRacesButton.addEventListener(
   "click",
-
-  function() {
-
+  () =>
     openLibrary(
       "race"
-    );
-
-  }
+    )
 );
 
 
 manageSpeciesButton.addEventListener(
   "click",
-
-  function() {
-
+  () =>
     openLibrary(
       "species"
-    );
-
-  }
+    )
 );
 
 
@@ -3017,27 +3999,6 @@ function renderLibraryList() {
           "library-card";
 
 
-        const summary =
-          [
-            makeDistributionSummary(
-              item.hairDistribution,
-              "Hair"
-            ),
-
-            makeDistributionSummary(
-              item.eyeDistribution,
-              "Eyes"
-            ),
-
-            makeDistributionSummary(
-              item.skinDistribution,
-              "Skin"
-            )
-          ]
-            .filter(Boolean)
-            .join(" · ");
-
-
         card.innerHTML = `
 
           <div class="library-card-header">
@@ -3066,11 +4027,27 @@ function renderLibraryList() {
 
           </div>
 
+          ${
+            item.info
+              ? `
+                <div class="library-info">
+                  ${escapeHTML(item.info)}
+                </div>
+              `
+              : ""
+          }
+
           <div class="library-summary">
-            ${
-              summary ||
-              "No base appearance probabilities yet."
-            }
+
+            Hair:
+            ${item.hairDistribution.length}
+
+            · Eyes:
+            ${item.eyeDistribution.length}
+
+            · Skin:
+            ${item.skinDistribution.length}
+
           </div>
 
         `;
@@ -3083,13 +4060,10 @@ function renderLibraryList() {
           .addEventListener(
             "click",
 
-            function() {
-
+            () =>
               openLibraryEditor(
                 item.id
-              );
-
-            }
+              )
           );
 
 
@@ -3104,14 +4078,11 @@ function renderLibraryList() {
 
               openConfirmation(
                 `Delete ${item.name}?`,
-                "This removes the preset from the library. Characters are not deleted, but ancestry using this preset may become Unknown.",
-                function() {
-
+                "This removes it from the library. Character records will remain.",
+                () =>
                   deleteLibraryItem(
                     item.id
-                  );
-
-                },
+                  ),
                 "Delete"
               );
 
@@ -3129,40 +4100,21 @@ function renderLibraryList() {
 }
 
 
-function makeDistributionSummary(
-  distribution,
-  label
-) {
-
-  if (!distribution.length) {
-    return "";
-  }
-
-
-  return `${label} ${distribution.length}`;
-
-}
-
-
 addLibraryItemButton.addEventListener(
   "click",
-
-  function() {
-
+  () =>
     openLibraryEditor(
       null
-    );
-
-  }
+    )
 );
 
 
 function openLibraryEditor(
-  itemId
+  id
 ) {
 
   editingLibraryId =
-    itemId;
+    id;
 
 
   const library =
@@ -3170,10 +4122,10 @@ function openLibraryEditor(
 
 
   const item =
-    itemId
+    id
       ? library.find(
           entry =>
-            entry.id === itemId
+            entry.id === id
         )
       : null;
 
@@ -3189,6 +4141,12 @@ function openLibraryEditor(
   libraryNameInput.value =
     item
       ? item.name
+      : "";
+
+
+  libraryInfoInput.value =
+    item
+      ? item.info
       : "";
 
 
@@ -3307,13 +4265,10 @@ document
       button.addEventListener(
         "click",
 
-        function() {
-
+        () =>
           addDistributionRow(
             button.dataset.trait
-          );
-
-        }
+          )
       );
 
     }
@@ -3326,9 +4281,11 @@ function addDistributionRow(
 ) {
 
   const container =
-    getDistributionContainer(
-      trait
-    );
+    trait === "hair"
+      ? hairDistributionEditor
+      : trait === "eyes"
+        ? eyeDistributionEditor
+        : skinDistributionEditor;
 
 
   const row =
@@ -3373,10 +4330,7 @@ function addDistributionRow(
     );
 
 
-  if (
-    entry &&
-    entry.colorId
-  ) {
+  if (entry) {
 
     select.value =
       entry.colorId;
@@ -3446,48 +4400,13 @@ function addDistributionRow(
   );
 
 
-  row.appendChild(
-    select
-  );
+  row.appendChild(select);
+  row.appendChild(percent);
+  row.appendChild(remove);
 
-  row.appendChild(
-    percent
-  );
-
-  row.appendChild(
-    remove
-  );
-
-
-  container.appendChild(
-    row
-  );
-
+  container.appendChild(row);
 
   updateAllDistributionTotals();
-
-}
-
-
-function getDistributionContainer(
-  trait
-) {
-
-  if (
-    trait === "hair"
-  ) {
-    return hairDistributionEditor;
-  }
-
-
-  if (
-    trait === "eyes"
-  ) {
-    return eyeDistributionEditor;
-  }
-
-
-  return skinDistributionEditor;
 
 }
 
@@ -3496,31 +4415,32 @@ function readDistribution(
   trait
 ) {
 
+  const container =
+    trait === "hair"
+      ? hairDistributionEditor
+      : trait === "eyes"
+        ? eyeDistributionEditor
+        : skinDistributionEditor;
+
+
   return Array.from(
-    getDistributionContainer(
-      trait
+    container.querySelectorAll(
+      ".distribution-row"
     )
-      .querySelectorAll(
-        ".distribution-row"
-      )
   )
     .map(
       row => ({
 
         colorId:
-          row
-            .querySelector(
-              "select"
-            )
-            .value,
+          row.querySelector(
+            "select"
+          ).value,
 
         percent:
           Number(
-            row
-              .querySelector(
-                "input"
-              )
-              .value
+            row.querySelector(
+              "input"
+            ).value
           ) || 0
 
       })
@@ -3533,34 +4453,21 @@ function readDistribution(
 }
 
 
-function distributionTotal(
-  distribution
-) {
-
-  return distribution.reduce(
-    (sum,entry) =>
-      sum + entry.percent,
-    0
-  );
-
-}
-
-
 function updateAllDistributionTotals() {
 
-  updateDistributionTotalDisplay(
+  updateDistributionTotal(
     "hair",
     hairDistributionTotal
   );
 
 
-  updateDistributionTotalDisplay(
+  updateDistributionTotal(
     "eyes",
     eyeDistributionTotal
   );
 
 
-  updateDistributionTotalDisplay(
+  updateDistributionTotal(
     "skin",
     skinDistributionTotal
   );
@@ -3568,20 +4475,22 @@ function updateAllDistributionTotals() {
 }
 
 
-function updateDistributionTotalDisplay(
+function updateDistributionTotal(
   trait,
   element
 ) {
 
-  const distribution =
+  const values =
     readDistribution(
       trait
     );
 
 
   const total =
-    distributionTotal(
-      distribution
+    values.reduce(
+      (sum,item) =>
+        sum + item.percent,
+      0
     );
 
 
@@ -3595,7 +4504,7 @@ function updateDistributionTotalDisplay(
   );
 
 
-  if (!distribution.length) {
+  if (!values.length) {
     return;
   }
 
@@ -3633,62 +4542,72 @@ function saveLibraryItem() {
   }
 
 
-  const hairDistribution =
+  const hair =
     readDistribution(
       "hair"
     );
 
-  const eyeDistribution =
+  const eyes =
     readDistribution(
       "eyes"
     );
 
-  const skinDistribution =
+  const skin =
     readDistribution(
       "skin"
     );
 
 
-  const distributions =
+  for (
+    const distribution of
     [
-      hairDistribution,
-      eyeDistribution,
-      skinDistribution
-    ];
-
-
-  if (
-    distributions.some(
-      distribution =>
-        distribution.length &&
-        !approximately100(
-          distributionTotal(
-            distribution
-          )
-        )
-    )
+      hair,
+      eyes,
+      skin
+    ]
   ) {
 
-    showToast(
-      "Each used probability list must total 100%"
-    );
+    const total =
+      distribution.reduce(
+        (sum,item) =>
+          sum + item.percent,
+        0
+      );
 
-    return;
 
-  }
+    if (
+      distribution.length &&
+      !approximately100(total)
+    ) {
+
+      showToast(
+        "Each used probability list must total 100%"
+      );
+
+      return;
+
+    }
 
 
-  if (
-    distributions.some(
-      hasDuplicateColors
-    )
-  ) {
+    const ids =
+      distribution.map(
+        item =>
+          item.colorId
+      );
 
-    showToast(
-      "A color can only appear once per list"
-    );
 
-    return;
+    if (
+      new Set(ids).size !==
+      ids.length
+    ) {
+
+      showToast(
+        "A color can only appear once per list"
+      );
+
+      return;
+
+    }
 
   }
 
@@ -3697,9 +4616,7 @@ function saveLibraryItem() {
     getActiveLibrary();
 
 
-  if (
-    editingLibraryId
-  ) {
+  if (editingLibraryId) {
 
     const item =
       library.find(
@@ -3717,14 +4634,22 @@ function saveLibraryItem() {
     item.name =
       name;
 
+
+    item.info =
+      libraryInfoInput.value
+        .trim();
+
+
     item.hairDistribution =
-      hairDistribution;
+      hair;
+
 
     item.eyeDistribution =
-      eyeDistribution;
+      eyes;
+
 
     item.skinDistribution =
-      skinDistribution;
+      skin;
 
   } else {
 
@@ -3735,11 +4660,18 @@ function saveLibraryItem() {
 
       name,
 
-      hairDistribution,
+      info:
+        libraryInfoInput.value
+          .trim(),
 
-      eyeDistribution,
+      hairDistribution:
+        hair,
 
-      skinDistribution
+      eyeDistribution:
+        eyes,
+
+      skinDistribution:
+        skin
 
     });
 
@@ -3752,25 +4684,6 @@ function saveLibraryItem() {
 
   showToast(
     `${name} saved`
-  );
-
-}
-
-
-function hasDuplicateColors(
-  distribution
-) {
-
-  const ids =
-    distribution.map(
-      entry =>
-        entry.colorId
-    );
-
-
-  return (
-    new Set(ids).size !==
-    ids.length
   );
 
 }
@@ -3807,29 +4720,11 @@ function deleteLibraryItem(
 
   updateWorldStats();
 
-  showToast(
-    "Library item deleted"
-  );
-
-}
-
-
-function createLibraryId() {
-
-  return (
-    "lib_" +
-    Date.now() +
-    "_" +
-    Math.random()
-      .toString(36)
-      .slice(2,8)
-  );
-
 }
 
 
 /* =========================================================
-   WORLD PANEL
+   WORLD
 ========================================================= */
 
 worldButton.addEventListener(
@@ -3914,25 +4809,7 @@ function updateWorldStats() {
 function populateVantageSelect() {
 
   vantageSelect.innerHTML =
-    "";
-
-
-  const none =
-    document.createElement(
-      "option"
-    );
-
-
-  none.value =
-    "";
-
-  none.textContent =
-    "— No Vantage Point —";
-
-
-  vantageSelect.appendChild(
-    none
-  );
+    `<option value="">— No Vantage Point —</option>`;
 
 
   [...characters]
@@ -3940,7 +4817,7 @@ function populateVantageSelect() {
       compareCharacterNames
     )
     .forEach(
-      character => {
+      person => {
 
         const option =
           document.createElement(
@@ -3949,17 +4826,17 @@ function populateVantageSelect() {
 
 
         option.value =
-          character.id;
+          person.id;
 
 
         option.textContent =
           getTreeName(
-            character
+            person
           );
 
 
         option.selected =
-          character.id ===
+          person.id ===
           vantageCharacterId;
 
 
@@ -3997,10 +4874,6 @@ vantageSelect.addEventListener(
 
     renderTree();
 
-    showToast(
-      "Vantage point changed"
-    );
-
   }
 );
 
@@ -4027,101 +4900,96 @@ function updateVantageStatus() {
 
 exportWorldButton.addEventListener(
   "click",
-  exportWorld
-);
+
+  function() {
+
+    const backup = {
+
+      app:
+        "Fantasy Family Tree",
+
+      version:
+        5,
+
+      exportedAt:
+        new Date().toISOString(),
+
+      vantageCharacterId,
+
+      characters,
+
+      raceLibrary,
+
+      speciesLibrary
+
+    };
 
 
-function exportWorld() {
-
-  const backup = {
-
-    app:
-      "Fantasy Family Tree",
-
-    version:
-      4,
-
-    exportedAt:
-      new Date().toISOString(),
-
-    vantageCharacterId,
-
-    characters,
-
-    raceLibrary,
-
-    speciesLibrary
-
-  };
-
-
-  const blob =
-    new Blob(
-      [
-        JSON.stringify(
-          backup,
-          null,
-          2
-        )
-      ],
-      {
-        type:
-          "application/json"
-      }
-    );
-
-
-  const url =
-    URL.createObjectURL(
-      blob
-    );
-
-
-  const link =
-    document.createElement(
-      "a"
-    );
-
-
-  link.href =
-    url;
-
-
-  link.download =
-    `fantasy-world-${
-      new Date()
-        .toISOString()
-        .slice(0,10)
-    }.json`;
-
-
-  document.body.appendChild(
-    link
-  );
-
-
-  link.click();
-
-  link.remove();
-
-
-  setTimeout(
-    function() {
-
-      URL.revokeObjectURL(
-        url
+    const blob =
+      new Blob(
+        [
+          JSON.stringify(
+            backup,
+            null,
+            2
+          )
+        ],
+        {
+          type:
+            "application/json"
+        }
       );
 
-    },
-    1000
-  );
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
 
 
-  showToast(
-    "World backup exported"
-  );
+    const link =
+      document.createElement(
+        "a"
+      );
 
-}
+
+    link.href =
+      url;
+
+
+    link.download =
+      `fantasy-world-${
+        new Date()
+          .toISOString()
+          .slice(0,10)
+      }.json`;
+
+
+    document.body.appendChild(
+      link
+    );
+
+
+    link.click();
+
+    link.remove();
+
+
+    setTimeout(
+      () =>
+        URL.revokeObjectURL(
+          url
+        ),
+      1000
+    );
+
+
+    showToast(
+      "World backup exported"
+    );
+
+  }
+);
 
 
 importWorldButton.addEventListener(
@@ -4160,26 +5028,18 @@ importWorldFile.addEventListener(
         );
 
 
-      const importedCharacters =
-        Array.isArray(data)
-          ? data
-          : data.characters;
-
-
       if (
         !Array.isArray(
-          importedCharacters
+          data.characters
         )
       ) {
-
         throw new Error();
-
       }
 
 
       openConfirmation(
         "Restore this world?",
-        "Your current browser world will be replaced by this backup.",
+        "Your current browser world will be replaced by the backup.",
         function() {
 
           raceLibrary =
@@ -4205,7 +5065,7 @@ importWorldFile.addEventListener(
 
 
           characters =
-            importedCharacters
+            data.characters
               .map(
                 normalizeCharacter
               );
@@ -4241,7 +5101,7 @@ importWorldFile.addEventListener(
 
 
           showToast(
-            `${characters.length} characters restored`
+            "World restored"
           );
 
         },
@@ -4266,43 +5126,29 @@ importWorldFile.addEventListener(
 
 searchButton.addEventListener(
   "click",
-  openSearch
+
+  function() {
+
+    searchBackdrop.classList.remove(
+      "hidden"
+    );
+
+
+    searchPanel.classList.remove(
+      "hidden"
+    );
+
+
+    searchInput.value =
+      "";
+
+
+    renderSearchResults(
+      characters
+    );
+
+  }
 );
-
-
-closeSearchButton.addEventListener(
-  "click",
-  closeSearch
-);
-
-
-searchBackdrop.addEventListener(
-  "click",
-  closeSearch
-);
-
-
-function openSearch() {
-
-  searchBackdrop.classList.remove(
-    "hidden"
-  );
-
-
-  searchPanel.classList.remove(
-    "hidden"
-  );
-
-
-  searchInput.value =
-    "";
-
-
-  renderSearchResults(
-    characters
-  );
-
-}
 
 
 function closeSearch() {
@@ -4319,6 +5165,18 @@ function closeSearch() {
 }
 
 
+closeSearchButton.addEventListener(
+  "click",
+  closeSearch
+);
+
+
+searchBackdrop.addEventListener(
+  "click",
+  closeSearch
+);
+
+
 searchInput.addEventListener(
   "input",
 
@@ -4332,47 +5190,15 @@ searchInput.addEventListener(
 
     const matches =
       characters.filter(
-        character => {
-
-          const raceText =
-            calculateAncestry(
-              character.id,
-              "race"
-            )
-              .map(
-                entry =>
-                  getAncestryName(
-                    "race",
-                    entry.id
-                  )
-              )
-              .join(" ");
-
-
-          const speciesText =
-            calculateAncestry(
-              character.id,
-              "species"
-            )
-              .map(
-                entry =>
-                  getAncestryName(
-                    "species",
-                    entry.id
-                  )
-              )
-              .join(" ");
-
+        person => {
 
           const text =
             [
-              character.title,
-              character.givenName,
-              character.familyName,
-              character.maidenName,
-              raceText,
-              speciesText,
-              ...character.aliases
+              person.title,
+              person.givenName,
+              person.familyName,
+              person.maidenName,
+              ...person.aliases
             ]
               .join(" ")
               .toLowerCase();
@@ -4439,9 +5265,7 @@ function renderSearchResults(
 
             ${
               person.portraitData
-
                 ? `<img src="${person.portraitData}" alt="">`
-
                 : escapeHTML(
                     getInitial(person)
                   )
@@ -4661,98 +5485,6 @@ resetViewButton.addEventListener(
 );
 
 
-/* DESKTOP DRAG */
-
-treeCanvas.addEventListener(
-  "pointerdown",
-
-  function(event) {
-
-    if (
-      event.pointerType === "touch"
-      ||
-      event.target.closest(
-        ".character-node"
-      )
-    ) {
-      return;
-    }
-
-
-    isPanning =
-      true;
-
-
-    panStartX =
-      event.clientX;
-
-    panStartY =
-      event.clientY;
-
-    startViewX =
-      viewX;
-
-    startViewY =
-      viewY;
-
-  }
-);
-
-
-treeCanvas.addEventListener(
-  "pointermove",
-
-  function(event) {
-
-    if (!isPanning) {
-      return;
-    }
-
-
-    viewX =
-      startViewX +
-      event.clientX -
-      panStartX;
-
-
-    viewY =
-      startViewY +
-      event.clientY -
-      panStartY;
-
-
-    applyViewTransform();
-
-  }
-);
-
-
-treeCanvas.addEventListener(
-  "pointerup",
-
-  function() {
-
-    isPanning =
-      false;
-
-  }
-);
-
-
-treeCanvas.addEventListener(
-  "pointercancel",
-
-  function() {
-
-    isPanning =
-      false;
-
-  }
-);
-
-
-/* PHONE DRAG / PINCH */
-
 treeCanvas.addEventListener(
   "touchstart",
 
@@ -4771,7 +5503,6 @@ treeCanvas.addEventListener(
 
       panStartY =
         touch.clientY;
-
 
       startViewX =
         viewX;
@@ -4817,33 +5548,30 @@ treeCanvas.addEventListener(
         zoom;
 
 
-      const midpoint = {
+      const midpointX =
+        (
+          first.clientX +
+          second.clientX
+        ) / 2;
 
-        x:
-          (
-            first.clientX +
-            second.clientX
-          ) / 2,
 
-        y:
-          (
-            first.clientY +
-            second.clientY
-          ) / 2
-
-      };
+      const midpointY =
+        (
+          first.clientY +
+          second.clientY
+        ) / 2;
 
 
       pinchWorldX =
         (
-          midpoint.x -
+          midpointX -
           viewX
         ) / zoom;
 
 
       pinchWorldY =
         (
-          midpoint.y -
+          midpointY -
           viewY
         ) / zoom;
 
@@ -4926,31 +5654,28 @@ treeCanvas.addEventListener(
         );
 
 
-      const midpoint = {
+      const midpointX =
+        (
+          first.clientX +
+          second.clientX
+        ) / 2;
 
-        x:
-          (
-            first.clientX +
-            second.clientX
-          ) / 2,
 
-        y:
-          (
-            first.clientY +
-            second.clientY
-          ) / 2
-
-      };
+      const midpointY =
+        (
+          first.clientY +
+          second.clientY
+        ) / 2;
 
 
       viewX =
-        midpoint.x -
+        midpointX -
         pinchWorldX *
         zoom;
 
 
       viewY =
-        midpoint.y -
+        midpointY -
         pinchWorldY *
         zoom;
 
@@ -5092,14 +5817,7 @@ characterForm.addEventListener(
         deathYear:
           getInputValue(
             "deathYear"
-          ),
-
-        raceAncestry: [],
-
-        speciesAncestry: [],
-
-        ancestryOverride:
-          false
+          )
 
       });
 
@@ -5115,7 +5833,6 @@ characterForm.addEventListener(
 
     closeCharacterForm();
 
-
     showToast(
       "Character added"
     );
@@ -5125,14 +5842,13 @@ characterForm.addEventListener(
 
 
 /* =========================================================
-   TREE
+   TREE LAYOUT
 ========================================================= */
 
 function renderTree() {
 
   characterLayer.innerHTML =
     "";
-
 
   treeLines.innerHTML =
     "";
@@ -5181,15 +5897,14 @@ function renderTree() {
         );
 
 
-      if (!position) {
-        return;
+      if (position) {
+
+        renderCharacterNode(
+          character,
+          position
+        );
+
       }
-
-
-      renderCharacterNode(
-        character,
-        position
-      );
 
     }
   );
@@ -5208,11 +5923,11 @@ function calculateTreeLayout() {
 
 
   characters.forEach(
-    character => {
+    person => {
 
       const generation =
         generations.get(
-          character.id
+          person.id
         ) || 0;
 
 
@@ -5232,20 +5947,10 @@ function calculateTreeLayout() {
 
       rows
         .get(generation)
-        .push(character);
+        .push(person);
 
     }
   );
-
-
-  const sorted =
-    Array.from(
-      rows.keys()
-    )
-      .sort(
-        (a,b) =>
-          a - b
-      );
 
 
   const positions =
@@ -5256,99 +5961,99 @@ function calculateTreeLayout() {
     WORLD_SIZE / 2;
 
 
-  let minX =
-    center;
-
-  let maxX =
-    center;
-
-  let minY =
-    center;
-
-  let maxY =
-    center;
+  let minX = center;
+  let maxX = center;
+  let minY = center;
+  let maxY = center;
 
 
-  sorted.forEach(
-    generation => {
+  Array.from(
+    rows.keys()
+  )
+    .sort(
+      (a,b) =>
+        a - b
+    )
+    .forEach(
+      generation => {
 
-      const row =
-        clusterSpouses(
-          rows.get(
-            generation
-          )
-        );
-
-
-      const width =
-        (
-          row.length - 1
-        ) *
-        NODE_GAP_X;
-
-
-      const startX =
-        center -
-        width / 2;
-
-
-      const y =
-        center -
-        650 +
-        generation *
-        GENERATION_GAP_Y;
-
-
-      row.forEach(
-        (character,index) => {
-
-          const x =
-            startX +
-            index *
-            NODE_GAP_X;
-
-
-          positions.set(
-            character.id,
-            {
-              x,
-              y
-            }
+        const row =
+          clusterSpouses(
+            rows.get(
+              generation
+            )
           );
 
 
-          minX =
-            Math.min(
-              minX,
-              x
+        const width =
+          (
+            row.length - 1
+          ) *
+          NODE_GAP_X;
+
+
+        const startX =
+          center -
+          width / 2;
+
+
+        const y =
+          center -
+          650 +
+          generation *
+          GENERATION_GAP_Y;
+
+
+        row.forEach(
+          (person,index) => {
+
+            const x =
+              startX +
+              index *
+              NODE_GAP_X;
+
+
+            positions.set(
+              person.id,
+              {
+                x,
+                y
+              }
             );
 
 
-          maxX =
-            Math.max(
-              maxX,
-              x
-            );
+            minX =
+              Math.min(
+                minX,
+                x
+              );
 
 
-          minY =
-            Math.min(
-              minY,
-              y
-            );
+            maxX =
+              Math.max(
+                maxX,
+                x
+              );
 
 
-          maxY =
-            Math.max(
-              maxY,
-              y
-            );
+            minY =
+              Math.min(
+                minY,
+                y
+              );
 
-        }
-      );
 
-    }
-  );
+            maxY =
+              Math.max(
+                maxY,
+                y
+              );
+
+          }
+        );
+
+      }
+    );
 
 
   return {
@@ -5392,10 +6097,10 @@ function calculateAllGenerations() {
 
 
   characters.forEach(
-    character => {
+    person => {
 
       calculateGeneration(
-        character.id,
+        person.id,
         memo,
         new Set()
       );
@@ -5415,16 +6120,12 @@ function calculateGeneration(
   visiting
 ) {
 
-  if (
-    memo.has(id)
-  ) {
+  if (memo.has(id)) {
     return memo.get(id);
   }
 
 
-  if (
-    visiting.has(id)
-  ) {
+  if (visiting.has(id)) {
     return 0;
   }
 
@@ -5464,7 +6165,7 @@ function calculateGeneration(
   }
 
 
-  const level =
+  const generation =
     Math.max(
       ...parents.map(
         parentId =>
@@ -5479,14 +6180,14 @@ function calculateGeneration(
 
   memo.set(
     id,
-    level
+    generation
   );
 
 
   visiting.delete(id);
 
 
-  return level;
+  return generation;
 
 }
 
@@ -5514,10 +6215,7 @@ function clusterSpouses(
       }
 
 
-      result.push(
-        person
-      );
-
+      result.push(person);
 
       visited.add(
         person.id
@@ -5529,8 +6227,8 @@ function clusterSpouses(
 
           const spouse =
             row.find(
-              entry =>
-                entry.id ===
+              item =>
+                item.id ===
                 spouseId
             );
 
@@ -5610,13 +6308,9 @@ function renderCharacterNode(
 
       ${
         character.portraitData
-
           ? `<img class="character-portrait" src="${character.portraitData}" alt="">`
-
           : escapeHTML(
-              getInitial(
-                character
-              )
+              getInitial(character)
             )
       }
 
@@ -5640,13 +6334,10 @@ function renderCharacterNode(
   node.addEventListener(
     "click",
 
-    function() {
-
+    () =>
       openProfile(
         character.id
-      );
-
-    }
+      )
   );
 
 
@@ -5701,20 +6392,20 @@ function drawRelationshipLines(
         .forEach(
           parentId => {
 
-            const parentPosition =
+            const parent =
               positions.get(
                 parentId
               );
 
 
-            if (!parentPosition) {
+            if (!parent) {
               return;
             }
 
 
             addSvgLine(
-              parentPosition.x,
-              parentPosition.y + 42,
+              parent.x,
+              parent.y + 42,
 
               childPosition.x,
               childPosition.y,
@@ -5759,9 +6450,7 @@ function drawPartnerLines(
               .join("-");
 
 
-          if (
-            drawn.has(key)
-          ) {
+          if (drawn.has(key)) {
             return;
           }
 
@@ -5827,20 +6516,24 @@ function addSvgLine(
     x1
   );
 
+
   line.setAttribute(
     "y1",
     y1
   );
+
 
   line.setAttribute(
     "x2",
     x2
   );
 
+
   line.setAttribute(
     "y2",
     y2
   );
+
 
   line.setAttribute(
     "class",
@@ -5916,12 +6609,10 @@ function openProfile(
     document.getElementById(
       "profileRaceAncestry"
     ),
-
     calculateAncestry(
       character.id,
       "race"
     ),
-
     "race"
   );
 
@@ -5930,12 +6621,10 @@ function openProfile(
     document.getElementById(
       "profileSpeciesAncestry"
     ),
-
     calculateAncestry(
       character.id,
       "species"
     ),
-
     "species"
   );
 
@@ -6018,6 +6707,11 @@ function openProfile(
   );
 
 
+  renderGeneticProbabilities(
+    character
+  );
+
+
   setVantageButton.textContent =
     id ===
     vantageCharacterId
@@ -6058,9 +6752,6 @@ function renderProfilePortrait(
     image.src =
       character.portraitData;
 
-    image.alt =
-      "";
-
 
     profilePortrait.appendChild(
       image
@@ -6074,6 +6765,191 @@ function renderProfilePortrait(
       );
 
   }
+
+}
+
+
+/* =========================================================
+   RELATIVES
+========================================================= */
+
+function renderRelationshipProfile(
+  character
+) {
+
+  renderRelationshipButtons(
+    "profileMother",
+    character.motherId
+      ? [
+          getCharacter(
+            character.motherId
+          )
+        ].filter(Boolean)
+      : []
+  );
+
+
+  renderRelationshipButtons(
+    "profileFather",
+    character.fatherId
+      ? [
+          getCharacter(
+            character.fatherId
+          )
+        ].filter(Boolean)
+      : []
+  );
+
+
+  renderRelationshipButtons(
+    "profileSiblings",
+    getSiblings(
+      character.id
+    )
+  );
+
+
+  renderRelationshipButtons(
+    "profileSpouses",
+    getCharactersFromIds(
+      character.spouseIds
+    )
+  );
+
+
+  renderRelationshipButtons(
+    "profileLovers",
+    getCharactersFromIds(
+      character.loverIds
+    )
+  );
+
+
+  renderRelationshipButtons(
+    "profileChildren",
+    getChildren(
+      character.id
+    )
+  );
+
+}
+
+
+function renderRelationshipButtons(
+  containerId,
+  people
+) {
+
+  const container =
+    document.getElementById(
+      containerId
+    );
+
+
+  container.innerHTML =
+    "";
+
+
+  if (!people.length) {
+
+    container.textContent =
+      "—";
+
+    return;
+
+  }
+
+
+  people.forEach(
+    person => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+
+      button.type =
+        "button";
+
+
+      button.className =
+        "relationship-button";
+
+
+      button.textContent =
+        getTreeName(
+          person
+        );
+
+
+      button.addEventListener(
+        "click",
+
+        () =>
+          openProfile(
+            person.id
+          )
+      );
+
+
+      container.appendChild(
+        button
+      );
+
+    }
+  );
+
+}
+
+
+function getChildren(
+  parentId
+) {
+
+  return characters.filter(
+    person =>
+      person.motherId ===
+        parentId
+      ||
+      person.fatherId ===
+        parentId
+  );
+
+}
+
+
+function getSiblings(
+  id
+) {
+
+  const person =
+    getCharacter(id);
+
+
+  if (!person) {
+    return [];
+  }
+
+
+  return characters.filter(
+    other =>
+      other.id !== id
+      &&
+      (
+        (
+          person.motherId &&
+          person.motherId ===
+          other.motherId
+        )
+        ||
+        (
+          person.fatherId &&
+          person.fatherId ===
+          other.fatherId
+        )
+      )
+  );
 
 }
 
@@ -6097,11 +6973,6 @@ setVantageButton.addEventListener(
 
     openProfile(
       selectedCharacterId
-    );
-
-
-    showToast(
-      "Vantage point changed"
     );
 
   }
@@ -6155,9 +7026,7 @@ function describeRelationship(
   if (
     vantageId === subjectId
   ) {
-
     return "Vantage Point";
-
   }
 
 
@@ -6177,9 +7046,7 @@ function describeRelationship(
     !vantage ||
     !subject
   ) {
-
     return "Unknown";
-
   }
 
 
@@ -6201,7 +7068,7 @@ function describeRelationship(
   }
 
 
-  const ancestor =
+  const ancestorDepth =
     getAncestorDepth(
       vantage.id,
       subject.id
@@ -6209,18 +7076,18 @@ function describeRelationship(
 
 
   if (
-    ancestor !== null
+    ancestorDepth !== null
   ) {
 
     return makeAncestorTerm(
       subject,
-      ancestor
+      ancestorDepth
     );
 
   }
 
 
-  const descendant =
+  const descendantDepth =
     getAncestorDepth(
       subject.id,
       vantage.id
@@ -6228,51 +7095,23 @@ function describeRelationship(
 
 
   if (
-    descendant !== null
+    descendantDepth !== null
   ) {
 
     return makeDescendantTerm(
-      descendant
+      descendantDepth
     );
 
   }
 
 
-  const sameMother =
-    vantage.motherId &&
-    vantage.motherId ===
-    subject.motherId;
-
-
-  const sameFather =
-    vantage.fatherId &&
-    vantage.fatherId ===
-    subject.fatherId;
-
-
-  if (
-    sameMother &&
-    sameFather
-  ) {
-    return "Sibling";
-  }
-
-
-  if (
-    sameMother ||
-    sameFather
-  ) {
-    return "Half-Sibling";
-  }
-
-
-  const firstAncestors =
+  const a =
     getAncestorMap(
       vantage.id
     );
 
 
-  const secondAncestors =
+  const b =
     getAncestorMap(
       subject.id
     );
@@ -6282,19 +7121,18 @@ function describeRelationship(
     [];
 
 
-  firstAncestors.forEach(
-    (firstDepth,id) => {
+  a.forEach(
+    (aDepth,id) => {
 
-      if (
-        secondAncestors.has(id)
-      ) {
+      if (b.has(id)) {
 
         common.push({
 
-          firstDepth,
+          a:
+            aDepth,
 
-          secondDepth:
-            secondAncestors.get(id)
+          b:
+            b.get(id)
 
         });
 
@@ -6310,15 +7148,15 @@ function describeRelationship(
 
 
   common.sort(
-    (a,b) =>
+    (first,second) =>
       Math.max(
-        a.firstDepth,
-        a.secondDepth
+        first.a,
+        first.b
       )
       -
       Math.max(
-        b.firstDepth,
-        b.secondDepth
+        second.a,
+        second.b
       )
   );
 
@@ -6328,31 +7166,39 @@ function describeRelationship(
 
 
   if (
-    nearest.firstDepth >= 2 &&
-    nearest.secondDepth >= 2
+    nearest.a === 1 &&
+    nearest.b === 1
+  ) {
+    return "Sibling";
+  }
+
+
+  if (
+    nearest.a >= 2 &&
+    nearest.b >= 2
   ) {
 
     const degree =
       Math.min(
-        nearest.firstDepth,
-        nearest.secondDepth
+        nearest.a,
+        nearest.b
       ) - 1;
 
 
     const removed =
       Math.abs(
-        nearest.firstDepth -
-        nearest.secondDepth
+        nearest.a -
+        nearest.b
       );
 
 
-    let result =
+    let text =
       `${ordinal(degree)} Cousin`;
 
 
     if (removed) {
 
-      result +=
+      text +=
         ` ${removed} ${
           removed === 1
             ? "Time"
@@ -6362,7 +7208,7 @@ function describeRelationship(
     }
 
 
-    return result;
+    return text;
 
   }
 
@@ -6389,19 +7235,11 @@ function getAncestorMap(
     ];
 
 
-  const bestSeen =
+  const visited =
     new Map();
 
 
-  bestSeen.set(
-    id,
-    0
-  );
-
-
-  while (
-    queue.length
-  ) {
+  while (queue.length) {
 
     const current =
       queue.shift();
@@ -6430,21 +7268,16 @@ function getAncestorMap(
             current.depth + 1;
 
 
-          const previous =
-            bestSeen.get(
-              parentId
-            );
-
-
           if (
-            previous !== undefined &&
-            previous <= depth
+            visited.has(parentId) &&
+            visited.get(parentId) <=
+            depth
           ) {
             return;
           }
 
 
-          bestSeen.set(
+          visited.set(
             parentId,
             depth
           );
@@ -6509,9 +7342,7 @@ function makeAncestorTerm(
     );
 
 
-  if (
-    depth === 1
-  ) {
+  if (depth === 1) {
 
     return role === "mother"
       ? "Mother"
@@ -6522,9 +7353,7 @@ function makeAncestorTerm(
   }
 
 
-  if (
-    depth === 2
-  ) {
+  if (depth === 2) {
 
     return role === "mother"
       ? "Grandmother"
@@ -6535,17 +7364,15 @@ function makeAncestorTerm(
   }
 
 
-  const great =
-    ordinal(
-      depth - 2
-    );
-
-
-  return role === "mother"
-    ? `${great} Great Grandmother`
-    : role === "father"
-      ? `${great} Great Grandfather`
-      : `${great} Great Grandparent`;
+  return `${ordinal(
+    depth - 2
+  )} Great ${
+    role === "mother"
+      ? "Grandmother"
+      : role === "father"
+        ? "Grandfather"
+        : "Grandparent"
+  }`;
 
 }
 
@@ -6554,25 +7381,19 @@ function makeDescendantTerm(
   depth
 ) {
 
-  if (
-    depth === 1
-  ) {
+  if (depth === 1) {
     return "Child";
   }
 
 
-  if (
-    depth === 2
-  ) {
+  if (depth === 2) {
     return "Grandchild";
   }
 
 
-  return `${
-    ordinal(
-      depth - 2
-    )
-  } Great Grandchild`;
+  return `${ordinal(
+    depth - 2
+  )} Great Grandchild`;
 
 }
 
@@ -6589,17 +7410,17 @@ function inferParentRole(
 
 
   characters.forEach(
-    character => {
+    person => {
 
       if (
-        character.motherId === id
+        person.motherId === id
       ) {
         mother = true;
       }
 
 
       if (
-        character.fatherId === id
+        person.fatherId === id
       ) {
         father = true;
       }
@@ -6629,377 +7450,8 @@ function inferParentRole(
 }
 
 
-function ordinal(
-  number
-) {
-
-  const hundred =
-    number % 100;
-
-
-  if (
-    hundred >= 11 &&
-    hundred <= 13
-  ) {
-    return `${number}th`;
-  }
-
-
-  switch (
-    number % 10
-  ) {
-
-    case 1:
-      return `${number}st`;
-
-    case 2:
-      return `${number}nd`;
-
-    case 3:
-      return `${number}rd`;
-
-    default:
-      return `${number}th`;
-
-  }
-
-}
-
-
 /* =========================================================
-   RELATIVES
-========================================================= */
-
-function renderRelationshipProfile(
-  character
-) {
-
-  renderRelationshipButtons(
-    "profileMother",
-
-    character.motherId
-      ? [
-          getCharacter(
-            character.motherId
-          )
-        ].filter(Boolean)
-      : []
-  );
-
-
-  renderRelationshipButtons(
-    "profileFather",
-
-    character.fatherId
-      ? [
-          getCharacter(
-            character.fatherId
-          )
-        ].filter(Boolean)
-      : []
-  );
-
-
-  renderRelationshipButtons(
-    "profileSiblings",
-    getSiblings(
-      character.id
-    )
-  );
-
-
-  renderRelationshipButtons(
-    "profileSpouses",
-    getCharactersFromIds(
-      character.spouseIds
-    )
-  );
-
-
-  renderRelationshipButtons(
-    "profileLovers",
-    getCharactersFromIds(
-      character.loverIds
-    )
-  );
-
-
-  renderRelationshipButtons(
-    "profileChildren",
-    getChildren(
-      character.id
-    )
-  );
-
-}
-
-
-function renderRelationshipButtons(
-  id,
-  people
-) {
-
-  const container =
-    document.getElementById(
-      id
-    );
-
-
-  container.innerHTML =
-    "";
-
-
-  if (!people.length) {
-
-    container.textContent =
-      "—";
-
-    return;
-
-  }
-
-
-  people.forEach(
-    person => {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-
-      button.className =
-        "relationship-button";
-
-
-      button.type =
-        "button";
-
-
-      button.textContent =
-        getTreeName(
-          person
-        );
-
-
-      button.addEventListener(
-        "click",
-
-        function() {
-
-          openProfile(
-            person.id
-          );
-
-        }
-      );
-
-
-      container.appendChild(
-        button
-      );
-
-    }
-  );
-
-}
-
-
-function getChildren(
-  parentId
-) {
-
-  return characters.filter(
-    character =>
-      character.motherId ===
-        parentId
-      ||
-      character.fatherId ===
-        parentId
-  );
-
-}
-
-
-function getSiblings(
-  id
-) {
-
-  const person =
-    getCharacter(id);
-
-
-  if (!person) {
-    return [];
-  }
-
-
-  return characters.filter(
-    other =>
-      other.id !== id
-      &&
-      (
-        (
-          person.motherId &&
-          other.motherId ===
-          person.motherId
-        )
-        ||
-        (
-          person.fatherId &&
-          other.fatherId ===
-          person.fatherId
-        )
-      )
-  );
-
-}
-
-
-/* =========================================================
-   PROFILE CLOSE / DELETE
-========================================================= */
-
-function closeProfile() {
-
-  profileBackdrop.classList.add(
-    "hidden"
-  );
-
-
-  profilePanel.classList.add(
-    "hidden"
-  );
-
-
-  selectedCharacterId =
-    null;
-
-}
-
-
-closeProfileButton.addEventListener(
-  "click",
-  closeProfile
-);
-
-
-closeProfileFooterButton.addEventListener(
-  "click",
-  closeProfile
-);
-
-
-profileBackdrop.addEventListener(
-  "click",
-  closeProfile
-);
-
-
-deleteCharacterButton.addEventListener(
-  "click",
-
-  function() {
-
-    const person =
-      getCharacter(
-        selectedCharacterId
-      );
-
-
-    if (!person) {
-      return;
-    }
-
-
-    openConfirmation(
-      `Delete ${getTreeName(person)}?`,
-      "Their character record and relationship links will be removed.",
-      function() {
-
-        characters =
-          characters.filter(
-            character =>
-              character.id !==
-              person.id
-          );
-
-
-        characters.forEach(
-          character => {
-
-            if (
-              character.motherId ===
-              person.id
-            ) {
-              character.motherId =
-                null;
-            }
-
-
-            if (
-              character.fatherId ===
-              person.id
-            ) {
-              character.fatherId =
-                null;
-            }
-
-
-            character.spouseIds =
-              character.spouseIds
-                .filter(
-                  id =>
-                    id !==
-                    person.id
-                );
-
-
-            character.loverIds =
-              character.loverIds
-                .filter(
-                  id =>
-                    id !==
-                    person.id
-                );
-
-          }
-        );
-
-
-        if (
-          vantageCharacterId ===
-          person.id
-        ) {
-
-          vantageCharacterId =
-            null;
-
-          saveVantage();
-
-        }
-
-
-        saveCharacters();
-
-        closeProfile();
-
-        renderTree();
-
-        showToast(
-          "Character deleted"
-        );
-
-      },
-      "Delete"
-    );
-
-  }
-);
-
-
-/* =========================================================
-   EDIT CHARACTER
+   EDIT PROFILE
 ========================================================= */
 
 editCharacterButton.addEventListener(
@@ -7025,66 +7477,66 @@ function openEditor() {
     character.portraitData;
 
 
-  document.getElementById(
-    "editTitle"
-  ).value =
-    character.title;
+  setInputValue(
+    "editTitle",
+    character.title
+  );
 
 
-  document.getElementById(
-    "editGivenName"
-  ).value =
-    character.givenName;
+  setInputValue(
+    "editGivenName",
+    character.givenName
+  );
 
 
-  document.getElementById(
-    "editAliases"
-  ).value =
+  setInputValue(
+    "editAliases",
     character.aliases.join(
       ", "
-    );
+    )
+  );
 
 
-  document.getElementById(
-    "editMaidenName"
-  ).value =
-    character.maidenName;
+  setInputValue(
+    "editMaidenName",
+    character.maidenName
+  );
 
 
-  document.getElementById(
-    "editFamilyName"
-  ).value =
-    character.familyName;
+  setInputValue(
+    "editFamilyName",
+    character.familyName
+  );
 
 
-  document.getElementById(
-    "editBirthYear"
-  ).value =
-    character.birthYear;
+  setInputValue(
+    "editBirthYear",
+    character.birthYear
+  );
 
 
-  document.getElementById(
-    "editDeathYear"
-  ).value =
-    character.deathYear;
+  setInputValue(
+    "editDeathYear",
+    character.deathYear
+  );
 
 
-  document.getElementById(
-    "editPhysicalFeature"
-  ).value =
-    character.physicalFeature;
+  setInputValue(
+    "editPhysicalFeature",
+    character.physicalFeature
+  );
 
 
-  document.getElementById(
-    "editAchievements"
-  ).value =
-    character.achievements;
+  setInputValue(
+    "editAchievements",
+    character.achievements
+  );
 
 
-  document.getElementById(
-    "editLife"
-  ).value =
-    character.life;
+  setInputValue(
+    "editLife",
+    character.life
+  );
 
 
   populateRelationshipSelectors(
@@ -7148,8 +7600,6 @@ function openEditor() {
 
 }
 
-
-/* RELATIONSHIP SELECTS */
 
 function populateRelationshipSelectors(
   character
@@ -7358,22 +7808,22 @@ editCharacterForm.addEventListener(
     }
 
 
-    const hasParent =
+    const hasParents =
       Boolean(
         motherId ||
         fatherId
       );
 
 
-    const ancestryOverride =
-      hasParent
+    const override =
+      hasParents
         ? editAncestryOverride.checked
         : false;
 
 
     const manualMode =
-      !hasParent ||
-      ancestryOverride;
+      !hasParents ||
+      override;
 
 
     const raceAncestry =
@@ -7388,14 +7838,43 @@ editCharacterForm.addEventListener(
       );
 
 
-    if (
-      manualMode &&
-      !validateManualAncestry(
-        raceAncestry,
-        speciesAncestry
-      )
-    ) {
-      return;
+    if (manualMode) {
+
+      if (
+        raceAncestry.length &&
+        !approximately100(
+          sumPercent(
+            raceAncestry
+          )
+        )
+      ) {
+
+        showToast(
+          "Race percentages must total 100%"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        speciesAncestry.length &&
+        !approximately100(
+          sumPercent(
+            speciesAncestry
+          )
+        )
+      ) {
+
+        showToast(
+          "Species percentages must total 100%"
+        );
+
+        return;
+
+      }
+
     }
 
 
@@ -7472,17 +7951,8 @@ editCharacterForm.addEventListener(
 
 
     character.ancestryOverride =
-      ancestryOverride;
+      override;
 
-
-    /*
-      We keep manual values even when
-      auto-mode is active.
-
-      They are simply ignored until
-      the character becomes a founder
-      again or Override is enabled.
-    */
 
     character.raceAncestry =
       raceAncestry;
@@ -7576,162 +8046,7 @@ editCharacterForm.addEventListener(
 );
 
 
-function validateManualAncestry(
-  raceAncestry,
-  speciesAncestry
-) {
-
-  if (
-    raceAncestry.length &&
-    !approximately100(
-      ancestryTotal(
-        raceAncestry
-      )
-    )
-  ) {
-
-    showToast(
-      "Race percentages must total 100%"
-    );
-
-    return false;
-
-  }
-
-
-  if (
-    speciesAncestry.length &&
-    !approximately100(
-      ancestryTotal(
-        speciesAncestry
-      )
-    )
-  ) {
-
-    showToast(
-      "Species percentages must total 100%"
-    );
-
-    return false;
-
-  }
-
-
-  if (
-    hasDuplicateAncestry(
-      raceAncestry
-    )
-  ) {
-
-    showToast(
-      "A Race can only appear once"
-    );
-
-    return false;
-
-  }
-
-
-  if (
-    hasDuplicateAncestry(
-      speciesAncestry
-    )
-  ) {
-
-    showToast(
-      "A Species can only appear once"
-    );
-
-    return false;
-
-  }
-
-
-  return true;
-
-}
-
-
-function ancestryTotal(
-  ancestry
-) {
-
-  return ancestry.reduce(
-    (sum,entry) =>
-      sum + entry.percent,
-    0
-  );
-
-}
-
-
-function hasDuplicateAncestry(
-  ancestry
-) {
-
-  const ids =
-    ancestry.map(
-      entry =>
-        entry.id
-    );
-
-
-  return (
-    new Set(ids).size !==
-    ids.length
-  );
-
-}
-
-
-/* CANCEL */
-
-function cancelEditor() {
-
-  editBackdrop.classList.add(
-    "hidden"
-  );
-
-
-  editPanel.classList.add(
-    "hidden"
-  );
-
-
-  if (
-    selectedCharacterId
-  ) {
-
-    openProfile(
-      selectedCharacterId
-    );
-
-  }
-
-}
-
-
-closeEditButton.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
-cancelEditButton.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
-editBackdrop.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
-/* =========================================================
-   CHARACTER COLOR EDIT
-========================================================= */
+/* COLOR SAVE */
 
 function setCharacterColorEditorValue(
   trait,
@@ -7740,6 +8055,8 @@ function setCharacterColorEditorValue(
 
   let select;
   let custom;
+  let id;
+  let hex;
 
 
   if (
@@ -7752,17 +8069,11 @@ function setCharacterColorEditorValue(
     custom =
       editHairCustom;
 
+    id =
+      character.hairColorId;
 
-    select.value =
-      character.hairColorId || "";
-
-
-    custom.value =
-      isHexColor(
-        character.hairColor
-      )
-        ? character.hairColor
-        : "#242429";
+    hex =
+      character.hairColor;
 
   }
 
@@ -7777,17 +8088,11 @@ function setCharacterColorEditorValue(
     custom =
       editEyeCustom;
 
+    id =
+      character.eyeColorId;
 
-    select.value =
-      character.eyeColorId || "";
-
-
-    custom.value =
-      isHexColor(
-        character.eyeColor
-      )
-        ? character.eyeColor
-        : "#242429";
+    hex =
+      character.eyeColor;
 
   }
 
@@ -7802,19 +8107,23 @@ function setCharacterColorEditorValue(
     custom =
       editSkinCustom;
 
+    id =
+      character.skinColorId;
 
-    select.value =
-      character.skinColorId || "";
-
-
-    custom.value =
-      isHexColor(
-        character.skinColor
-      )
-        ? character.skinColor
-        : "#F3D2BF";
+    hex =
+      character.skinColor;
 
   }
+
+
+  select.value =
+    id || "";
+
+
+  custom.value =
+    isHexColor(hex)
+      ? hex
+      : "#777777";
 
 
   select.dispatchEvent(
@@ -7889,7 +8198,8 @@ function applyCharacterColorFromEditor(
     hex =
       custom.value;
 
-  } else if (id) {
+  }
+  else if (id) {
 
     const preset =
       findColorPreset(
@@ -7948,7 +8258,7 @@ function applyCharacterColorFromEditor(
 
 
 /* =========================================================
-   PORTRAITS
+   PORTRAIT
 ========================================================= */
 
 editPortraitFile.addEventListener(
@@ -8202,7 +8512,7 @@ function loadImage(
 
 
 /* =========================================================
-   TWO-WAY RELATIONSHIPS
+   RELATIONSHIP SYNC
 ========================================================= */
 
 function syncTwoWay(
@@ -8269,7 +8579,166 @@ function syncTwoWay(
 
 
 /* =========================================================
-   CONFIRMATION
+   CLOSE / DELETE
+========================================================= */
+
+function closeProfile() {
+
+  profileBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  profilePanel.classList.add(
+    "hidden"
+  );
+
+
+  selectedCharacterId =
+    null;
+
+}
+
+
+closeProfileButton.addEventListener(
+  "click",
+  closeProfile
+);
+
+
+closeProfileFooterButton.addEventListener(
+  "click",
+  closeProfile
+);
+
+
+function cancelEditor() {
+
+  editBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  editPanel.classList.add(
+    "hidden"
+  );
+
+
+  if (
+    selectedCharacterId
+  ) {
+
+    openProfile(
+      selectedCharacterId
+    );
+
+  }
+
+}
+
+
+closeEditButton.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+cancelEditButton.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+deleteCharacterButton.addEventListener(
+  "click",
+
+  function() {
+
+    const character =
+      getCharacter(
+        selectedCharacterId
+      );
+
+
+    if (!character) {
+      return;
+    }
+
+
+    openConfirmation(
+      `Delete ${getTreeName(character)}?`,
+      "Their record and relationship links will be removed.",
+      function() {
+
+        const id =
+          character.id;
+
+
+        characters =
+          characters.filter(
+            person =>
+              person.id !== id
+          );
+
+
+        characters.forEach(
+          person => {
+
+            if (
+              person.motherId === id
+            ) {
+              person.motherId =
+                null;
+            }
+
+
+            if (
+              person.fatherId === id
+            ) {
+              person.fatherId =
+                null;
+            }
+
+
+            person.spouseIds =
+              person.spouseIds
+                .filter(
+                  value =>
+                    value !== id
+                );
+
+
+            person.loverIds =
+              person.loverIds
+                .filter(
+                  value =>
+                    value !== id
+                );
+
+          }
+        );
+
+
+        saveCharacters();
+
+        closeProfile();
+
+        renderTree();
+
+        showToast(
+          "Character deleted"
+        );
+
+      },
+      "Delete"
+    );
+
+  }
+);
+
+
+/* =========================================================
+   CONFIRM
 ========================================================= */
 
 function openConfirmation(
@@ -8366,8 +8835,8 @@ function getCharacter(
 ) {
 
   return characters.find(
-    character =>
-      character.id === id
+    person =>
+      person.id === id
   );
 
 }
@@ -8423,6 +8892,31 @@ function getSelectedMultipleIds(
 }
 
 
+function setInputValue(
+  id,
+  value
+) {
+
+  document.getElementById(
+    id
+  ).value =
+    value || "";
+
+}
+
+
+function getInputValue(
+  id
+) {
+
+  return document
+    .getElementById(id)
+    .value
+    .trim();
+
+}
+
+
 function makeAliasArray(
   value
 ) {
@@ -8466,9 +8960,9 @@ function getProfileName(
 
 
   return `
-    ${character.givenName}
+    ${character.givenName || ""}
     ${maiden}
-    ${character.familyName}
+    ${character.familyName || ""}
   `
     .replace(
       /\s+/g,
@@ -8494,13 +8988,13 @@ function getInitial(
 
 
 function compareCharacterNames(
-  a,
-  b
+  first,
+  second
 ) {
 
-  return getTreeName(a)
+  return getTreeName(first)
     .localeCompare(
-      getTreeName(b)
+      getTreeName(second)
     );
 
 }
@@ -8580,45 +9074,116 @@ function isHexColor(
 }
 
 
-function getInputValue(
-  id
-) {
-
-  return document
-    .getElementById(id)
-    .value
-    .trim();
-
-}
-
-
 function escapeHTML(
   value
 ) {
 
-  const div =
+  const element =
     document.createElement(
       "div"
     );
 
 
-  div.textContent =
+  element.textContent =
     value || "";
 
 
-  return div.innerHTML;
+  return element.innerHTML;
+
+}
+
+
+function sumPercent(
+  entries
+) {
+
+  return entries.reduce(
+    (sum,item) =>
+      sum +
+      Number(
+        item.percent
+      ),
+    0
+  );
 
 }
 
 
 function approximately100(
+  value
+) {
+
+  return Math.abs(
+    value - 100
+  ) < 0.01;
+
+}
+
+
+function formatPercent(
+  value
+) {
+
+  return Number(value)
+    .toFixed(4)
+    .replace(
+      /0+$/,
+      ""
+    )
+    .replace(
+      /\.$/,
+      ""
+    );
+
+}
+
+
+function ordinal(
   number
 ) {
 
+  const hundred =
+    number % 100;
+
+
+  if (
+    hundred >= 11 &&
+    hundred <= 13
+  ) {
+    return `${number}th`;
+  }
+
+
+  switch (
+    number % 10
+  ) {
+
+    case 1:
+      return `${number}st`;
+
+    case 2:
+      return `${number}nd`;
+
+    case 3:
+      return `${number}rd`;
+
+    default:
+      return `${number}th`;
+
+  }
+
+}
+
+
+function createLibraryId() {
+
   return (
-    Math.abs(
-      number - 100
-    ) < 0.01
+    "lib_" +
+    Date.now() +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,8)
   );
 
 }
@@ -8626,51 +9191,51 @@ function approximately100(
 
 function cleanBrokenRelationships() {
 
-  const ids =
+  const valid =
     new Set(
       characters.map(
-        character =>
-          character.id
+        person =>
+          person.id
       )
     );
 
 
   characters.forEach(
-    character => {
+    person => {
 
       if (
-        !ids.has(
-          character.motherId
+        !valid.has(
+          person.motherId
         )
       ) {
-        character.motherId =
+        person.motherId =
           null;
       }
 
 
       if (
-        !ids.has(
-          character.fatherId
+        !valid.has(
+          person.fatherId
         )
       ) {
-        character.fatherId =
+        person.fatherId =
           null;
       }
 
 
-      character.spouseIds =
-        character.spouseIds
+      person.spouseIds =
+        person.spouseIds
           .filter(
             id =>
-              ids.has(id)
+              valid.has(id)
           );
 
 
-      character.loverIds =
-        character.loverIds
+      person.loverIds =
+        person.loverIds
           .filter(
             id =>
-              ids.has(id)
+              valid.has(id)
           );
 
     }
@@ -8718,7 +9283,9 @@ function focusCharacter(
 
   const position =
     lastLayout
-      ? lastLayout.positions.get(id)
+      ? lastLayout.positions.get(
+          id
+        )
       : null;
 
 
@@ -8755,11 +9322,8 @@ function focusCharacter(
 
 
   setTimeout(
-    function() {
-
-      openProfile(id);
-
-    },
+    () =>
+      openProfile(id),
     180
   );
 
