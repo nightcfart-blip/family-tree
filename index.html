@@ -26,15 +26,25 @@
         <h1>Family Tree</h1>
       </div>
 
+
       <div class="topbar-actions">
 
         <button
           id="searchButton"
           class="top-icon-button"
           type="button"
-          aria-label="Search characters"
+          aria-label="Search"
         >
           ⌕
+        </button>
+
+        <button
+          id="worldButton"
+          class="top-icon-button"
+          type="button"
+          aria-label="World settings"
+        >
+          ◉
         </button>
 
         <button
@@ -75,7 +85,9 @@
 
       <div id="emptyState" class="empty-state">
 
-        <div class="empty-symbol">✦</div>
+        <div class="empty-symbol">
+          ✦
+        </div>
 
         <h2>Your tree is empty</h2>
 
@@ -123,7 +135,10 @@
       </div>
 
 
-      <div id="zoomIndicator" class="zoom-indicator">
+      <div
+        id="zoomIndicator"
+        class="zoom-indicator"
+      >
         100%
       </div>
 
@@ -132,13 +147,20 @@
   </div>
 
 
+
   <!-- SEARCH -->
 
-  <div id="searchBackdrop" class="backdrop hidden"></div>
+  <div
+    id="searchBackdrop"
+    class="backdrop hidden"
+  ></div>
 
-  <section id="searchPanel" class="search-panel hidden">
+  <section
+    id="searchPanel"
+    class="floating-panel hidden"
+  >
 
-    <div class="search-header">
+    <div class="floating-header">
 
       <div>
         <p class="eyebrow">Find Person</p>
@@ -156,7 +178,7 @@
     </div>
 
 
-    <div class="search-body">
+    <div class="floating-body">
 
       <input
         id="searchInput"
@@ -175,11 +197,115 @@
   </section>
 
 
+
+  <!-- WORLD / BACKUP / VANTAGE -->
+
+  <div
+    id="worldBackdrop"
+    class="backdrop hidden"
+  ></div>
+
+  <section
+    id="worldPanel"
+    class="floating-panel hidden"
+  >
+
+    <div class="floating-header">
+
+      <div>
+        <p class="eyebrow">World Settings</p>
+        <h2>Your World</h2>
+      </div>
+
+      <button
+        id="closeWorldButton"
+        class="icon-button"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="floating-body world-body">
+
+
+      <section class="world-section">
+
+        <p class="world-label">
+          Vantage Point
+        </p>
+
+        <p class="world-description">
+          Choose the character whose point of view should be used when calculating family relationships.
+        </p>
+
+        <select
+          id="vantageSelect"
+          class="world-select"
+        ></select>
+
+        <div
+          id="vantageStatus"
+          class="vantage-status"
+        ></div>
+
+      </section>
+
+
+      <section class="world-section">
+
+        <p class="world-label">
+          Backup
+        </p>
+
+        <p class="world-description">
+          Export saves your characters, relationships, colors, writing, and vantage point into one backup file.
+        </p>
+
+        <button
+          id="exportWorldButton"
+          class="world-action-button"
+          type="button"
+        >
+          Export World
+        </button>
+
+        <button
+          id="importWorldButton"
+          class="world-action-button secondary-world-button"
+          type="button"
+        >
+          Import World
+        </button>
+
+        <input
+          id="importWorldFile"
+          class="hidden"
+          type="file"
+          accept=".json,application/json"
+        >
+
+      </section>
+
+    </div>
+
+  </section>
+
+
+
   <!-- ADD CHARACTER -->
 
-  <div id="formBackdrop" class="backdrop hidden"></div>
+  <div
+    id="formBackdrop"
+    class="backdrop hidden"
+  ></div>
 
-  <section id="characterFormPanel" class="bottom-panel hidden">
+  <section
+    id="characterFormPanel"
+    class="bottom-panel hidden"
+  >
 
     <div class="panel-handle"></div>
 
@@ -230,16 +356,32 @@
           <input id="familyName" type="text" required>
         </label>
 
+
         <div class="field-row">
 
           <label class="field">
+
             <span>Birth Year</span>
-            <input id="birthYear" type="text" inputmode="numeric">
+
+            <input
+              id="birthYear"
+              type="text"
+              inputmode="numeric"
+            >
+
           </label>
 
+
           <label class="field">
+
             <span>Death Year</span>
-            <input id="deathYear" type="text" inputmode="numeric">
+
+            <input
+              id="deathYear"
+              type="text"
+              inputmode="numeric"
+            >
+
           </label>
 
         </div>
@@ -257,7 +399,10 @@
           Cancel
         </button>
 
-        <button class="save-button" type="submit">
+        <button
+          class="save-button"
+          type="submit"
+        >
           Save Character
         </button>
 
@@ -268,11 +413,18 @@
   </section>
 
 
+
   <!-- PROFILE -->
 
-  <div id="profileBackdrop" class="backdrop hidden"></div>
+  <div
+    id="profileBackdrop"
+    class="backdrop hidden"
+  ></div>
 
-  <section id="profilePanel" class="profile-panel hidden">
+  <section
+    id="profilePanel"
+    class="profile-panel hidden"
+  >
 
     <div class="profile-topbar">
 
@@ -293,102 +445,265 @@
 
     <div class="profile-dashboard">
 
+
       <section class="profile-box title-box">
-        <span class="box-label">Title</span>
-        <div id="profileTitle" class="box-value big-value"></div>
+
+        <span class="box-label">
+          Title
+        </span>
+
+        <div
+          id="profileTitle"
+          class="box-value big-value"
+        ></div>
+
       </section>
+
 
       <section class="profile-box name-box">
-        <span class="box-label">Name</span>
-        <div id="profileFullName" class="profile-main-name"></div>
-        <div id="profileYearsTop" class="profile-main-years"></div>
+
+        <span class="box-label">
+          Name
+        </span>
+
+        <div
+          id="profileFullName"
+          class="profile-main-name"
+        ></div>
+
+        <div
+          id="profileYearsTop"
+          class="profile-main-years"
+        ></div>
+
       </section>
 
+
       <section class="profile-box aliases-box">
-        <span class="box-label">Aliases</span>
-        <div id="profileAliases" class="box-value"></div>
+
+        <span class="box-label">
+          Aliases
+        </span>
+
+        <div
+          id="profileAliases"
+          class="box-value"
+        ></div>
+
       </section>
+
 
       <section class="colors-box">
 
         <div class="color-profile-item">
-          <div id="hairColorSwatch" class="large-color-swatch"></div>
+
+          <div
+            id="hairColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
           <span>Hair Color</span>
-          <small id="profileHairColor"></small>
+
+          <small
+            id="profileHairColor"
+          ></small>
+
         </div>
 
+
         <div class="color-profile-item">
-          <div id="eyeColorSwatch" class="large-color-swatch"></div>
+
+          <div
+            id="eyeColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
           <span>Eye Color</span>
-          <small id="profileEyeColor"></small>
+
+          <small
+            id="profileEyeColor"
+          ></small>
+
         </div>
 
+
         <div class="color-profile-item">
-          <div id="skinColorSwatch" class="large-color-swatch"></div>
+
+          <div
+            id="skinColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
           <span>Skin Color</span>
-          <small id="profileSkinColor"></small>
+
+          <small
+            id="profileSkinColor"
+          ></small>
+
         </div>
 
       </section>
 
+
+
+      <!-- FAMILY -->
+
       <section class="profile-box family-box">
 
-        <span class="box-label">Family</span>
+        <span class="box-label">
+          Family
+        </span>
+
+
+        <div
+          id="vantageRelation"
+          class="vantage-relation hidden"
+        >
+
+          <span
+            id="vantageRelationLabel"
+            class="vantage-relation-label"
+          ></span>
+
+          <strong
+            id="vantageRelationText"
+            class="vantage-relation-text"
+          ></strong>
+
+        </div>
+
 
         <div class="family-list">
 
           <div class="family-group">
+
             <span>Mother</span>
-            <div id="profileMother" class="relationship-values"></div>
+
+            <div
+              id="profileMother"
+              class="relationship-values"
+            ></div>
+
           </div>
 
+
           <div class="family-group">
+
             <span>Father</span>
-            <div id="profileFather" class="relationship-values"></div>
+
+            <div
+              id="profileFather"
+              class="relationship-values"
+            ></div>
+
           </div>
 
+
           <div class="family-group">
+
             <span>Siblings</span>
-            <div id="profileSiblings" class="relationship-values"></div>
+
+            <div
+              id="profileSiblings"
+              class="relationship-values"
+            ></div>
+
           </div>
 
+
           <div class="family-group">
+
             <span>Spouses</span>
-            <div id="profileSpouses" class="relationship-values"></div>
+
+            <div
+              id="profileSpouses"
+              class="relationship-values"
+            ></div>
+
           </div>
 
+
           <div class="family-group">
+
             <span>Lovers</span>
-            <div id="profileLovers" class="relationship-values"></div>
+
+            <div
+              id="profileLovers"
+              class="relationship-values"
+            ></div>
+
           </div>
 
+
           <div class="family-group">
+
             <span>Children</span>
-            <div id="profileChildren" class="relationship-values"></div>
+
+            <div
+              id="profileChildren"
+              class="relationship-values"
+            ></div>
+
           </div>
 
         </div>
 
       </section>
 
+
       <section class="profile-box race-box">
-        <span class="box-label">Race</span>
-        <div id="profileRace" class="box-value centered-value"></div>
+
+        <span class="box-label">
+          Race
+        </span>
+
+        <div
+          id="profileRace"
+          class="box-value centered-value"
+        ></div>
+
       </section>
+
 
       <section class="profile-box feature-box">
-        <span class="box-label">Notable Physical Feature</span>
-        <div id="profilePhysicalFeature" class="box-value"></div>
+
+        <span class="box-label">
+          Notable Physical Feature
+        </span>
+
+        <div
+          id="profilePhysicalFeature"
+          class="box-value"
+        ></div>
+
       </section>
+
 
       <section class="profile-box achievements-box">
-        <span class="box-label">Noteworthy Achievements</span>
-        <div id="profileAchievements" class="box-value long-value"></div>
+
+        <span class="box-label">
+          Noteworthy Achievements
+        </span>
+
+        <div
+          id="profileAchievements"
+          class="box-value long-value"
+        ></div>
+
       </section>
 
+
       <section class="profile-box life-box">
-        <span class="box-label">Life</span>
-        <div id="profileLife" class="life-text"></div>
+
+        <span class="box-label">
+          Life
+        </span>
+
+        <div
+          id="profileLife"
+          class="life-text"
+        ></div>
+
       </section>
 
     </div>
@@ -425,18 +740,28 @@
   </section>
 
 
+
   <!-- EDIT CHARACTER -->
 
-  <div id="editBackdrop" class="backdrop hidden"></div>
+  <div
+    id="editBackdrop"
+    class="backdrop hidden"
+  ></div>
 
-  <section id="editPanel" class="bottom-panel editor-panel hidden">
+  <section
+    id="editPanel"
+    class="bottom-panel editor-panel hidden"
+  >
 
     <div class="panel-handle"></div>
 
     <div class="panel-header">
 
       <div>
-        <p class="eyebrow">Character Editor</p>
+        <p class="eyebrow">
+          Character Editor
+        </p>
+
         <h2>Edit Character</h2>
       </div>
 
@@ -455,7 +780,10 @@
 
       <div class="form-body">
 
-        <div class="editor-heading">Identity</div>
+
+        <div class="editor-heading">
+          Identity
+        </div>
 
         <label class="field">
           <span>Title</span>
@@ -483,79 +811,171 @@
         </label>
 
 
-        <div class="editor-heading">Dates</div>
+        <div class="editor-heading">
+          Dates
+        </div>
+
 
         <div class="field-row">
 
           <label class="field">
+
             <span>Birth Year</span>
-            <input id="editBirthYear" type="text" inputmode="numeric">
+
+            <input
+              id="editBirthYear"
+              type="text"
+              inputmode="numeric"
+            >
+
           </label>
 
+
           <label class="field">
+
             <span>Death Year</span>
-            <input id="editDeathYear" type="text" inputmode="numeric">
+
+            <input
+              id="editDeathYear"
+              type="text"
+              inputmode="numeric"
+            >
+
           </label>
 
         </div>
 
 
-        <div class="editor-heading">Relationships</div>
+        <div class="editor-heading">
+          Relationships
+        </div>
+
 
         <label class="field">
+
           <span>Mother</span>
-          <select id="editMother"></select>
+
+          <select
+            id="editMother"
+          ></select>
+
         </label>
 
+
         <label class="field">
+
           <span>Father</span>
-          <select id="editFather"></select>
+
+          <select
+            id="editFather"
+          ></select>
+
         </label>
 
+
         <label class="field">
+
           <span>Spouses</span>
-          <select id="editSpouses" class="relationship-multi" multiple></select>
+
+          <select
+            id="editSpouses"
+            class="relationship-multi"
+            multiple
+          ></select>
+
         </label>
+
 
         <label class="field">
+
           <span>Lovers</span>
-          <select id="editLovers" class="relationship-multi" multiple></select>
+
+          <select
+            id="editLovers"
+            class="relationship-multi"
+            multiple
+          ></select>
+
         </label>
 
 
-        <div class="editor-heading">Appearance</div>
+        <div class="editor-heading">
+          Appearance
+        </div>
+
 
         <label class="field">
           <span>Race</span>
           <input id="editRace" type="text">
         </label>
 
+
         <div class="color-editor-grid">
 
           <label class="color-editor-field">
+
             <span>Hair Color</span>
-            <input id="editHairColor" type="color" value="#242429">
-            <strong id="editHairColorValue">#242429</strong>
+
+            <input
+              id="editHairColor"
+              type="color"
+              value="#242429"
+            >
+
+            <strong id="editHairColorValue">
+              #242429
+            </strong>
+
           </label>
 
+
           <label class="color-editor-field">
+
             <span>Eye Color</span>
-            <input id="editEyeColor" type="color" value="#242429">
-            <strong id="editEyeColorValue">#242429</strong>
+
+            <input
+              id="editEyeColor"
+              type="color"
+              value="#242429"
+            >
+
+            <strong id="editEyeColorValue">
+              #242429
+            </strong>
+
           </label>
 
+
           <label class="color-editor-field">
+
             <span>Skin Color</span>
-            <input id="editSkinColor" type="color" value="#242429">
-            <strong id="editSkinColorValue">#242429</strong>
+
+            <input
+              id="editSkinColor"
+              type="color"
+              value="#242429"
+            >
+
+            <strong id="editSkinColorValue">
+              #242429
+            </strong>
+
           </label>
 
         </div>
 
 
         <label class="field">
-          <span>Notable Physical Feature</span>
-          <textarea id="editPhysicalFeature" rows="4"></textarea>
+
+          <span>
+            Notable Physical Feature
+          </span>
+
+          <textarea
+            id="editPhysicalFeature"
+            rows="4"
+          ></textarea>
+
         </label>
 
 
@@ -563,15 +983,30 @@
           Noteworthy Achievements
         </div>
 
+
         <label class="field">
-          <textarea id="editAchievements" rows="7"></textarea>
+
+          <textarea
+            id="editAchievements"
+            rows="7"
+          ></textarea>
+
         </label>
 
 
-        <div class="editor-heading">Life</div>
+        <div class="editor-heading">
+          Life
+        </div>
+
 
         <label class="field">
-          <textarea id="editLife" class="life-editor" rows="15"></textarea>
+
+          <textarea
+            id="editLife"
+            class="life-editor"
+            rows="15"
+          ></textarea>
+
         </label>
 
       </div>
@@ -587,7 +1022,10 @@
           Cancel
         </button>
 
-        <button class="save-button" type="submit">
+        <button
+          class="save-button"
+          type="submit"
+        >
           Save Changes
         </button>
 
