@@ -36,23 +36,35 @@ const DEFAULT_GENETIC_MODEL = {
   parentActual: 40
 };
 
+
 let geneticModel =
   loadGeneticModel();
 
 
 /* =========================================================
-   TREE
+   TREE SETTINGS
 ========================================================= */
 
-const NODE_GAP_X = 235;
-const GENERATION_GAP_Y = 235;
-const WORLD_SIZE = 6000;
+const NODE_GAP_X =
+  235;
 
-const MIN_ZOOM = 0.2;
-const MAX_ZOOM = 2.5;
-const ZOOM_STEP = 0.15;
+const GENERATION_GAP_Y =
+  235;
 
-const CIRCLE_RADIUS = 42;
+const WORLD_SIZE =
+  6000;
+
+const MIN_ZOOM =
+  0.2;
+
+const MAX_ZOOM =
+  2.5;
+
+const ZOOM_STEP =
+  0.15;
+
+const CIRCLE_RADIUS =
+  42;
 
 
 /* =========================================================
@@ -80,40 +92,63 @@ let selectedCharacterId =
 
 
 /* =========================================================
-   VIEW
+   VIEW STATE
 ========================================================= */
 
 let viewX = 0;
+
 let viewY = 0;
+
 let zoom = 1;
 
-let isPanning = false;
+let isPanning =
+  false;
 
-let panStartX = 0;
-let panStartY = 0;
+let panStartX =
+  0;
 
-let startViewX = 0;
-let startViewY = 0;
+let panStartY =
+  0;
 
-let pinchStartDistance = 0;
-let pinchStartZoom = 1;
+let startViewX =
+  0;
 
-let pinchWorldX = 0;
-let pinchWorldY = 0;
+let startViewY =
+  0;
 
-let lastLayout = null;
+let pinchStartDistance =
+  0;
+
+let pinchStartZoom =
+  1;
+
+let pinchWorldX =
+  0;
+
+let pinchWorldY =
+  0;
+
+let lastLayout =
+  null;
+
 
 let focusState = {
-  distances: new Map(),
-  directAncestors: new Set()
+
+  distances:
+    new Map(),
+
+  directAncestors:
+    new Set()
+
 };
 
 
 /* =========================================================
-   TEMP
+   TEMP STATE
 ========================================================= */
 
-let pendingPortraitData = null;
+let pendingPortraitData =
+  null;
 
 let activeLibraryType =
   "race";
@@ -126,6 +161,24 @@ let confirmAction =
 
 let toastTimer =
   null;
+
+
+/* PROBABILITY WHEEL */
+
+let activeWheelTrait =
+  null;
+
+let activeWheelProbabilities =
+  [];
+
+let activeWheelResult =
+  null;
+
+let wheelRotation =
+  0;
+
+let wheelIsSpinning =
+  false;
 
 
 /* =========================================================
@@ -698,6 +751,102 @@ const editSkinCustom =
   );
 
 
+/* EDIT GENETICS */
+
+const editHairProbabilities =
+  document.getElementById(
+    "editHairProbabilities"
+  );
+
+const editEyeProbabilities =
+  document.getElementById(
+    "editEyeProbabilities"
+  );
+
+const editSkinProbabilities =
+  document.getElementById(
+    "editSkinProbabilities"
+  );
+
+const spinHairButton =
+  document.getElementById(
+    "spinHairButton"
+  );
+
+const spinEyeButton =
+  document.getElementById(
+    "spinEyeButton"
+  );
+
+const spinSkinButton =
+  document.getElementById(
+    "spinSkinButton"
+  );
+
+
+/* PROBABILITY WHEEL */
+
+const probabilityWheelBackdrop =
+  document.getElementById(
+    "probabilityWheelBackdrop"
+  );
+
+const probabilityWheelPanel =
+  document.getElementById(
+    "probabilityWheelPanel"
+  );
+
+const probabilityWheelTitle =
+  document.getElementById(
+    "probabilityWheelTitle"
+  );
+
+const closeProbabilityWheelButton =
+  document.getElementById(
+    "closeProbabilityWheelButton"
+  );
+
+const probabilityWheel =
+  document.getElementById(
+    "probabilityWheel"
+  );
+
+const probabilityWheelLegend =
+  document.getElementById(
+    "probabilityWheelLegend"
+  );
+
+const probabilityWheelResult =
+  document.getElementById(
+    "probabilityWheelResult"
+  );
+
+const probabilityWheelResultSwatch =
+  document.getElementById(
+    "probabilityWheelResultSwatch"
+  );
+
+const probabilityWheelResultName =
+  document.getElementById(
+    "probabilityWheelResultName"
+  );
+
+const probabilityWheelResultChance =
+  document.getElementById(
+    "probabilityWheelResultChance"
+  );
+
+const spinAgainButton =
+  document.getElementById(
+    "spinAgainButton"
+  );
+
+const applyWheelResultButton =
+  document.getElementById(
+    "applyWheelResultButton"
+  );
+
+
 /* CONFIRM */
 
 const confirmBackdrop =
@@ -1104,6 +1253,7 @@ saveGeneticModelButton.addEventListener(
 
     saveGeneticModel();
 
+
     showToast(
       "Genetic model saved"
     );
@@ -1135,7 +1285,9 @@ function loadCharacters() {
       JSON.parse(saved);
 
 
-    if (!Array.isArray(parsed)) {
+    if (
+      !Array.isArray(parsed)
+    ) {
       return [];
     }
 
@@ -1325,7 +1477,9 @@ function normalizeCharacter(
   return {
 
     id:
-      Number(character.id),
+      Number(
+        character.id
+      ),
 
     title:
       character.title || "",
@@ -1475,7 +1629,9 @@ function normalizeAncestry(
   values
 ) {
 
-  if (!Array.isArray(values)) {
+  if (
+    !Array.isArray(values)
+  ) {
     return [];
   }
 
@@ -1509,7 +1665,9 @@ function normalizeDistribution(
   values
 ) {
 
-  if (!Array.isArray(values)) {
+  if (
+    !Array.isArray(values)
+  ) {
     return [];
   }
 
@@ -1567,7 +1725,9 @@ function normalizeIdArray(
   values
 ) {
 
-  if (!Array.isArray(values)) {
+  if (
+    !Array.isArray(values)
+  ) {
     return [];
   }
 
@@ -1695,7 +1855,8 @@ function migrateLegacyRaceFields() {
 
 
       const oldRace =
-        character.race.trim();
+        character.race
+          .trim();
 
 
       if (!oldRace) {
@@ -2005,7 +2166,9 @@ function calculateAncestryInternal(
   }
 
 
-  visiting.add(key);
+  visiting.add(
+    key
+  );
 
 
   if (
@@ -2032,7 +2195,9 @@ function calculateAncestryInternal(
     );
 
 
-    visiting.delete(key);
+    visiting.delete(
+      key
+    );
 
 
     return cloneEntries(
@@ -2076,7 +2241,9 @@ function calculateAncestryInternal(
   );
 
 
-  visiting.delete(key);
+  visiting.delete(
+    key
+  );
 
 
   return cloneEntries(
@@ -2141,7 +2308,8 @@ function addParentAncestry(
       addMapValue(
         map,
         entry.id,
-        entry.percent * 0.5
+        entry.percent *
+        0.5
       );
 
     }
@@ -2198,7 +2366,7 @@ function ancestryWithUnknown(
 
 
 /* =========================================================
-   GENETIC APPEARANCE
+   GENETIC APPEARANCE ENGINE
 ========================================================= */
 
 function calculateTraitProbabilities(
@@ -2256,7 +2424,9 @@ function calculateTraitInternal(
   }
 
 
-  visiting.add(key);
+  visiting.add(
+    key
+  );
 
 
   const raceBaseline =
@@ -2332,7 +2502,9 @@ function calculateTraitInternal(
     );
 
 
-    visiting.delete(key);
+    visiting.delete(
+      key
+    );
 
 
     return cloneEntries(
@@ -2378,14 +2550,16 @@ function calculateTraitInternal(
   addWeightedEntries(
     finalMap,
     raceBaseline,
-    geneticModel.race / 100
+    geneticModel.race /
+    100
   );
 
 
   addWeightedEntries(
     finalMap,
     speciesBaseline,
-    geneticModel.species / 100
+    geneticModel.species /
+    100
   );
 
 
@@ -2420,7 +2594,9 @@ function calculateTraitInternal(
   );
 
 
-  visiting.delete(key);
+  visiting.delete(
+    key
+  );
 
 
   return cloneEntries(
@@ -2534,7 +2710,7 @@ function addFamilyContribution(
 
 
 /* =========================================================
-   RACE / SPECIES BASELINES
+   RACE / SPECIES TRAIT BASELINE
 ========================================================= */
 
 function calculateAncestryTraitBaseline(
@@ -2844,7 +3020,9 @@ function actualColorDistribution(
 
   if (
     hex &&
-    isHexColor(hex)
+    isHexColor(
+      hex
+    )
   ) {
 
     const nearest =
@@ -2916,17 +3094,20 @@ function findNearestPreset(
 
         const distance =
           Math.pow(
-            source.r - rgb.r,
+            source.r -
+            rgb.r,
             2
           )
           +
           Math.pow(
-            source.g - rgb.g,
+            source.g -
+            rgb.g,
             2
           )
           +
           Math.pow(
-            source.b - rgb.b,
+            source.b -
+            rgb.b,
             2
           );
 
@@ -3024,7 +3205,8 @@ function addWeightedEntries(
         (
           entry.percent /
           100
-        ) * weight
+        ) *
+        weight
       );
 
     }
@@ -3075,7 +3257,8 @@ function normalizeProbabilityEntries(
               entry.percent
             ) /
             total
-          ) * 100
+          ) *
+          100
 
       })
     )
@@ -3136,7 +3319,9 @@ function addMapValue(
 
   if (
     !id ||
-    !Number.isFinite(amount)
+    !Number.isFinite(
+      amount
+    )
   ) {
     return;
   }
@@ -3147,7 +3332,8 @@ function addMapValue(
     (
       map.get(id) ||
       0
-    ) + amount
+    ) +
+    amount
   );
 
 }
@@ -3162,7 +3348,8 @@ function sumMap(
   )
     .reduce(
       (sum,value) =>
-        sum + value,
+        sum +
+        value,
       0
     );
 
@@ -3170,63 +3357,83 @@ function sumMap(
 
 
 /* =========================================================
-   GENETIC PROFILE DISPLAY
+   EDIT GENETICS DISPLAY
 ========================================================= */
 
-function renderGeneticProbabilities(
-  character
-) {
+function renderEditGenetics() {
 
-  renderProbabilityList(
-    document.getElementById(
-      "profileHairProbabilities"
-    ),
+  const character =
+    getCharacter(
+      selectedCharacterId
+    );
+
+
+  if (!character) {
+    return;
+  }
+
+
+  renderEditProbabilityList(
+    editHairProbabilities,
     "hair",
     calculateTraitProbabilities(
       character.id,
       "hair"
     ),
-    character.hairColorId,
-    character.hairColor
+    editHairPreset.value
   );
 
 
-  renderProbabilityList(
-    document.getElementById(
-      "profileEyeProbabilities"
-    ),
+  renderEditProbabilityList(
+    editEyeProbabilities,
     "eyes",
     calculateTraitProbabilities(
       character.id,
       "eyes"
     ),
-    character.eyeColorId,
-    character.eyeColor
+    editEyePreset.value
   );
 
 
-  renderProbabilityList(
-    document.getElementById(
-      "profileSkinProbabilities"
-    ),
+  renderEditProbabilityList(
+    editSkinProbabilities,
     "skin",
     calculateTraitProbabilities(
       character.id,
       "skin"
     ),
-    character.skinColorId,
-    character.skinColor
+    editSkinPreset.value
   );
+
+
+  spinHairButton.disabled =
+    !calculateTraitProbabilities(
+      character.id,
+      "hair"
+    ).length;
+
+
+  spinEyeButton.disabled =
+    !calculateTraitProbabilities(
+      character.id,
+      "eyes"
+    ).length;
+
+
+  spinSkinButton.disabled =
+    !calculateTraitProbabilities(
+      character.id,
+      "skin"
+    ).length;
 
 }
 
 
-function renderProbabilityList(
+function renderEditProbabilityList(
   container,
   trait,
   probabilities,
-  actualId,
-  actualHex
+  actualId
 ) {
 
   container.innerHTML =
@@ -3248,7 +3455,7 @@ function renderProbabilityList(
 
 
     empty.textContent =
-      "Not enough genetic information yet. Add Race/Species base probabilities or family appearance data.";
+      "Not enough genetic information yet.";
 
 
     container.appendChild(
@@ -3257,30 +3464,6 @@ function renderProbabilityList(
 
 
     return;
-
-  }
-
-
-  let actualGeneticId =
-    actualId;
-
-
-  if (
-    actualId === "custom" &&
-    actualHex
-  ) {
-
-    const nearest =
-      findNearestPreset(
-        trait,
-        actualHex
-      );
-
-
-    actualGeneticId =
-      nearest
-        ? nearest.id
-        : "";
 
   }
 
@@ -3340,7 +3523,7 @@ function renderProbabilityList(
 
       if (
         entry.id ===
-        actualGeneticId
+        actualId
       ) {
 
         name.classList.add(
@@ -3458,6 +3641,693 @@ function formatProbability(
 
 
 /* =========================================================
+   PROBABILITY WHEEL
+========================================================= */
+
+spinHairButton.addEventListener(
+  "click",
+
+  () =>
+    openProbabilityWheel(
+      "hair"
+    )
+);
+
+
+spinEyeButton.addEventListener(
+  "click",
+
+  () =>
+    openProbabilityWheel(
+      "eyes"
+    )
+);
+
+
+spinSkinButton.addEventListener(
+  "click",
+
+  () =>
+    openProbabilityWheel(
+      "skin"
+    )
+);
+
+
+function openProbabilityWheel(
+  trait
+) {
+
+  const character =
+    getCharacter(
+      selectedCharacterId
+    );
+
+
+  if (!character) {
+    return;
+  }
+
+
+  const probabilities =
+    calculateTraitProbabilities(
+      character.id,
+      trait
+    )
+      .filter(
+        entry =>
+          findColorPreset(
+            trait,
+            entry.id
+          )
+      );
+
+
+  if (
+    !probabilities.length
+  ) {
+
+    showToast(
+      "No genetic probabilities available yet"
+    );
+
+    return;
+
+  }
+
+
+  activeWheelTrait =
+    trait;
+
+
+  activeWheelProbabilities =
+    normalizeProbabilityEntries(
+      probabilities
+    );
+
+
+  activeWheelResult =
+    null;
+
+  wheelIsSpinning =
+    false;
+
+
+  probabilityWheelTitle.textContent =
+    `${getTraitLabel(trait)} Probability Wheel`;
+
+
+  probabilityWheelResult.classList.add(
+    "hidden"
+  );
+
+
+  applyWheelResultButton.disabled =
+    true;
+
+
+  buildProbabilityWheel();
+
+  renderProbabilityWheelLegend();
+
+
+  probabilityWheelBackdrop.classList.remove(
+    "hidden"
+  );
+
+
+  probabilityWheelPanel.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+function closeProbabilityWheel() {
+
+  if (
+    wheelIsSpinning
+  ) {
+    return;
+  }
+
+
+  probabilityWheelBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  probabilityWheelPanel.classList.add(
+    "hidden"
+  );
+
+
+  activeWheelTrait =
+    null;
+
+  activeWheelProbabilities =
+    [];
+
+  activeWheelResult =
+    null;
+
+}
+
+
+closeProbabilityWheelButton.addEventListener(
+  "click",
+  closeProbabilityWheel
+);
+
+
+probabilityWheelBackdrop.addEventListener(
+  "click",
+  closeProbabilityWheel
+);
+
+
+function getTraitLabel(
+  trait
+) {
+
+  if (
+    trait === "hair"
+  ) {
+    return "Hair";
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+    return "Eye";
+  }
+
+
+  return "Skin";
+
+}
+
+
+function buildProbabilityWheel() {
+
+  if (
+    !activeWheelProbabilities.length
+  ) {
+    return;
+  }
+
+
+  let cursor =
+    0;
+
+
+  const segments =
+    [];
+
+
+  activeWheelProbabilities.forEach(
+    entry => {
+
+      const preset =
+        findColorPreset(
+          activeWheelTrait,
+          entry.id
+        );
+
+
+      if (!preset) {
+        return;
+      }
+
+
+      const start =
+        cursor;
+
+
+      const end =
+        cursor +
+        (
+          entry.percent /
+          100
+        ) *
+        360;
+
+
+      segments.push(
+        `${preset.hex} ${start}deg ${end}deg`
+      );
+
+
+      cursor =
+        end;
+
+    }
+  );
+
+
+  if (
+    !segments.length
+  ) {
+    return;
+  }
+
+
+  probabilityWheel.style.background =
+    `conic-gradient(${segments.join(",")})`;
+
+}
+
+
+function renderProbabilityWheelLegend() {
+
+  probabilityWheelLegend.innerHTML =
+    "";
+
+
+  activeWheelProbabilities.forEach(
+    entry => {
+
+      const preset =
+        findColorPreset(
+          activeWheelTrait,
+          entry.id
+        );
+
+
+      if (!preset) {
+        return;
+      }
+
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "wheel-legend-row";
+
+
+      const swatch =
+        document.createElement(
+          "div"
+        );
+
+
+      swatch.className =
+        "wheel-legend-swatch";
+
+
+      swatch.style.background =
+        preset.hex;
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+
+      name.className =
+        "wheel-legend-name";
+
+
+      name.textContent =
+        preset.name;
+
+
+      const percent =
+        document.createElement(
+          "div"
+        );
+
+
+      percent.className =
+        "wheel-legend-percent";
+
+
+      percent.textContent =
+        `${formatProbability(
+          entry.percent
+        )}%`;
+
+
+      row.appendChild(
+        swatch
+      );
+
+      row.appendChild(
+        name
+      );
+
+      row.appendChild(
+        percent
+      );
+
+
+      probabilityWheelLegend.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+spinAgainButton.addEventListener(
+  "click",
+  spinProbabilityWheel
+);
+
+
+function spinProbabilityWheel() {
+
+  if (
+    wheelIsSpinning ||
+    !activeWheelProbabilities.length
+  ) {
+    return;
+  }
+
+
+  wheelIsSpinning =
+    true;
+
+
+  applyWheelResultButton.disabled =
+    true;
+
+
+  probabilityWheelResult.classList.add(
+    "hidden"
+  );
+
+
+  activeWheelResult =
+    chooseWeightedResult(
+      activeWheelProbabilities
+    );
+
+
+  if (
+    !activeWheelResult
+  ) {
+
+    wheelIsSpinning =
+      false;
+
+    return;
+
+  }
+
+
+  const targetCenter =
+    getWheelSegmentCenter(
+      activeWheelResult.id
+    );
+
+
+  const fullTurns =
+    5 +
+    Math.floor(
+      Math.random() *
+      3
+    );
+
+
+  /*
+    Pointer is at 12 o'clock.
+
+    Conic gradient begins there too,
+    so rotate result segment center
+    back to the pointer.
+  */
+
+  const targetRotation =
+    fullTurns *
+    360
+    +
+    (
+      360 -
+      targetCenter
+    );
+
+
+  wheelRotation +=
+    targetRotation;
+
+
+  probabilityWheel.style.transform =
+    `rotate(${wheelRotation}deg)`;
+
+
+  setTimeout(
+    function() {
+
+      wheelIsSpinning =
+        false;
+
+
+      showWheelResult(
+        activeWheelResult
+      );
+
+
+      applyWheelResultButton.disabled =
+        false;
+
+    },
+    3250
+  );
+
+}
+
+
+function chooseWeightedResult(
+  probabilities
+) {
+
+  const roll =
+    Math.random() *
+    100;
+
+
+  let cursor =
+    0;
+
+
+  for (
+    const entry
+    of probabilities
+  ) {
+
+    cursor +=
+      entry.percent;
+
+
+    if (
+      roll <= cursor
+    ) {
+
+      return {
+        ...entry
+      };
+
+    }
+
+  }
+
+
+  return probabilities.length
+    ? {
+        ...probabilities[
+          probabilities.length -
+          1
+        ]
+      }
+    : null;
+
+}
+
+
+function getWheelSegmentCenter(
+  colorId
+) {
+
+  let cursor =
+    0;
+
+
+  for (
+    const entry
+    of activeWheelProbabilities
+  ) {
+
+    const start =
+      cursor;
+
+
+    const size =
+      (
+        entry.percent /
+        100
+      ) *
+      360;
+
+
+    const end =
+      start +
+      size;
+
+
+    if (
+      entry.id ===
+      colorId
+    ) {
+
+      return (
+        start +
+        end
+      ) / 2;
+
+    }
+
+
+    cursor =
+      end;
+
+  }
+
+
+  return 0;
+
+}
+
+
+function showWheelResult(
+  result
+) {
+
+  const preset =
+    findColorPreset(
+      activeWheelTrait,
+      result.id
+    );
+
+
+  if (!preset) {
+    return;
+  }
+
+
+  probabilityWheelResultSwatch.style.background =
+    preset.hex;
+
+
+  probabilityWheelResultName.textContent =
+    preset.name;
+
+
+  probabilityWheelResultChance.textContent =
+    `${formatProbability(
+      result.percent
+    )}% genetic probability`;
+
+
+  probabilityWheelResult.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+applyWheelResultButton.addEventListener(
+  "click",
+
+  function() {
+
+    if (
+      !activeWheelResult ||
+      !activeWheelTrait
+    ) {
+      return;
+    }
+
+
+    applyWheelColorToEditor(
+      activeWheelTrait,
+      activeWheelResult.id
+    );
+
+
+    closeProbabilityWheel();
+
+
+    renderEditGenetics();
+
+
+    showToast(
+      "Wheel result applied"
+    );
+
+  }
+);
+
+
+function applyWheelColorToEditor(
+  trait,
+  colorId
+) {
+
+  let select;
+
+
+  if (
+    trait === "hair"
+  ) {
+    select =
+      editHairPreset;
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+    select =
+      editEyePreset;
+  }
+
+
+  if (
+    trait === "skin"
+  ) {
+    select =
+      editSkinPreset;
+  }
+
+
+  if (!select) {
+    return;
+  }
+
+
+  select.value =
+    colorId;
+
+
+  select.dispatchEvent(
+    new Event(
+      "change"
+    )
+  );
+
+}
+
+
+/* =========================================================
    ANCESTRY DISPLAY
 ========================================================= */
 
@@ -3491,7 +4361,8 @@ function getAncestryName(
     )
       .find(
         entry =>
-          entry.id === id
+          entry.id ===
+          id
       );
 
 
@@ -3948,10 +4819,12 @@ editMother.addEventListener(
   refreshAncestryMode
 );
 
+
 editFather.addEventListener(
   "change",
   refreshAncestryMode
 );
+
 
 editAncestryOverride.addEventListener(
   "change",
@@ -4018,6 +4891,9 @@ function refreshAncestryMode() {
     );
 
 
+    renderEditGenetics();
+
+
     return;
 
   }
@@ -4048,6 +4924,9 @@ function refreshAncestryMode() {
     manualAncestryEditor.classList.remove(
       "hidden"
     );
+
+
+    renderEditGenetics();
 
 
     return;
@@ -4094,6 +4973,9 @@ function refreshAncestryMode() {
     "species"
   );
 
+
+  renderEditGenetics();
+
 }
 
 
@@ -4139,7 +5021,8 @@ function calculateEditorPreviewAncestry(
               addMapValue(
                 map,
                 entry.id,
-                entry.percent * 0.5
+                entry.percent *
+                0.5
               );
 
             }
@@ -4172,10 +5055,12 @@ function setupCharacterColorEditors() {
     "hair"
   );
 
+
   populateCharacterColorSelect(
     editEyePreset,
     "eyes"
   );
+
 
   populateCharacterColorSelect(
     editSkinPreset,
@@ -4335,6 +5220,9 @@ function setupOneColorEditor(
         "Not Set";
 
 
+      renderEditGenetics();
+
+
       return;
 
     }
@@ -4355,6 +5243,9 @@ function setupOneColorEditor(
 
       name.textContent =
         "Custom";
+
+
+      renderEditGenetics();
 
 
       return;
@@ -4386,6 +5277,9 @@ function setupOneColorEditor(
     name.textContent =
       preset.name;
 
+
+    renderEditGenetics();
+
   }
 
 
@@ -4409,6 +5303,7 @@ function setupOneColorEditor(
 
 manageRacesButton.addEventListener(
   "click",
+
   () =>
     openLibrary(
       "race"
@@ -4418,6 +5313,7 @@ manageRacesButton.addEventListener(
 
 manageSpeciesButton.addEventListener(
   "click",
+
   () =>
     openLibrary(
       "species"
@@ -4468,6 +5364,7 @@ function closeLibrary() {
   libraryBackdrop.classList.add(
     "hidden"
   );
+
 
   libraryPanel.classList.add(
     "hidden"
@@ -4611,6 +5508,7 @@ function renderLibraryList() {
 
         edit.addEventListener(
           "click",
+
           () =>
             openLibraryEditor(
               item.id
@@ -4731,6 +5629,7 @@ function renderLibraryList() {
 
 addLibraryItemButton.addEventListener(
   "click",
+
   () =>
     openLibraryEditor(
       null
@@ -4754,7 +5653,8 @@ function openLibraryEditor(
     id
       ? library.find(
           entry =>
-            entry.id === id
+            entry.id ===
+            id
         )
       : null;
 
@@ -4827,6 +5727,7 @@ function openLibraryEditor(
     "hidden"
   );
 
+
   libraryPanel.classList.add(
     "hidden"
   );
@@ -4835,6 +5736,7 @@ function openLibraryEditor(
   libraryEditorBackdrop.classList.remove(
     "hidden"
   );
+
 
   libraryEditorPanel.classList.remove(
     "hidden"
@@ -4849,6 +5751,7 @@ function closeLibraryEditor() {
     "hidden"
   );
 
+
   libraryEditorPanel.classList.add(
     "hidden"
   );
@@ -4857,6 +5760,7 @@ function closeLibraryEditor() {
   libraryBackdrop.classList.remove(
     "hidden"
   );
+
 
   libraryPanel.classList.remove(
     "hidden"
@@ -4889,6 +5793,7 @@ document
 
       button.addEventListener(
         "click",
+
         () =>
           addDistributionRow(
             button.dataset.trait
@@ -5082,7 +5987,8 @@ function readDistribution(
     )
     .filter(
       entry =>
-        entry.percent > 0
+        entry.percent >
+        0
     );
 
 }
@@ -5217,7 +6123,9 @@ function saveLibraryItem() {
 
     if (
       distribution.length &&
-      !approximately100(total)
+      !approximately100(
+        total
+      )
     ) {
 
       showToast(
@@ -5320,6 +6228,7 @@ function saveLibraryItem() {
 
   closeLibraryEditor();
 
+
   showToast(
     `${name} saved`
   );
@@ -5338,7 +6247,8 @@ function deleteLibraryItem(
     raceLibrary =
       raceLibrary.filter(
         item =>
-          item.id !== id
+          item.id !==
+          id
       );
 
   } else {
@@ -5346,7 +6256,8 @@ function deleteLibraryItem(
     speciesLibrary =
       speciesLibrary.filter(
         item =>
-          item.id !== id
+          item.id !==
+          id
       );
 
   }
@@ -5396,6 +6307,7 @@ function openWorldPanel() {
     "hidden"
   );
 
+
   worldPanel.classList.remove(
     "hidden"
   );
@@ -5408,6 +6320,7 @@ function closeWorldPanel() {
   worldBackdrop.classList.add(
     "hidden"
   );
+
 
   worldPanel.classList.add(
     "hidden"
@@ -5438,7 +6351,9 @@ function updateWorldStats() {
 
   worldVantageName.textContent =
     vantage
-      ? getTreeName(vantage)
+      ? getTreeName(
+          vantage
+        )
       : "None";
 
 }
@@ -5545,7 +6460,7 @@ exportWorldButton.addEventListener(
         "Fantasy Family Tree",
 
       version:
-        7,
+        8,
 
       exportedAt:
         new Date()
@@ -5822,6 +6737,7 @@ function closeSearch() {
     "hidden"
   );
 
+
   searchPanel.classList.add(
     "hidden"
   );
@@ -6037,6 +6953,7 @@ function renderSearchResults(
           name
         );
 
+
         info.appendChild(
           meta
         );
@@ -6045,6 +6962,7 @@ function renderSearchResults(
         button.appendChild(
           circle
         );
+
 
         button.appendChild(
           info
@@ -6088,19 +7006,22 @@ function applyViewTransform() {
 
   zoomIndicator.textContent =
     `${Math.round(
-      zoom * 100
+      zoom *
+      100
     )}%`;
 
 
   treeCanvas.classList.toggle(
     "zoomed-far",
-    zoom < 0.58
+    zoom <
+    0.58
   );
 
 
   treeCanvas.classList.toggle(
     "zoomed-very-far",
-    zoom < 0.36
+    zoom <
+    0.36
   );
 
 }
@@ -6137,13 +7058,16 @@ function centerTree() {
             layout.contentHeight,
             500
           )
-        ) * 0.82
+        ) *
+        0.82
       )
     );
 
 
   viewX =
-    rect.width / 2 -
+    rect.width /
+    2
+    -
     layout.centerX *
     zoom;
 
@@ -6151,7 +7075,10 @@ function centerTree() {
   viewY =
     Math.max(
       40,
-      rect.height * 0.12 -
+
+      rect.height *
+      0.12
+      -
       layout.topY *
       zoom
     );
@@ -6172,14 +7099,16 @@ function zoomAtPoint(
     (
       x -
       viewX
-    ) / zoom;
+    ) /
+    zoom;
 
 
   const worldY =
     (
       y -
       viewY
-    ) / zoom;
+    ) /
+    zoom;
 
 
   zoom =
@@ -6223,8 +7152,12 @@ zoomInButton.addEventListener(
     zoomAtPoint(
       zoom +
       ZOOM_STEP,
-      rect.width / 2,
-      rect.height / 2
+
+      rect.width /
+      2,
+
+      rect.height /
+      2
     );
 
   }
@@ -6244,8 +7177,12 @@ zoomOutButton.addEventListener(
     zoomAtPoint(
       zoom -
       ZOOM_STEP,
-      rect.width / 2,
-      rect.height / 2
+
+      rect.width /
+      2,
+
+      rect.height /
+      2
     );
 
   }
@@ -6264,7 +7201,8 @@ treeCanvas.addEventListener(
   function(event) {
 
     if (
-      event.touches.length === 1
+      event.touches.length ===
+      1
     ) {
 
       const touch =
@@ -6293,7 +7231,8 @@ treeCanvas.addEventListener(
 
 
     if (
-      event.touches.length === 2
+      event.touches.length ===
+      2
     ) {
 
       isPanning =
@@ -6325,28 +7264,32 @@ treeCanvas.addEventListener(
         (
           first.clientX +
           second.clientX
-        ) / 2;
+        ) /
+        2;
 
 
       const midpointY =
         (
           first.clientY +
           second.clientY
-        ) / 2;
+        ) /
+        2;
 
 
       pinchWorldX =
         (
           midpointX -
           viewX
-        ) / zoom;
+        ) /
+        zoom;
 
 
       pinchWorldY =
         (
           midpointY -
           viewY
-        ) / zoom;
+        ) /
+        zoom;
 
     }
 
@@ -6366,7 +7309,8 @@ treeCanvas.addEventListener(
 
 
     if (
-      event.touches.length === 1 &&
+      event.touches.length ===
+      1 &&
       isPanning
     ) {
 
@@ -6392,7 +7336,8 @@ treeCanvas.addEventListener(
 
 
     if (
-      event.touches.length === 2
+      event.touches.length ===
+      2
     ) {
 
       const first =
@@ -6432,14 +7377,16 @@ treeCanvas.addEventListener(
         (
           first.clientX +
           second.clientX
-        ) / 2;
+        ) /
+        2;
 
 
       const midpointY =
         (
           first.clientY +
           second.clientY
-        ) / 2;
+        ) /
+        2;
 
 
       viewX =
@@ -6594,6 +7541,7 @@ function openCharacterForm() {
     "hidden"
   );
 
+
   characterFormPanel.classList.remove(
     "hidden"
   );
@@ -6606,6 +7554,7 @@ function closeCharacterForm() {
   formBackdrop.classList.add(
     "hidden"
   );
+
 
   characterFormPanel.classList.add(
     "hidden"
@@ -6724,7 +7673,7 @@ characterForm.addEventListener(
 
 
 /* =========================================================
-   TREE LAYOUT
+   TREE
 ========================================================= */
 
 function renderTree() {
@@ -6834,7 +7783,9 @@ function calculateTreeLayout() {
 
 
       rows
-        .get(generation)
+        .get(
+          generation
+        )
         .push(
           person
         );
@@ -6848,13 +7799,21 @@ function calculateTreeLayout() {
 
 
   const center =
-    WORLD_SIZE / 2;
+    WORLD_SIZE /
+    2;
 
 
-  let minX = center;
-  let maxX = center;
-  let minY = center;
-  let maxY = center;
+  let minX =
+    center;
+
+  let maxX =
+    center;
+
+  let minY =
+    center;
+
+  let maxY =
+    center;
 
 
   Array.from(
@@ -6862,7 +7821,8 @@ function calculateTreeLayout() {
   )
     .sort(
       (a,b) =>
-        a - b
+        a -
+        b
     )
     .forEach(
       generation => {
@@ -6877,19 +7837,22 @@ function calculateTreeLayout() {
 
         const width =
           (
-            row.length - 1
+            row.length -
+            1
           ) *
           NODE_GAP_X;
 
 
         const startX =
           center -
-          width / 2;
+          width /
+          2;
 
 
         const y =
           center -
-          650 +
+          650
+          +
           generation *
           GENERATION_GAP_Y;
 
@@ -6954,7 +7917,8 @@ function calculateTreeLayout() {
       (
         minX +
         maxX
-      ) / 2,
+      ) /
+      2,
 
     topY:
       minY,
@@ -7025,7 +7989,9 @@ function calculateGeneration(
 
 
   const person =
-    getCharacter(id);
+    getCharacter(
+      id
+    );
 
 
   if (!person) {
@@ -7033,7 +7999,9 @@ function calculateGeneration(
   }
 
 
-  visiting.add(id);
+  visiting.add(
+    id
+  );
 
 
   const parents =
@@ -7041,7 +8009,9 @@ function calculateGeneration(
       person.motherId,
       person.fatherId
     ]
-      .filter(Boolean);
+      .filter(
+        Boolean
+      );
 
 
   if (
@@ -7054,7 +8024,9 @@ function calculateGeneration(
     );
 
 
-    visiting.delete(id);
+    visiting.delete(
+      id
+    );
 
 
     return 0;
@@ -7072,7 +8044,8 @@ function calculateGeneration(
             visiting
           )
       )
-    ) + 1;
+    ) +
+    1;
 
 
   memo.set(
@@ -7081,7 +8054,9 @@ function calculateGeneration(
   );
 
 
-  visiting.delete(id);
+  visiting.delete(
+    id
+  );
 
 
   return generation;
@@ -7093,7 +8068,9 @@ function clusterPartners(
   row
 ) {
 
-  const result = [];
+  const result =
+    [];
+
   const visited =
     new Set();
 
@@ -7203,7 +8180,8 @@ function renderCharacterNode(
 
 
   if (
-    focusState.directAncestors
+    focusState
+      .directAncestors
       .has(
         character.id
       )
@@ -7353,11 +8331,14 @@ function buildFocusState() {
   if (!vantage) {
 
     characters.forEach(
-      person =>
+      person => {
+
         distances.set(
           person.id,
           0
-        )
+        );
+
+      }
     );
 
 
@@ -7409,14 +8390,17 @@ function buildFocusState() {
     const neighbours =
       graph.get(
         current.id
-      ) || new Set();
+      ) ||
+      new Set();
 
 
     neighbours.forEach(
       id => {
 
         if (
-          distances.has(id)
+          distances.has(
+            id
+          )
         ) {
           return;
         }
@@ -7459,17 +8443,23 @@ function collectDirectAncestors(
 ) {
 
   if (
-    visiting.has(id)
+    visiting.has(
+      id
+    )
   ) {
     return;
   }
 
 
-  visiting.add(id);
+  visiting.add(
+    id
+  );
 
 
   const person =
-    getCharacter(id);
+    getCharacter(
+      id
+    );
 
 
   if (!person) {
@@ -7481,22 +8471,23 @@ function collectDirectAncestors(
     person.motherId,
     person.fatherId
   ]
-    .filter(Boolean)
+    .filter(
+      Boolean
+    )
     .forEach(
       parentId => {
 
         if (
-          result.has(
+          !result.has(
             parentId
           )
         ) {
-          return;
+
+          result.add(
+            parentId
+          );
+
         }
-
-
-        result.add(
-          parentId
-        );
 
 
         collectDirectAncestors(
@@ -7509,7 +8500,9 @@ function collectDirectAncestors(
     );
 
 
-  visiting.delete(id);
+  visiting.delete(
+    id
+  );
 
 }
 
@@ -7536,7 +8529,9 @@ function buildRelationshipGraph() {
     }
 
 
-    return graph.get(id);
+    return graph.get(
+      id
+    );
 
   }
 
@@ -7549,19 +8544,23 @@ function buildRelationshipGraph() {
     if (
       !first ||
       !second ||
-      first === second
+      first ===
+      second
     ) {
       return;
     }
 
 
-    ensure(first).add(
-      second
-    );
+    ensure(first)
+      .add(
+        second
+      );
 
-    ensure(second).add(
-      first
-    );
+
+    ensure(second)
+      .add(
+        first
+      );
 
   }
 
@@ -7586,33 +8585,44 @@ function buildRelationshipGraph() {
       );
 
 
-      person.siblingIds
+      getSiblings(
+        person.id
+      )
         .forEach(
-          id =>
+          sibling => {
+
             connect(
               person.id,
-              id
-            )
+              sibling.id
+            );
+
+          }
         );
 
 
       person.spouseIds
         .forEach(
-          id =>
+          id => {
+
             connect(
               person.id,
               id
-            )
+            );
+
+          }
         );
 
 
       person.loverIds
         .forEach(
-          id =>
+          id => {
+
             connect(
               person.id,
               id
-            )
+            );
+
+          }
         );
 
     }
@@ -7644,7 +8654,8 @@ function getFocusClass(
 
 
   if (
-    focusState.directAncestors
+    focusState
+      .directAncestors
       .has(id)
   ) {
     return "focus-clear";
@@ -7652,33 +8663,38 @@ function getFocusClass(
 
 
   const distance =
-    focusState.distances
+    focusState
+      .distances
       .get(id);
 
 
   if (
-    distance === undefined
+    distance ===
+    undefined
   ) {
     return "focus-remote";
   }
 
 
   if (
-    distance <= 3
+    distance <=
+    3
   ) {
     return "focus-clear";
   }
 
 
   if (
-    distance === 4
+    distance ===
+    4
   ) {
     return "focus-near";
   }
 
 
   if (
-    distance <= 6
+    distance <=
+    6
   ) {
     return "focus-distant";
   }
@@ -7693,23 +8709,31 @@ function focusRank(
   className
 ) {
 
-  switch (
-    className
+  if (
+    className ===
+    "focus-clear"
   ) {
-
-    case "focus-clear":
-      return 0;
-
-    case "focus-near":
-      return 1;
-
-    case "focus-distant":
-      return 2;
-
-    default:
-      return 3;
-
+    return 0;
   }
+
+
+  if (
+    className ===
+    "focus-near"
+  ) {
+    return 1;
+  }
+
+
+  if (
+    className ===
+    "focus-distant"
+  ) {
+    return 2;
+  }
+
+
+  return 3;
 
 }
 
@@ -7719,7 +8743,9 @@ function getLineFocusClass(
 ) {
 
   const validIds =
-    ids.filter(Boolean);
+    ids.filter(
+      Boolean
+    );
 
 
   if (
@@ -7730,18 +8756,20 @@ function getLineFocusClass(
   }
 
 
-  let worstRank =
+  let worst =
     0;
 
 
   validIds.forEach(
     id => {
 
-      worstRank =
+      worst =
         Math.max(
-          worstRank,
+          worst,
           focusRank(
-            getFocusClass(id)
+            getFocusClass(
+              id
+            )
           )
         );
 
@@ -7750,21 +8778,21 @@ function getLineFocusClass(
 
 
   if (
-    worstRank === 0
+    worst === 0
   ) {
     return "focus-clear";
   }
 
 
   if (
-    worstRank === 1
+    worst === 1
   ) {
     return "focus-near";
   }
 
 
   if (
-    worstRank === 2
+    worst === 2
   ) {
     return "focus-distant";
   }
@@ -7790,13 +8818,18 @@ function isDirectAncestorEdge(
   const spine =
     new Set([
       vantageCharacterId,
-      ...focusState.directAncestors
+      ...focusState
+        .directAncestors
     ]);
 
 
   if (
-    !spine.has(firstId) ||
-    !spine.has(secondId)
+    !spine.has(
+      firstId
+    ) ||
+    !spine.has(
+      secondId
+    )
   ) {
     return false;
   }
@@ -7823,31 +8856,29 @@ function isDirectAncestorEdge(
 
 
   return (
-    first.motherId === secondId ||
-    first.fatherId === secondId ||
-    second.motherId === firstId ||
-    second.fatherId === firstId
+    first.motherId ===
+      secondId
+    ||
+    first.fatherId ===
+      secondId
+    ||
+    second.motherId ===
+      firstId
+    ||
+    second.fatherId ===
+      firstId
   );
 
 }
 
 
 /* =========================================================
-   CLEAN FAMILY CONNECTIONS
+   TREE RELATIONSHIP LINES
 ========================================================= */
 
 function drawRelationshipLines(
   positions
 ) {
-
-  /*
-    Romantic / partner relationships
-    are independent of genealogy.
-
-    This means a spouse/lover line
-    can still exist even when the pair
-    are also parent + child.
-  */
 
   drawPartnerLines(
     positions,
@@ -7863,28 +8894,10 @@ function drawRelationshipLines(
   );
 
 
-  /*
-    Optional manual sibling lines.
-
-    We only draw these when the pair
-    DO NOT already share a known parent,
-    because automatic siblings already
-    visually share their family branch.
-  */
-
   drawManualSiblingLines(
     positions
   );
 
-
-  /*
-    Group children by their exact
-    parent combination.
-
-    One pair of parents gets ONE
-    parent bond and ONE child branch,
-    instead of separate diagonal lines.
-  */
 
   const groups =
     buildChildGroups();
@@ -7952,7 +8965,8 @@ function buildChildGroups() {
           ]
             .sort(
               (a,b) =>
-                a - b
+                a -
+                b
             );
 
 
@@ -7971,7 +8985,9 @@ function buildChildGroups() {
 
 
       if (
-        !groups.has(key)
+        !groups.has(
+          key
+        )
       ) {
 
         groups.set(
@@ -7987,7 +9003,9 @@ function buildChildGroups() {
 
 
       groups
-        .get(key)
+        .get(
+          key
+        )
         .children
         .push(
           child
@@ -8056,10 +9074,6 @@ function drawChildGroup(
     [];
 
 
-  /*
-    BOTH PARENTS
-  */
-
   if (
     motherPosition &&
     fatherPosition
@@ -8084,13 +9098,6 @@ function drawChildGroup(
       ];
 
 
-    /*
-      Parent bond.
-
-      This touches the circle edges
-      instead of floating nearby.
-    */
-
     addCircleConnection(
       motherPosition,
       fatherPosition,
@@ -8099,31 +9106,22 @@ function drawChildGroup(
     );
 
 
-    /*
-      Children descend from the
-      MIDPOINT OF THE PARENT BOND.
-    */
-
     anchorX =
       (
         motherCenter.x +
         fatherCenter.x
-      ) / 2;
+      ) /
+      2;
 
 
     anchorY =
       (
         motherCenter.y +
         fatherCenter.y
-      ) / 2;
+      ) /
+      2;
 
-  }
-
-  /*
-    ONE PARENT
-  */
-
-  else {
+  } else {
 
     const parentPosition =
       motherPosition ||
@@ -8154,7 +9152,8 @@ function drawChildGroup(
 
     anchorY =
       parentPosition.y +
-      CIRCLE_RADIUS * 2;
+      CIRCLE_RADIUS *
+      2;
 
   }
 
@@ -8168,29 +9167,20 @@ function drawChildGroup(
     );
 
 
-  /*
-    Put the sibling branch shortly
-    above the child circles.
-  */
-
   let branchY =
     topChildY -
     55;
 
 
-  /*
-    Prevent the branch from landing
-    above the parent anchor in strange
-    cross-generation fantasy pairings.
-  */
-
   if (
     branchY <
-    anchorY + 25
+    anchorY +
+    25
   ) {
 
     branchY =
-      anchorY + 25;
+      anchorY +
+      25;
 
   }
 
@@ -8209,27 +9199,19 @@ function drawChildGroup(
     ];
 
 
-  /*
-    Is this shared trunk part of the
-    Vantage's direct ancestor spine?
-  */
-
-  const ancestralChild =
-    children.find(
-      entry =>
-        entry.child.id ===
+  const directSpineTrunk =
+    childIds.some(
+      childId =>
+        childId ===
           vantageCharacterId
         ||
         focusState
           .directAncestors
           .has(
-            entry.child.id
+            childId
           )
-    );
-
-
-  const directSpineTrunk =
-    ancestralChild &&
+    )
+    &&
     parentIds.some(
       parentId =>
         focusState
@@ -8240,7 +9222,7 @@ function drawChildGroup(
     );
 
 
-  const trunkExtraClass =
+  const trunkExtra =
     directSpineTrunk
       ? " direct-ancestor-line"
       : "";
@@ -8254,11 +9236,6 @@ function drawChildGroup(
         );
 
 
-  /*
-    Main vertical trunk from parent
-    or parent-bond to the children.
-  */
-
   addSvgLine(
     anchorX,
     anchorY,
@@ -8266,16 +9243,13 @@ function drawChildGroup(
     anchorX,
     branchY,
 
-    `tree-line parent-child-line ${trunkFocus}${trunkExtraClass}`
+    `tree-line parent-child-line ${trunkFocus}${trunkExtra}`
   );
 
 
-  /*
-    ONE CHILD
-  */
-
   if (
-    children.length === 1
+    children.length ===
+    1
   ) {
 
     const entry =
@@ -8294,7 +9268,8 @@ function drawChildGroup(
       Math.abs(
         childX -
         anchorX
-      ) > 1
+      ) >
+      1
     ) {
 
       addSvgLine(
@@ -8332,16 +9307,6 @@ function drawChildGroup(
   }
 
 
-  /*
-    MULTIPLE CHILDREN
-
-         parents
-            |
-       -------------
-       |     |     |
-      kid   kid   kid
-  */
-
   const minX =
     Math.min(
       ...children.map(
@@ -8367,7 +9332,7 @@ function drawChildGroup(
     maxX,
     branchY,
 
-    `tree-line parent-child-line ${trunkFocus}${trunkExtraClass}`
+    `tree-line parent-child-line ${trunkFocus}${trunkExtra}`
   );
 
 
@@ -8428,7 +9393,7 @@ function makeChildLineClass(
 
 
 /* =========================================================
-   PARTNER CONNECTIONS
+   PARTNER LINES
 ========================================================= */
 
 function drawPartnerLines(
@@ -8455,19 +9420,26 @@ function drawPartnerLines(
               ]
                 .sort(
                   (a,b) =>
-                    a - b
+                    a -
+                    b
                 )
-                .join("-");
+                .join(
+                  "-"
+                );
 
 
             if (
-              drawn.has(key)
+              drawn.has(
+                key
+              )
             ) {
               return;
             }
 
 
-            drawn.add(key);
+            drawn.add(
+              key
+            );
 
 
             const first =
@@ -8489,14 +9461,6 @@ function drawPartnerLines(
               return;
             }
 
-
-            /*
-              Circle edge → circle edge.
-
-              Works horizontally,
-              vertically or diagonally,
-              including parent/child pairs.
-            */
 
             addCircleConnection(
               first,
@@ -8547,12 +9511,6 @@ function drawManualSiblingLines(
             }
 
 
-            /*
-              If parents already prove
-              the sibling relationship,
-              no separate dotted line.
-            */
-
             if (
               shareKnownParent(
                 person,
@@ -8570,19 +9528,26 @@ function drawManualSiblingLines(
               ]
                 .sort(
                   (a,b) =>
-                    a - b
+                    a -
+                    b
                 )
-                .join("-");
+                .join(
+                  "-"
+                );
 
 
             if (
-              drawn.has(key)
+              drawn.has(
+                key
+              )
             ) {
               return;
             }
 
 
-            drawn.add(key);
+            drawn.add(
+              key
+            );
 
 
             const first =
@@ -8624,7 +9589,7 @@ function drawManualSiblingLines(
 
 
 /* =========================================================
-   LINE DRAWING HELPERS
+   LINE HELPERS
 ========================================================= */
 
 function getCircleCenter(
@@ -8680,7 +9645,8 @@ function addCircleConnection(
 
 
   if (
-    distance < 1
+    distance <
+    1
   ) {
     return;
   }
@@ -8796,7 +9762,9 @@ function openProfile(
 ) {
 
   const character =
-    getCharacter(id);
+    getCharacter(
+      id
+    );
 
 
   if (!character) {
@@ -8954,11 +9922,6 @@ function openProfile(
   );
 
 
-  renderGeneticProbabilities(
-    character
-  );
-
-
   setVantageButton.textContent =
     id ===
     vantageCharacterId
@@ -8969,6 +9932,7 @@ function openProfile(
   profileBackdrop.classList.remove(
     "hidden"
   );
+
 
   profilePanel.classList.remove(
     "hidden"
@@ -9030,7 +9994,10 @@ function renderRelationshipProfile(
           getCharacter(
             character.motherId
           )
-        ].filter(Boolean)
+        ]
+          .filter(
+            Boolean
+          )
       : []
   );
 
@@ -9042,7 +10009,10 @@ function renderRelationshipProfile(
           getCharacter(
             character.fatherId
           )
-        ].filter(Boolean)
+        ]
+          .filter(
+            Boolean
+          )
       : []
   );
 
@@ -9175,7 +10145,9 @@ function getAutomaticSiblings(
 ) {
 
   const person =
-    getCharacter(id);
+    getCharacter(
+      id
+    );
 
 
   if (!person) {
@@ -9185,7 +10157,8 @@ function getAutomaticSiblings(
 
   return characters.filter(
     other =>
-      other.id !== id
+      other.id !==
+        id
       &&
       shareKnownParent(
         person,
@@ -9201,7 +10174,9 @@ function getSiblings(
 ) {
 
   const person =
-    getCharacter(id);
+    getCharacter(
+      id
+    );
 
 
   if (!person) {
@@ -9217,11 +10192,14 @@ function getSiblings(
     id
   )
     .forEach(
-      sibling =>
+      sibling => {
+
         result.set(
           sibling.id,
           sibling
-        )
+        );
+
+      }
     );
 
 
@@ -9273,7 +10251,9 @@ function shareKnownParent(
       first.motherId,
       first.fatherId
     ]
-      .filter(Boolean);
+      .filter(
+        Boolean
+      );
 
 
   const secondParents =
@@ -9282,13 +10262,17 @@ function shareKnownParent(
         second.motherId,
         second.fatherId
       ]
-        .filter(Boolean)
+        .filter(
+          Boolean
+        )
     );
 
 
   return firstParents.some(
     id =>
-      secondParents.has(id)
+      secondParents.has(
+        id
+      )
   );
 
 }
@@ -9313,7 +10297,9 @@ function sharedParentCount(
         second.motherId,
         second.fatherId
       ]
-        .filter(Boolean)
+        .filter(
+          Boolean
+        )
     );
 
 
@@ -9321,10 +10307,14 @@ function sharedParentCount(
     first.motherId,
     first.fatherId
   ]
-    .filter(Boolean)
+    .filter(
+      Boolean
+    )
     .filter(
       id =>
-        secondParents.has(id)
+        secondParents.has(
+          id
+        )
     )
     .length;
 
@@ -9332,7 +10322,7 @@ function sharedParentCount(
 
 
 /* =========================================================
-   VANTAGE RELATION
+   VANTAGE
 ========================================================= */
 
 setVantageButton.addEventListener(
@@ -9347,6 +10337,7 @@ setVantageButton.addEventListener(
     saveVantage();
 
     renderTree();
+
 
     openProfile(
       selectedCharacterId
@@ -9395,6 +10386,10 @@ function renderVantageRelation(
 }
 
 
+/* =========================================================
+   RELATIONSHIP DESCRIPTION
+========================================================= */
+
 function describeRelationship(
   vantageId,
   subjectId
@@ -9428,12 +10423,6 @@ function describeRelationship(
   }
 
 
-  /*
-    Spouse / lover remains visible
-    even if there is also a blood
-    relationship.
-  */
-
   if (
     vantage.spouseIds.includes(
       subject.id
@@ -9453,18 +10442,14 @@ function describeRelationship(
 
 
   /*
-    Manual or automatic sibling.
+    SIBLING
   */
 
   if (
-    getSiblings(
-      vantage.id
+    areSiblings(
+      vantage.id,
+      subject.id
     )
-      .some(
-        sibling =>
-          sibling.id ===
-          subject.id
-      )
   ) {
 
     const shared =
@@ -9484,7 +10469,8 @@ function describeRelationship(
 
 
     if (
-      shared === 1
+      shared ===
+      1
     ) {
 
       return `Half ${base}`;
@@ -9498,7 +10484,7 @@ function describeRelationship(
 
 
   /*
-    Subject is ancestor.
+    DIRECT ANCESTOR
   */
 
   const ancestorDepth =
@@ -9509,7 +10495,8 @@ function describeRelationship(
 
 
   if (
-    ancestorDepth !== null
+    ancestorDepth !==
+    null
   ) {
 
     return makeAncestorTerm(
@@ -9521,7 +10508,7 @@ function describeRelationship(
 
 
   /*
-    Subject is descendant.
+    DIRECT DESCENDANT
   */
 
   const descendantDepth =
@@ -9532,7 +10519,8 @@ function describeRelationship(
 
 
   if (
-    descendantDepth !== null
+    descendantDepth !==
+    null
   ) {
 
     return makeDescendantTerm(
@@ -9542,6 +10530,133 @@ function describeRelationship(
 
   }
 
+
+  /*
+    MANUAL / AUTOMATIC SIBLING
+    EXTENDED KINSHIP
+
+    Parent's sibling = aunt/uncle.
+  */
+
+  const vantageParents =
+    getParents(
+      vantage.id
+    );
+
+
+  for (
+    const parent
+    of vantageParents
+  ) {
+
+    if (
+      areSiblings(
+        parent.id,
+        subject.id
+      )
+    ) {
+
+      return genderedTerm(
+        subject,
+        "Aunt",
+        "Uncle",
+        "Aunt/Uncle"
+      );
+
+    }
+
+  }
+
+
+  /*
+    Sibling's child = niece/nephew.
+  */
+
+  const vantageSiblings =
+    getSiblings(
+      vantage.id
+    );
+
+
+  for (
+    const sibling
+    of vantageSiblings
+  ) {
+
+    if (
+      subject.motherId ===
+        sibling.id
+      ||
+      subject.fatherId ===
+        sibling.id
+    ) {
+
+      return genderedTerm(
+        subject,
+        "Niece",
+        "Nephew",
+        "Niece/Nephew"
+      );
+
+    }
+
+  }
+
+
+  /*
+    GRANDPARENT SIBLING
+    = great-aunt / great-uncle
+
+    Also works recursively further back.
+  */
+
+  const ancestorSiblingRelation =
+    findAncestorSiblingRelation(
+      vantage.id,
+      subject.id
+    );
+
+
+  if (
+    ancestorSiblingRelation
+  ) {
+
+    return makeAncestorSiblingTerm(
+      subject,
+      ancestorSiblingRelation.depth
+    );
+
+  }
+
+
+  /*
+    DESCENDANT OF SIBLING
+    = great-niece / great-nephew etc.
+  */
+
+  const siblingDescendant =
+    findSiblingDescendantRelation(
+      vantage.id,
+      subject.id
+    );
+
+
+  if (
+    siblingDescendant
+  ) {
+
+    return makeSiblingDescendantTerm(
+      subject,
+      siblingDescendant.depth
+    );
+
+  }
+
+
+  /*
+    NORMAL COUSIN SYSTEM
+    BASED ON KNOWN PARENTS
+  */
 
   const vantageAncestors =
     getAncestorMap(
@@ -9563,7 +10678,9 @@ function describeRelationship(
     (vantageDepth,id) => {
 
       if (
-        subjectAncestors.has(id)
+        subjectAncestors.has(
+          id
+        )
       ) {
 
         common.push({
@@ -9637,8 +10754,11 @@ function describeRelationship(
 
 
   if (
-    nearest.vantageDepth === 2 &&
-    nearest.subjectDepth === 1
+    nearest.vantageDepth ===
+      2
+    &&
+    nearest.subjectDepth ===
+      1
   ) {
 
     return genderedTerm(
@@ -9652,8 +10772,11 @@ function describeRelationship(
 
 
   if (
-    nearest.vantageDepth === 1 &&
-    nearest.subjectDepth === 2
+    nearest.vantageDepth ===
+      1
+    &&
+    nearest.subjectDepth ===
+      2
   ) {
 
     return genderedTerm(
@@ -9667,15 +10790,19 @@ function describeRelationship(
 
 
   if (
-    nearest.vantageDepth >= 2 &&
-    nearest.subjectDepth >= 2
+    nearest.vantageDepth >=
+      2
+    &&
+    nearest.subjectDepth >=
+      2
   ) {
 
     const degree =
       Math.min(
         nearest.vantageDepth,
         nearest.subjectDepth
-      ) - 1;
+      ) -
+      1;
 
 
     const removed =
@@ -9689,7 +10816,9 @@ function describeRelationship(
       `${ordinal(degree)} Cousin`;
 
 
-    if (removed) {
+    if (
+      removed
+    ) {
 
       text +=
         ` ${removed} ${
@@ -9711,6 +10840,382 @@ function describeRelationship(
 }
 
 
+function areSiblings(
+  firstId,
+  secondId
+) {
+
+  if (
+    firstId ===
+    secondId
+  ) {
+    return false;
+  }
+
+
+  return getSiblings(
+    firstId
+  )
+    .some(
+      sibling =>
+        sibling.id ===
+        secondId
+    );
+
+}
+
+
+function getParents(
+  id
+) {
+
+  const person =
+    getCharacter(
+      id
+    );
+
+
+  if (!person) {
+    return [];
+  }
+
+
+  return [
+    person.motherId,
+    person.fatherId
+  ]
+    .filter(
+      Boolean
+    )
+    .map(
+      parentId =>
+        getCharacter(
+          parentId
+        )
+    )
+    .filter(
+      Boolean
+    );
+
+}
+
+
+/* =========================================================
+   MANUAL SIBLING EXTENDED KINSHIP
+========================================================= */
+
+function findAncestorSiblingRelation(
+  vantageId,
+  subjectId
+) {
+
+  const queue =
+    getParents(
+      vantageId
+    )
+      .map(
+        parent => ({
+          person:
+            parent,
+
+          depth:
+            1
+        })
+      );
+
+
+  const visited =
+    new Set();
+
+
+  while (
+    queue.length
+  ) {
+
+    const current =
+      queue.shift();
+
+
+    if (
+      visited.has(
+        current.person.id
+      )
+    ) {
+      continue;
+    }
+
+
+    visited.add(
+      current.person.id
+    );
+
+
+    if (
+      areSiblings(
+        current.person.id,
+        subjectId
+      )
+    ) {
+
+      return {
+        depth:
+          current.depth
+      };
+
+    }
+
+
+    getParents(
+      current.person.id
+    )
+      .forEach(
+        parent => {
+
+          queue.push({
+
+            person:
+              parent,
+
+            depth:
+              current.depth +
+              1
+
+          });
+
+        }
+      );
+
+  }
+
+
+  return null;
+
+}
+
+
+function makeAncestorSiblingTerm(
+  subject,
+  ancestorDepth
+) {
+
+  /*
+    Parent sibling = Aunt/Uncle
+
+    Grandparent sibling =
+    Great Aunt/Uncle
+
+    Great-grandparent sibling =
+    2× Great Aunt/Uncle
+  */
+
+  if (
+    ancestorDepth <=
+    1
+  ) {
+
+    return genderedTerm(
+      subject,
+      "Aunt",
+      "Uncle",
+      "Aunt/Uncle"
+    );
+
+  }
+
+
+  const greatCount =
+    ancestorDepth -
+    1;
+
+
+  const greatText =
+    greatCount === 1
+      ? "Great"
+      : `${greatCount}× Great`;
+
+
+  return genderedTerm(
+    subject,
+    `${greatText} Aunt`,
+    `${greatText} Uncle`,
+    `${greatText} Aunt/Uncle`
+  );
+
+}
+
+
+function findSiblingDescendantRelation(
+  vantageId,
+  subjectId
+) {
+
+  const siblings =
+    getSiblings(
+      vantageId
+    );
+
+
+  for (
+    const sibling
+    of siblings
+  ) {
+
+    const depth =
+      getDescendantDepthFrom(
+        sibling.id,
+        subjectId
+      );
+
+
+    if (
+      depth !== null
+    ) {
+
+      return {
+        depth
+      };
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+function getDescendantDepthFrom(
+  ancestorId,
+  descendantId
+) {
+
+  const queue =
+    [
+      {
+        id:
+          ancestorId,
+
+        depth:
+          0
+      }
+    ];
+
+
+  const visited =
+    new Set();
+
+
+  while (
+    queue.length
+  ) {
+
+    const current =
+      queue.shift();
+
+
+    if (
+      visited.has(
+        current.id
+      )
+    ) {
+      continue;
+    }
+
+
+    visited.add(
+      current.id
+    );
+
+
+    const children =
+      getChildren(
+        current.id
+      );
+
+
+    for (
+      const child
+      of children
+    ) {
+
+      const depth =
+        current.depth +
+        1;
+
+
+      if (
+        child.id ===
+        descendantId
+      ) {
+
+        return depth;
+
+      }
+
+
+      queue.push({
+        id:
+          child.id,
+
+        depth
+      });
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+function makeSiblingDescendantTerm(
+  subject,
+  depth
+) {
+
+  if (
+    depth <=
+    1
+  ) {
+
+    return genderedTerm(
+      subject,
+      "Niece",
+      "Nephew",
+      "Niece/Nephew"
+    );
+
+  }
+
+
+  const greatCount =
+    depth -
+    1;
+
+
+  const greatText =
+    greatCount === 1
+      ? "Great"
+      : `${greatCount}× Great`;
+
+
+  return genderedTerm(
+    subject,
+    `${greatText} Niece`,
+    `${greatText} Nephew`,
+    `${greatText} Niece/Nephew`
+  );
+
+}
+
+
+/* =========================================================
+   ANCESTOR HELPERS
+========================================================= */
+
 function getAncestorMap(
   id
 ) {
@@ -9723,7 +11228,8 @@ function getAncestorMap(
     [
       {
         id,
-        depth: 0
+        depth:
+          0
       }
     ];
 
@@ -9755,7 +11261,9 @@ function getAncestorMap(
       person.motherId,
       person.fatherId
     ]
-      .filter(Boolean)
+      .filter(
+        Boolean
+      )
       .forEach(
         parentId => {
 
@@ -9791,10 +11299,12 @@ function getAncestorMap(
 
 
           queue.push({
+
             id:
               parentId,
 
             depth
+
           });
 
         }
@@ -9836,7 +11346,8 @@ function makeAncestorTerm(
 ) {
 
   if (
-    depth === 1
+    depth ===
+    1
   ) {
 
     return genderedTerm(
@@ -9850,7 +11361,8 @@ function makeAncestorTerm(
 
 
   if (
-    depth === 2
+    depth ===
+    2
   ) {
 
     return genderedTerm(
@@ -9864,11 +11376,13 @@ function makeAncestorTerm(
 
 
   const greatCount =
-    depth - 2;
+    depth -
+    2;
 
 
   const greatText =
-    greatCount === 1
+    greatCount ===
+      1
       ? "Great"
       : `${greatCount}× Great`;
 
@@ -9889,7 +11403,8 @@ function makeDescendantTerm(
 ) {
 
   if (
-    depth === 1
+    depth ===
+    1
   ) {
 
     return genderedTerm(
@@ -9903,7 +11418,8 @@ function makeDescendantTerm(
 
 
   if (
-    depth === 2
+    depth ===
+    2
   ) {
 
     return genderedTerm(
@@ -9917,11 +11433,13 @@ function makeDescendantTerm(
 
 
   const greatCount =
-    depth - 2;
+    depth -
+    2;
 
 
   const greatText =
-    greatCount === 1
+    greatCount ===
+      1
       ? "Great"
       : `${greatCount}× Great`;
 
@@ -10072,10 +11590,13 @@ function openEditor() {
 
   refreshAncestryMode();
 
+  renderEditGenetics();
+
 
   profileBackdrop.classList.add(
     "hidden"
   );
+
 
   profilePanel.classList.add(
     "hidden"
@@ -10085,6 +11606,7 @@ function openEditor() {
   editBackdrop.classList.remove(
     "hidden"
   );
+
 
   editPanel.classList.remove(
     "hidden"
@@ -10336,7 +11858,9 @@ editCharacterForm.addEventListener(
       );
 
 
-    if (manualMode) {
+    if (
+      manualMode
+    ) {
 
       if (
         hasDuplicateAncestry(
@@ -10549,7 +12073,8 @@ editCharacterForm.addEventListener(
 
 
     character.portraitData =
-      pendingPortraitData || "";
+      pendingPortraitData ||
+      "";
 
 
     syncTwoWay(
@@ -10584,6 +12109,7 @@ editCharacterForm.addEventListener(
     editBackdrop.classList.add(
       "hidden"
     );
+
 
     editPanel.classList.add(
       "hidden"
@@ -10695,11 +12221,14 @@ function setCharacterColorEditorValue(
 
 
   select.value =
-    id || "";
+    id ||
+    "";
 
 
   custom.value =
-    isHexColor(hex)
+    isHexColor(
+      hex
+    )
       ? hex
       : "#777777";
 
@@ -10777,7 +12306,9 @@ function applyCharacterColorFromEditor(
       custom.value;
 
   }
-  else if (id) {
+  else if (
+    id
+  ) {
 
     const preset =
       findColorPreset(
@@ -10996,18 +12527,21 @@ async function compressPortrait(
     (
       image.width -
       size
-    ) / 2,
+    ) /
+    2,
 
     (
       image.height -
       size
-    ) / 2,
+    ) /
+    2,
 
     size,
     size,
 
     0,
     0,
+
     320,
     320
   );
@@ -11105,14 +12639,18 @@ function syncTwoWay(
     id => {
 
       if (
-        newIds.includes(id)
+        newIds.includes(
+          id
+        )
       ) {
         return;
       }
 
 
       const other =
-        getCharacter(id);
+        getCharacter(
+          id
+        );
 
 
       if (other) {
@@ -11135,7 +12673,9 @@ function syncTwoWay(
     id => {
 
       const other =
-        getCharacter(id);
+        getCharacter(
+          id
+        );
 
 
       if (
@@ -11188,9 +12728,10 @@ function makeReciprocalRelationships() {
                       )
                   ) {
 
-                    other[field].push(
-                      person.id
-                    );
+                    other[field]
+                      .push(
+                        person.id
+                      );
 
                   }
 
@@ -11215,6 +12756,7 @@ function closeProfile() {
   profileBackdrop.classList.add(
     "hidden"
   );
+
 
   profilePanel.classList.add(
     "hidden"
@@ -11244,6 +12786,7 @@ function cancelEditor() {
   editBackdrop.classList.add(
     "hidden"
   );
+
 
   editPanel.classList.add(
     "hidden"
@@ -11304,7 +12847,8 @@ deleteCharacterButton.addEventListener(
         characters =
           characters.filter(
             person =>
-              person.id !== id
+              person.id !==
+              id
           );
 
 
@@ -11312,18 +12856,24 @@ deleteCharacterButton.addEventListener(
           person => {
 
             if (
-              person.motherId === id
+              person.motherId ===
+              id
             ) {
+
               person.motherId =
                 null;
+
             }
 
 
             if (
-              person.fatherId === id
+              person.fatherId ===
+              id
             ) {
+
               person.fatherId =
                 null;
+
             }
 
 
@@ -11331,7 +12881,8 @@ deleteCharacterButton.addEventListener(
               person.siblingIds
                 .filter(
                   value =>
-                    value !== id
+                    value !==
+                    id
                 );
 
 
@@ -11339,7 +12890,8 @@ deleteCharacterButton.addEventListener(
               person.spouseIds
                 .filter(
                   value =>
-                    value !== id
+                    value !==
+                    id
                 );
 
 
@@ -11347,7 +12899,8 @@ deleteCharacterButton.addEventListener(
               person.loverIds
                 .filter(
                   value =>
-                    value !== id
+                    value !==
+                    id
                 );
 
           }
@@ -11355,7 +12908,8 @@ deleteCharacterButton.addEventListener(
 
 
         if (
-          vantageCharacterId === id
+          vantageCharacterId ===
+          id
         ) {
 
           vantageCharacterId =
@@ -11417,6 +12971,7 @@ function openConfirmation(
     "hidden"
   );
 
+
   confirmPanel.classList.remove(
     "hidden"
   );
@@ -11429,6 +12984,7 @@ function closeConfirmation() {
   confirmBackdrop.classList.add(
     "hidden"
   );
+
 
   confirmPanel.classList.add(
     "hidden"
@@ -11483,7 +13039,8 @@ function getCharacter(
 
   return characters.find(
     person =>
-      person.id === id
+      person.id ===
+      id
   );
 
 }
@@ -11496,9 +13053,13 @@ function getCharactersFromIds(
   return ids
     .map(
       id =>
-        getCharacter(id)
+        getCharacter(
+          id
+        )
     )
-    .filter(Boolean);
+    .filter(
+      Boolean
+    );
 
 }
 
@@ -11514,7 +13075,9 @@ function getSelectedSingleId(
 
 
   return value
-    ? Number(value)
+    ? Number(
+        value
+      )
     : null;
 
 }
@@ -11547,7 +13110,8 @@ function setInputValue(
   document.getElementById(
     id
   ).value =
-    value || "";
+    value ||
+    "";
 
 }
 
@@ -11557,7 +13121,9 @@ function getInputValue(
 ) {
 
   return document
-    .getElementById(id)
+    .getElementById(
+      id
+    )
     .value
     .trim();
 
@@ -11569,12 +13135,16 @@ function makeAliasArray(
 ) {
 
   return value
-    .split(",")
+    .split(
+      ","
+    )
     .map(
       item =>
         item.trim()
     )
-    .filter(Boolean);
+    .filter(
+      Boolean
+    );
 
 }
 
@@ -11639,7 +13209,9 @@ function getInitial(
     character.familyName ||
     "?"
   )
-    .charAt(0)
+    .charAt(
+      0
+    )
     .toUpperCase();
 
 }
@@ -11650,9 +13222,13 @@ function compareCharacterNames(
   second
 ) {
 
-  return getTreeName(first)
+  return getTreeName(
+    first
+  )
     .localeCompare(
-      getTreeName(second)
+      getTreeName(
+        second
+      )
     );
 
 }
@@ -11703,7 +13279,8 @@ function setProfileText(
   document.getElementById(
     id
   ).textContent =
-    value || "—";
+    value ||
+    "—";
 
 }
 
@@ -11716,7 +13293,8 @@ function setColorSwatch(
   document.getElementById(
     id
   ).style.background =
-    color || "#242429";
+    color ||
+    "#242429";
 
 }
 
@@ -11727,7 +13305,8 @@ function isHexColor(
 
   return /^#[0-9A-Fa-f]{6}$/
     .test(
-      value || ""
+      value ||
+      ""
     );
 
 }
@@ -11754,8 +13333,10 @@ function approximately100(
 ) {
 
   return Math.abs(
-    value - 100
-  ) < 0.01;
+    value -
+    100
+  ) <
+  0.01;
 
 }
 
@@ -11765,29 +13346,42 @@ function formatPercent(
 ) {
 
   const number =
-    Number(value);
+    Number(
+      value
+    );
 
 
   if (
-    !Number.isFinite(number)
+    !Number.isFinite(
+      number
+    )
   ) {
     return "0";
   }
 
 
   if (
-    Number.isInteger(number)
+    Number.isInteger(
+      number
+    )
   ) {
-    return String(number);
+    return String(
+      number
+    );
   }
 
 
   if (
-    Math.abs(number) >= 1
+    Math.abs(
+      number
+    ) >=
+    1
   ) {
 
     return number
-      .toFixed(2)
+      .toFixed(
+        2
+      )
       .replace(
         /0+$/,
         ""
@@ -11801,11 +13395,16 @@ function formatPercent(
 
 
   if (
-    Math.abs(number) >= 0.01
+    Math.abs(
+      number
+    ) >=
+    0.01
   ) {
 
     return number
-      .toFixed(4)
+      .toFixed(
+        4
+      )
       .replace(
         /0+$/,
         ""
@@ -11819,7 +13418,9 @@ function formatPercent(
 
 
   return number
-    .toFixed(6)
+    .toFixed(
+      6
+    )
     .replace(
       /0+$/,
       ""
@@ -11837,19 +13438,24 @@ function ordinal(
 ) {
 
   const hundred =
-    number % 100;
+    number %
+    100;
 
 
   if (
-    hundred >= 11 &&
-    hundred <= 13
+    hundred >=
+      11
+    &&
+    hundred <=
+      13
   ) {
     return `${number}th`;
   }
 
 
   switch (
-    number % 10
+    number %
+    10
   ) {
 
     case 1:
@@ -11876,8 +13482,13 @@ function createLibraryId() {
     Date.now() +
     "_" +
     Math.random()
-      .toString(36)
-      .slice(2,8)
+      .toString(
+        36
+      )
+      .slice(
+        2,
+        8
+      )
   );
 
 }
@@ -11898,7 +13509,9 @@ function cleanBrokenRelationships() {
     person => {
 
       if (
-        person.motherId !== null &&
+        person.motherId !==
+          null
+        &&
         !valid.has(
           person.motherId
         )
@@ -11911,7 +13524,9 @@ function cleanBrokenRelationships() {
 
 
       if (
-        person.fatherId !== null &&
+        person.fatherId !==
+          null
+        &&
         !valid.has(
           person.fatherId
         )
@@ -11928,8 +13543,11 @@ function cleanBrokenRelationships() {
           .filter(
             id =>
               id !==
-              person.id &&
-              valid.has(id)
+                person.id
+              &&
+              valid.has(
+                id
+              )
           );
 
 
@@ -11938,8 +13556,11 @@ function cleanBrokenRelationships() {
           .filter(
             id =>
               id !==
-              person.id &&
-              valid.has(id)
+                person.id
+              &&
+              valid.has(
+                id
+              )
           );
 
 
@@ -11948,8 +13569,11 @@ function cleanBrokenRelationships() {
           .filter(
             id =>
               id !==
-              person.id &&
-              valid.has(id)
+                person.id
+              &&
+              valid.has(
+                id
+              )
           );
 
     }
@@ -11957,7 +13581,9 @@ function cleanBrokenRelationships() {
 
 
   if (
-    vantageCharacterId !== null &&
+    vantageCharacterId !==
+      null
+    &&
     !valid.has(
       vantageCharacterId
     )
@@ -12037,13 +13663,17 @@ function focusCharacter(
 
 
     viewX =
-      rect.width / 2 -
+      rect.width /
+      2
+      -
       position.x *
       zoom;
 
 
     viewY =
-      rect.height / 2 -
+      rect.height /
+      2
+      -
       position.y *
       zoom;
 
@@ -12055,7 +13685,9 @@ function focusCharacter(
 
   setTimeout(
     () =>
-      openProfile(id),
+      openProfile(
+        id
+      ),
     180
   );
 
