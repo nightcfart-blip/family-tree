@@ -1144,3 +1144,204 @@ button:active {
 .hidden {
   display: none !important;
 }
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-icon-button {
+  width: 46px;
+  height: 46px;
+
+  border:
+    1px solid rgba(255,255,255,0.12);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,0.05);
+
+  color: #f5f3ef;
+
+  font-size: 24px;
+}
+
+.search-panel {
+  position: fixed;
+
+  left: 12px;
+  right: 12px;
+  top:
+    calc(
+      12px +
+      env(safe-area-inset-top)
+    );
+
+  max-height: 78dvh;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(255,255,255,0.1);
+
+  border-radius: 22px;
+
+  background: #17171a;
+
+  box-shadow:
+    0 24px 70px
+    rgba(0,0,0,0.55);
+
+  z-index: 130;
+}
+
+.search-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 16px;
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.08);
+}
+
+.search-header h2 {
+  margin: 0;
+
+  font-size: 22px;
+}
+
+.search-body {
+  padding: 14px;
+
+  max-height: 65dvh;
+
+  overflow-y: auto;
+}
+
+.search-input {
+  width: 100%;
+
+  min-height: 50px;
+
+  padding: 12px 14px;
+
+  border:
+    1px solid rgba(255,255,255,0.1);
+
+  border-radius: 14px;
+
+  outline: none;
+
+  background: #202024;
+
+  color: #f5f3ef;
+
+  font-size: 16px;
+}
+
+.search-results {
+  display: grid;
+
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+.search-result {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  border:
+    1px solid rgba(255,255,255,0.07);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,0.025);
+
+  color: #f5f3ef;
+
+  text-align: left;
+}
+
+.search-result-circle {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(255,255,255,0.15);
+
+  background: #242429;
+
+  font-weight: 600;
+}
+
+.search-result-text {
+  min-width: 0;
+}
+
+.search-result-name {
+  display: block;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.search-result-meta {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 12px;
+
+  color: #918b83;
+}
+
+.search-empty {
+  padding: 24px 12px;
+
+  text-align: center;
+
+  color: #77716b;
+
+  font-size: 14px;
+}
+
+.profile-footer-three {
+  grid-template-columns:
+    1.2fr 1fr 1fr;
+}
+
+.delete-button {
+  min-height: 52px;
+
+  border:
+    1px solid rgba(255,100,100,0.32);
+
+  border-radius: 14px;
+
+  background:
+    rgba(130,20,20,0.18);
+
+  color: #ffb3b3;
+
+  font-weight: 650;
+}
