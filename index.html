@@ -284,167 +284,161 @@
     </section>
 
 
-<section class="world-section">
+    <section class="world-section">
 
-  <p class="world-label">
-    Genetic Model
-  </p>
-
-  <p class="world-description">
-    Choose how strongly family, Race and Species influence appearance probabilities.
-  </p>
-
-
-  <div class="genetic-settings-group">
-
-    <div class="genetic-settings-title">
-      Overall Influence
-    </div>
-
-    <label class="genetic-setting-row">
-
-      <span>Family</span>
-
-      <div>
-        <input
-          id="familyWeightInput"
-          type="number"
-          min="0"
-          max="100"
-          step="1"
-          inputmode="decimal"
-        >
-
-        <strong>%</strong>
-      </div>
-
-    </label>
-
-
-    <label class="genetic-setting-row">
-
-      <span>Race</span>
-
-      <div>
-        <input
-          id="raceWeightInput"
-          type="number"
-          min="0"
-          max="100"
-          step="1"
-          inputmode="decimal"
-        >
-
-        <strong>%</strong>
-      </div>
-
-    </label>
-
-
-    <label class="genetic-setting-row">
-
-      <span>Species</span>
-
-      <div>
-        <input
-          id="speciesWeightInput"
-          type="number"
-          min="0"
-          max="100"
-          step="1"
-          inputmode="decimal"
-        >
-
-        <strong>%</strong>
-      </div>
-
-    </label>
-
-
-    <div
-      id="overallWeightTotal"
-      class="genetic-setting-total"
-    >
-      Total: 100%
-    </div>
-
-  </div>
-
-
-  <div class="genetic-settings-group">
-
-    <div class="genetic-settings-title">
-      Parent Contribution
-    </div>
-
-    <p class="world-description">
-      Controls how much of a parent's contribution comes from their inherited possibilities versus the color they actually display.
-    </p>
-
-
-    <label class="genetic-setting-row">
-
-      <span>Inherited Genetics</span>
-
-      <div>
-        <input
-          id="parentGeneticWeightInput"
-          type="number"
-          min="0"
-          max="100"
-          step="1"
-          inputmode="decimal"
-        >
-
-        <strong>%</strong>
-      </div>
-
-    </label>
-
-
-    <label class="genetic-setting-row">
-
-      <span>Actual Appearance</span>
-
-      <div>
-        <input
-          id="parentActualWeightInput"
-          type="number"
-          min="0"
-          max="100"
-          step="1"
-          inputmode="decimal"
-        >
-
-        <strong>%</strong>
-      </div>
-
-    </label>
-
-
-    <div
-      id="parentWeightTotal"
-      class="genetic-setting-total"
-    >
-      Total: 100%
-    </div>
-
-  </div>
-
-
-  <button
-    id="saveGeneticModelButton"
-    class="world-action-button"
-    type="button"
-  >
-    Save Genetic Model
-  </button>
-
-</section>
-
-      <p class="world-description genetics-model-description">
-        Parent genetics already contain earlier generations, allowing grandparents and deeper ancestry to continue influencing descendants.
+      <p class="world-label">
+        Genetic Model
       </p>
+
+      <p class="world-description">
+        Choose how strongly family, Race and Species influence appearance probabilities.
+      </p>
+
+
+      <div class="genetic-settings-group">
+
+        <div class="genetic-settings-title">
+          Overall Influence
+        </div>
+
+        <label class="genetic-setting-row">
+
+          <span>Family</span>
+
+          <div>
+            <input
+              id="familyWeightInput"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              inputmode="decimal"
+            >
+
+            <strong>%</strong>
+          </div>
+
+        </label>
+
+
+        <label class="genetic-setting-row">
+
+          <span>Race</span>
+
+          <div>
+            <input
+              id="raceWeightInput"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              inputmode="decimal"
+            >
+
+            <strong>%</strong>
+          </div>
+
+        </label>
+
+
+        <label class="genetic-setting-row">
+
+          <span>Species</span>
+
+          <div>
+            <input
+              id="speciesWeightInput"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              inputmode="decimal"
+            >
+
+            <strong>%</strong>
+          </div>
+
+        </label>
+
+
+        <div
+          id="overallWeightTotal"
+          class="genetic-setting-total"
+        >
+          Total: 100%
+        </div>
+
+      </div>
+
+
+      <div class="genetic-settings-group">
+
+        <div class="genetic-settings-title">
+          Parent Contribution
+        </div>
+
+        <p class="world-description">
+          Controls how much of a parent's contribution comes from their inherited possibilities versus the color they actually display.
+        </p>
+
+
+        <label class="genetic-setting-row">
+
+          <span>Inherited Genetics</span>
+
+          <div>
+            <input
+              id="parentGeneticWeightInput"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              inputmode="decimal"
+            >
+
+            <strong>%</strong>
+          </div>
+
+        </label>
+
+
+        <label class="genetic-setting-row">
+
+          <span>Actual Appearance</span>
+
+          <div>
+            <input
+              id="parentActualWeightInput"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              inputmode="decimal"
+            >
+
+            <strong>%</strong>
+          </div>
+
+        </label>
+
+
+        <div
+          id="parentWeightTotal"
+          class="genetic-setting-total"
+        >
+          Total: 100%
+        </div>
+
+      </div>
+
+
+      <button
+        id="saveGeneticModelButton"
+        class="world-action-button"
+        type="button"
+      >
+        Save Genetic Model
+      </button>
 
     </section>
 
@@ -744,10 +738,21 @@
         <input id="maidenName" type="text">
       </label>
 
-     <label class="field">
-  <span>Family Name</span>
-  <input id="familyName" type="text">
-</label>
+      <label class="field">
+        <span>Family Name</span>
+        <input id="familyName" type="text">
+      </label>
+
+      <label class="field">
+        <span>Gender</span>
+
+        <select id="gender">
+          <option value="unknown">Unknown</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="nonbinary">Nonbinary</option>
+        </select>
+      </label>
 
       <div class="field-row">
 
@@ -875,6 +880,20 @@
         <div
           id="profileAliases"
           class="box-value"
+        ></div>
+
+      </section>
+
+
+      <section class="profile-box gender-box">
+
+        <span class="box-label">
+          Gender
+        </span>
+
+        <div
+          id="profileGender"
+          class="box-value big-value"
         ></div>
 
       </section>
@@ -1240,10 +1259,21 @@
         <input id="editMaidenName" type="text">
       </label>
 
-<label class="field">
-  <span>Family Name</span>
-  <input id="editFamilyName" type="text">
-</label>
+      <label class="field">
+        <span>Family Name</span>
+        <input id="editFamilyName" type="text">
+      </label>
+
+      <label class="field">
+        <span>Gender</span>
+
+        <select id="editGender">
+          <option value="unknown">Unknown</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="nonbinary">Nonbinary</option>
+        </select>
+      </label>
 
 
       <div class="editor-heading">
