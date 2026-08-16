@@ -10,6 +10,9 @@ const RACE_LIBRARY_KEY =
 const SPECIES_LIBRARY_KEY =
   "fantasyFamilyTreeSpeciesLibrary";
 
+const GENETIC_MODEL_KEY =
+  "fantasyFamilyTreeGeneticModel";
+
 const UNKNOWN_ANCESTRY_ID =
   "__unknown__";
 
@@ -39,20 +42,28 @@ const COLOR_PRESETS =
   possibility distribution.
 */
 
-const FAMILY_WEIGHT =
-  0.70;
+const DEFAULT_GENETIC_MODEL = {
 
-const RACE_WEIGHT =
-  0.20;
+  family:
+    70,
 
-const SPECIES_WEIGHT =
-  0.10;
+  race:
+    20,
 
-const PARENT_GENETIC_WEIGHT =
-  0.60;
+  species:
+    10,
 
-const PARENT_ACTUAL_WEIGHT =
-  0.40;
+  parentGenetic:
+    60,
+
+  parentActual:
+    40
+
+};
+
+
+let geneticModel =
+  loadGeneticModel();
 
 
 /* TREE */
@@ -309,6 +320,47 @@ const importWorldFile =
     "importWorldFile"
   );
 
+/* GENETIC MODEL SETTINGS */
+
+const familyWeightInput =
+  document.getElementById(
+    "familyWeightInput"
+  );
+
+const raceWeightInput =
+  document.getElementById(
+    "raceWeightInput"
+  );
+
+const speciesWeightInput =
+  document.getElementById(
+    "speciesWeightInput"
+  );
+
+const parentGeneticWeightInput =
+  document.getElementById(
+    "parentGeneticWeightInput"
+  );
+
+const parentActualWeightInput =
+  document.getElementById(
+    "parentActualWeightInput"
+  );
+
+const overallWeightTotal =
+  document.getElementById(
+    "overallWeightTotal"
+  );
+
+const parentWeightTotal =
+  document.getElementById(
+    "parentWeightTotal"
+  );
+
+const saveGeneticModelButton =
+  document.getElementById(
+    "saveGeneticModelButton"
+  );
 
 /* LIBRARY */
 
@@ -705,6 +757,343 @@ const toast =
 /* =========================================================
    STORAGE
 ========================================================= */
+
+function loadGeneticModel() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        GENETIC_MODEL_KEY
+      );
+
+
+    if (!saved) {
+
+      return {
+        ...DEFAULT_GENETIC_MODEL
+      };
+
+    }
+
+
+    const parsed =
+      JSON.parse(saved);
+
+
+    return {
+
+      family:
+        safeWeight(
+          parsed.family,
+          DEFAULT_GENETIC_MODEL.family
+        ),
+
+      race:
+        safeWeight(
+          parsed.race,
+          DEFAULT_GENETIC_MODEL.race
+        ),
+
+      species:
+        safeWeight(
+          parsed.species,
+          DEFAULT_GENETIC_MODEL.species
+        ),
+
+      parentGenetic:
+        safeWeight(
+          parsed.parentGenetic,
+          DEFAULT_GENETIC_MODEL.parentGenetic
+        ),
+
+      parentActual:
+        safeWeight(
+          parsed.parentActual,
+          DEFAULT_GENETIC_MODEL.parentActual
+        )
+
+    };
+
+  } catch {
+
+    return {
+      ...DEFAULT_GENETIC_MODEL
+    };
+
+  }
+
+}
+
+
+function saveGeneticModel() {
+
+  localStorage.setItem(
+    GENETIC_MODEL_KEY,
+    JSON.stringify(
+      geneticModel
+    )
+  );
+
+}
+
+
+function safeWeight(
+  value,
+  fallback
+) {
+
+  const number =
+    Number(value);
+
+
+  if (
+    !Number.isFinite(number)
+  ) {
+
+    return fallback;
+
+  }
+
+
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      number
+    )
+  );
+
+}
+
+
+function populateGeneticModelInputs() {
+
+  familyWeightInput.value =
+    geneticModel.family;
+
+
+  raceWeightInput.value =
+    geneticModel.race;
+
+
+  speciesWeightInput.value =
+    geneticModel.species;
+
+
+  parentGeneticWeightInput.value =
+    geneticModel.parentGenetic;
+
+
+  parentActualWeightInput.value =
+    geneticModel.parentActual;
+
+
+  updateGeneticModelTotals();
+
+}
+
+
+function updateGeneticModelTotals() {
+
+  const overall =
+    getModelInputNumber(
+      familyWeightInput
+    )
+    +
+    getModelInputNumber(
+      raceWeightInput
+    )
+    +
+    getModelInputNumber(
+      speciesWeightInput
+    );
+
+
+  const parent =
+    getModelInputNumber(
+      parentGeneticWeightInput
+    )
+    +
+    getModelInputNumber(
+      parentActualWeightInput
+    );
+
+
+  overallWeightTotal.textContent =
+    `Total: ${formatPercent(overall)}%`;
+
+
+  parentWeightTotal.textContent =
+    `Total: ${formatPercent(parent)}%`;
+
+
+  setTotalValidity(
+    overallWeightTotal,
+    overall
+  );
+
+
+  setTotalValidity(
+    parentWeightTotal,
+    parent
+  );
+
+}
+
+
+function getModelInputNumber(
+  input
+) {
+
+  return Number(
+    input.value
+  ) || 0;
+
+}
+
+
+function setTotalValidity(
+  element,
+  total
+) {
+
+  element.classList.remove(
+    "valid",
+    "invalid"
+  );
+
+
+  element.classList.add(
+    approximately100(total)
+      ? "valid"
+      : "invalid"
+  );
+
+}
+
+
+[
+  familyWeightInput,
+  raceWeightInput,
+  speciesWeightInput,
+  parentGeneticWeightInput,
+  parentActualWeightInput
+]
+  .forEach(
+    input => {
+
+      input.addEventListener(
+        "input",
+        updateGeneticModelTotals
+      );
+
+    }
+  );
+
+
+saveGeneticModelButton.addEventListener(
+  "click",
+
+  function() {
+
+    const family =
+      getModelInputNumber(
+        familyWeightInput
+      );
+
+
+    const race =
+      getModelInputNumber(
+        raceWeightInput
+      );
+
+
+    const species =
+      getModelInputNumber(
+        speciesWeightInput
+      );
+
+
+    const parentGenetic =
+      getModelInputNumber(
+        parentGeneticWeightInput
+      );
+
+
+    const parentActual =
+      getModelInputNumber(
+        parentActualWeightInput
+      );
+
+
+    if (
+      !approximately100(
+        family +
+        race +
+        species
+      )
+    ) {
+
+      showToast(
+        "Family + Race + Species must total 100%"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      !approximately100(
+        parentGenetic +
+        parentActual
+      )
+    ) {
+
+      showToast(
+        "Parent Genetics + Actual Appearance must total 100%"
+      );
+
+      return;
+
+    }
+
+
+    geneticModel = {
+
+      family,
+
+      race,
+
+      species,
+
+      parentGenetic,
+
+      parentActual
+
+    };
+
+
+    saveGeneticModel();
+
+
+    showToast(
+      "Genetic model saved"
+    );
+
+
+    /*
+      Nothing needs to be stored
+      on individual characters.
+
+      Their probabilities are
+      recalculated from this model
+      whenever profiles are opened.
+    */
+
+  }
+);
 
 function loadCharacters() {
 
@@ -1816,8 +2205,11 @@ function calculateTraitInternal(
     FAMILY — 70%
   */
 
-  const perParentWeight =
-    FAMILY_WEIGHT / 2;
+const perParentWeight =
+  (
+    geneticModel.family /
+    100
+  ) / 2;
 
 
   addFamilyContribution(
@@ -1848,22 +2240,21 @@ function calculateTraitInternal(
     RACE — 20%
   */
 
-  addWeightedEntries(
-    finalMap,
-    raceBaseline,
-    RACE_WEIGHT
-  );
-
+addWeightedEntries(
+  finalMap,
+  raceBaseline,
+  geneticModel.race / 100
+);
 
   /*
     SPECIES — 10%
   */
 
-  addWeightedEntries(
-    finalMap,
-    speciesBaseline,
-    SPECIES_WEIGHT
-  );
+addWeightedEntries(
+  finalMap,
+  speciesBaseline,
+  geneticModel.species / 100
+);
 
 
   /*
@@ -1972,21 +2363,21 @@ function addFamilyContribution(
   */
 
   addWeightedEntries(
-    parentMap,
-    parentGenetics,
-    PARENT_GENETIC_WEIGHT
-  );
+  parentMap,
+  parentGenetics,
+  geneticModel.parentGenetic / 100
+);
 
 
   /*
     40% parent's actual appearance
   */
 
-  addWeightedEntries(
-    parentMap,
-    parentActual,
-    PARENT_ACTUAL_WEIGHT
-  );
+addWeightedEntries(
+  parentMap,
+  parentActual,
+  geneticModel.parentActual / 100
+);
 
 
   let parentBlend =
@@ -4751,6 +5142,8 @@ function openWorldPanel() {
 
   updateWorldStats();
 
+  populateGeneticModelInputs();
+
 
   worldBackdrop.classList.remove(
     "hidden"
@@ -4914,14 +5307,15 @@ exportWorldButton.addEventListener(
       exportedAt:
         new Date().toISOString(),
 
-      vantageCharacterId,
+vantageCharacterId,
 
-      characters,
+geneticModel,
 
-      raceLibrary,
+characters,
 
-      speciesLibrary
+raceLibrary,
 
+speciesLibrary
     };
 
 
@@ -5076,6 +5470,78 @@ importWorldFile.addEventListener(
               data.vantageCharacterId
             );
 
+          geneticModel = {
+
+  family:
+    safeWeight(
+      data.geneticModel?.family,
+      DEFAULT_GENETIC_MODEL.family
+    ),
+
+  race:
+    safeWeight(
+      data.geneticModel?.race,
+      DEFAULT_GENETIC_MODEL.race
+    ),
+
+  species:
+    safeWeight(
+      data.geneticModel?.species,
+      DEFAULT_GENETIC_MODEL.species
+    ),
+
+  parentGenetic:
+    safeWeight(
+      data.geneticModel?.parentGenetic,
+      DEFAULT_GENETIC_MODEL.parentGenetic
+    ),
+
+  parentActual:
+    safeWeight(
+      data.geneticModel?.parentActual,
+      DEFAULT_GENETIC_MODEL.parentActual
+    )
+
+};
+
+
+if (
+  !approximately100(
+    geneticModel.family +
+    geneticModel.race +
+    geneticModel.species
+  )
+) {
+
+  geneticModel.family =
+    DEFAULT_GENETIC_MODEL.family;
+
+  geneticModel.race =
+    DEFAULT_GENETIC_MODEL.race;
+
+  geneticModel.species =
+    DEFAULT_GENETIC_MODEL.species;
+
+}
+
+
+if (
+  !approximately100(
+    geneticModel.parentGenetic +
+    geneticModel.parentActual
+  )
+) {
+
+  geneticModel.parentGenetic =
+    DEFAULT_GENETIC_MODEL.parentGenetic;
+
+  geneticModel.parentActual =
+    DEFAULT_GENETIC_MODEL.parentActual;
+
+}
+
+
+saveGeneticModel();
 
           cleanBrokenRelationships();
 
