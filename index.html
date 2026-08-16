@@ -1040,61 +1040,6 @@
       </section>
 
 
-      <section class="profile-box genetics-box">
-
-        <span class="box-label">
-          Genetic Appearance Probabilities
-        </span>
-
-        <p class="genetics-profile-note">
-          Fantasy inheritance model based on family, Race and Species.
-        </p>
-
-
-        <div class="genetic-trait-card">
-
-          <div class="genetic-trait-heading">
-            Hair
-          </div>
-
-          <div
-            id="profileHairProbabilities"
-            class="probability-list"
-          ></div>
-
-        </div>
-
-
-        <div class="genetic-trait-card">
-
-          <div class="genetic-trait-heading">
-            Eyes
-          </div>
-
-          <div
-            id="profileEyeProbabilities"
-            class="probability-list"
-          ></div>
-
-        </div>
-
-
-        <div class="genetic-trait-card">
-
-          <div class="genetic-trait-heading">
-            Skin
-          </div>
-
-          <div
-            id="profileSkinProbabilities"
-            class="probability-list"
-          ></div>
-
-        </div>
-
-      </section>
-
-
       <section class="profile-box feature-box">
 
         <span class="box-label">
@@ -1488,12 +1433,38 @@
       </div>
 
 
-      <div class="appearance-preset">
+      <!-- HAIR -->
+
+      <section class="appearance-genetics-card">
+
+        <div class="appearance-genetics-header">
+
+          <div>
+            <span class="appearance-genetics-kicker">
+              Hair
+            </span>
+
+            <h3>
+              Hair Color
+            </h3>
+          </div>
+
+          <button
+            id="spinHairButton"
+            class="probability-wheel-button"
+            type="button"
+          >
+            🎲 Probability Wheel
+          </button>
+
+        </div>
+
 
         <label class="field">
-          <span>Hair Color</span>
+          <span>Actual Hair Color</span>
           <select id="editHairPreset"></select>
         </label>
+
 
         <div class="appearance-preview-row">
 
@@ -1506,6 +1477,7 @@
 
         </div>
 
+
         <label
           id="editHairCustomWrap"
           class="custom-color-field hidden"
@@ -1514,15 +1486,55 @@
           <input id="editHairCustom" type="color">
         </label>
 
-      </div>
+
+        <div class="edit-genetics-section">
+
+          <div class="edit-genetics-title">
+            Genetic Possibilities
+          </div>
+
+          <div
+            id="editHairProbabilities"
+            class="probability-list"
+          ></div>
+
+        </div>
+
+      </section>
 
 
-      <div class="appearance-preset">
+      <!-- EYES -->
+
+      <section class="appearance-genetics-card">
+
+        <div class="appearance-genetics-header">
+
+          <div>
+            <span class="appearance-genetics-kicker">
+              Eyes
+            </span>
+
+            <h3>
+              Eye Color
+            </h3>
+          </div>
+
+          <button
+            id="spinEyeButton"
+            class="probability-wheel-button"
+            type="button"
+          >
+            🎲 Probability Wheel
+          </button>
+
+        </div>
+
 
         <label class="field">
-          <span>Eye Color</span>
+          <span>Actual Eye Color</span>
           <select id="editEyePreset"></select>
         </label>
+
 
         <div class="appearance-preview-row">
 
@@ -1535,6 +1547,7 @@
 
         </div>
 
+
         <label
           id="editEyeCustomWrap"
           class="custom-color-field hidden"
@@ -1543,15 +1556,55 @@
           <input id="editEyeCustom" type="color">
         </label>
 
-      </div>
+
+        <div class="edit-genetics-section">
+
+          <div class="edit-genetics-title">
+            Genetic Possibilities
+          </div>
+
+          <div
+            id="editEyeProbabilities"
+            class="probability-list"
+          ></div>
+
+        </div>
+
+      </section>
 
 
-      <div class="appearance-preset">
+      <!-- SKIN -->
+
+      <section class="appearance-genetics-card">
+
+        <div class="appearance-genetics-header">
+
+          <div>
+            <span class="appearance-genetics-kicker">
+              Skin
+            </span>
+
+            <h3>
+              Skin Color
+            </h3>
+          </div>
+
+          <button
+            id="spinSkinButton"
+            class="probability-wheel-button"
+            type="button"
+          >
+            🎲 Probability Wheel
+          </button>
+
+        </div>
+
 
         <label class="field">
-          <span>Skin Color</span>
+          <span>Actual Skin Color</span>
           <select id="editSkinPreset"></select>
         </label>
+
 
         <div class="appearance-preview-row">
 
@@ -1564,6 +1617,7 @@
 
         </div>
 
+
         <label
           id="editSkinCustomWrap"
           class="custom-color-field hidden"
@@ -1572,7 +1626,21 @@
           <input id="editSkinCustom" type="color">
         </label>
 
-      </div>
+
+        <div class="edit-genetics-section">
+
+          <div class="edit-genetics-title">
+            Genetic Possibilities
+          </div>
+
+          <div
+            id="editSkinProbabilities"
+            class="probability-list"
+          ></div>
+
+        </div>
+
+      </section>
 
 
       <label class="field">
@@ -1603,7 +1671,11 @@
       </div>
 
       <label class="field">
-        <textarea id="editLife" class="life-editor" rows="15"></textarea>
+        <textarea
+          id="editLife"
+          class="life-editor"
+          rows="15"
+        ></textarea>
       </label>
 
     </div>
@@ -1626,6 +1698,130 @@
     </div>
 
   </form>
+
+</section>
+
+
+
+<!-- PROBABILITY WHEEL -->
+
+<div
+  id="probabilityWheelBackdrop"
+  class="backdrop hidden"
+></div>
+
+<section
+  id="probabilityWheelPanel"
+  class="probability-wheel-panel hidden"
+>
+
+  <div class="probability-wheel-topbar">
+
+    <div>
+      <p class="eyebrow">
+        Genetic Randomizer
+      </p>
+
+      <h2 id="probabilityWheelTitle">
+        Hair Probability Wheel
+      </h2>
+    </div>
+
+    <button
+      id="closeProbabilityWheelButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="probability-wheel-body">
+
+    <p class="probability-wheel-description">
+      Each section of the wheel follows this character's calculated genetic percentages.
+    </p>
+
+
+    <div class="wheel-stage">
+
+      <div class="wheel-pointer"></div>
+
+      <div
+        id="probabilityWheel"
+        class="probability-wheel"
+      ></div>
+
+      <div class="wheel-center">
+        ✦
+      </div>
+
+    </div>
+
+
+    <div
+      id="probabilityWheelLegend"
+      class="probability-wheel-legend"
+    ></div>
+
+
+    <div
+      id="probabilityWheelResult"
+      class="probability-wheel-result hidden"
+    >
+
+      <span>
+        Result
+      </span>
+
+      <div class="wheel-result-main">
+
+        <div
+          id="probabilityWheelResultSwatch"
+          class="wheel-result-swatch"
+        ></div>
+
+        <div>
+
+          <strong
+            id="probabilityWheelResultName"
+          ></strong>
+
+          <small
+            id="probabilityWheelResultChance"
+          ></small>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="probability-wheel-footer">
+
+    <button
+      id="spinAgainButton"
+      class="secondary-button"
+      type="button"
+    >
+      Spin Again
+    </button>
+
+    <button
+      id="applyWheelResultButton"
+      class="save-button"
+      type="button"
+      disabled
+    >
+      Apply Result
+    </button>
+
+  </div>
 
 </section>
 
