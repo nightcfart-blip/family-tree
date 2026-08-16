@@ -10,6 +10,8 @@ const RACE_LIBRARY_KEY =
 const SPECIES_LIBRARY_KEY =
   "fantasyFamilyTreeSpeciesLibrary";
 
+const UNKNOWN_ANCESTRY_ID =
+  "__unknown__";
 
 const COLOR_PRESETS =
   window.COLOR_PRESETS;
@@ -26,13 +28,7 @@ const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.15;
 
 
-/* DATA */
-
-let characters =
-  loadCharacters();
-
-let vantageCharacterId =
-  loadVantage();
+/* DATA — libraries first for migration */
 
 let raceLibrary =
   loadLibrary(
@@ -43,6 +39,12 @@ let speciesLibrary =
   loadLibrary(
     SPECIES_LIBRARY_KEY
   );
+
+let characters =
+  loadCharacters();
+
+let vantageCharacterId =
+  loadVantage();
 
 let selectedCharacterId =
   null;
@@ -71,13 +73,10 @@ let pinchWorldY = 0;
 let lastLayout = null;
 
 
-/* PORTRAIT */
+/* EDITOR TEMP */
 
 let pendingPortraitData =
   null;
-
-
-/* LIBRARY EDITING */
 
 let activeLibraryType =
   "race";
@@ -119,7 +118,6 @@ const emptyState =
     "emptyState"
   );
 
-
 const addCharacterButton =
   document.getElementById(
     "addCharacterButton"
@@ -129,7 +127,6 @@ const addFirstCharacterButton =
   document.getElementById(
     "addFirstCharacterButton"
   );
-
 
 const zoomInButton =
   document.getElementById(
@@ -450,7 +447,7 @@ const vantageRelationText =
   );
 
 
-/* EDIT */
+/* CHARACTER EDIT */
 
 const editBackdrop =
   document.getElementById(
@@ -477,6 +474,89 @@ const cancelEditButton =
     "cancelEditButton"
   );
 
+const editMother =
+  document.getElementById(
+    "editMother"
+  );
+
+const editFather =
+  document.getElementById(
+    "editFather"
+  );
+
+const editAncestryOverride =
+  document.getElementById(
+    "editAncestryOverride"
+  );
+
+const ancestryOverrideWrap =
+  document.getElementById(
+    "ancestryOverrideWrap"
+  );
+
+const ancestryModeTitle =
+  document.getElementById(
+    "ancestryModeTitle"
+  );
+
+const ancestryModeDescription =
+  document.getElementById(
+    "ancestryModeDescription"
+  );
+
+const automaticAncestryPreview =
+  document.getElementById(
+    "automaticAncestryPreview"
+  );
+
+const automaticRacePreview =
+  document.getElementById(
+    "automaticRacePreview"
+  );
+
+const automaticSpeciesPreview =
+  document.getElementById(
+    "automaticSpeciesPreview"
+  );
+
+const manualAncestryEditor =
+  document.getElementById(
+    "manualAncestryEditor"
+  );
+
+const raceAncestryRows =
+  document.getElementById(
+    "raceAncestryRows"
+  );
+
+const speciesAncestryRows =
+  document.getElementById(
+    "speciesAncestryRows"
+  );
+
+const raceAncestryTotal =
+  document.getElementById(
+    "raceAncestryTotal"
+  );
+
+const speciesAncestryTotal =
+  document.getElementById(
+    "speciesAncestryTotal"
+  );
+
+const addRaceAncestryButton =
+  document.getElementById(
+    "addRaceAncestryButton"
+  );
+
+const addSpeciesAncestryButton =
+  document.getElementById(
+    "addSpeciesAncestryButton"
+  );
+
+
+/* PORTRAIT */
+
 const editPortraitFile =
   document.getElementById(
     "editPortraitFile"
@@ -493,7 +573,7 @@ const removePortraitButton =
   );
 
 
-/* COLOR PRESET ELEMENTS */
+/* COLORS */
 
 const editHairPreset =
   document.getElementById(
@@ -728,14 +808,16 @@ function saveVantage() {
 
   localStorage.setItem(
     VANTAGE_KEY,
-    String(vantageCharacterId)
+    String(
+      vantageCharacterId
+    )
   );
 
 }
 
 
 /* =========================================================
-   NORMALIZE
+   NORMALIZATION
 ========================================================= */
 
 function normalizeCharacter(
@@ -796,8 +878,28 @@ function normalizeCharacter(
     deathYear:
       character.deathYear || "",
 
+    /*
+      Kept only so old worlds
+      can be migrated safely.
+    */
+
     race:
       character.race || "",
+
+    raceAncestry:
+      normalizeAncestry(
+        character.raceAncestry
+      ),
+
+    speciesAncestry:
+      normalizeAncestry(
+        character.speciesAncestry
+      ),
+
+    ancestryOverride:
+      Boolean(
+        character.ancestryOverride
+      ),
 
     motherId:
       normalizeId(
@@ -854,6 +956,44 @@ function normalizeCharacter(
 }
 
 
+function normalizeAncestry(
+  values
+) {
+
+  if (
+    !Array.isArray(values)
+  ) {
+
+    return [];
+
+  }
+
+
+  return values
+    .map(
+      entry => ({
+
+        id:
+          String(
+            entry.id || ""
+          ),
+
+        percent:
+          Number(
+            entry.percent
+          ) || 0
+
+      })
+    )
+    .filter(
+      entry =>
+        entry.id &&
+        entry.percent > 0
+    );
+
+}
+
+
 function normalizeLibraryItem(
   item
 ) {
@@ -892,13 +1032,9 @@ function normalizeDistribution(
 ) {
 
   if (
-    !Array.isArray(
-      distribution
-    )
+    !Array.isArray(distribution)
   ) {
-
     return [];
-
   }
 
 
@@ -957,7 +1093,9 @@ function normalizeIdArray(
   values
 ) {
 
-  if (!Array.isArray(values)) {
+  if (
+    !Array.isArray(values)
+  ) {
     return [];
   }
 
@@ -970,7 +1108,1383 @@ function normalizeIdArray(
 
 
 /* =========================================================
-   COLOR PRESETS
+   LEGACY RACE MIGRATION
+========================================================= */
+
+function migrateLegacyRaceFields() {
+
+  let libraryChanged =
+    false;
+
+  let characterChanged =
+    false;
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        character.raceAncestry.length
+      ) {
+        return;
+      }
+
+
+      const oldRace =
+        character.race.trim();
+
+
+      if (!oldRace) {
+        return;
+      }
+
+
+      let matching =
+        raceLibrary.find(
+          item =>
+            item.name
+              .toLowerCase()
+            ===
+            oldRace
+              .toLowerCase()
+        );
+
+
+      if (!matching) {
+
+        matching = {
+
+          id:
+            createLibraryId(),
+
+          name:
+            oldRace,
+
+          hairDistribution: [],
+
+          eyeDistribution: [],
+
+          skinDistribution: []
+
+        };
+
+
+        raceLibrary.push(
+          matching
+        );
+
+
+        libraryChanged =
+          true;
+
+      }
+
+
+      /*
+        Only seed it as manual ancestry.
+
+        If this person has parents,
+        automatic ancestry still wins.
+      */
+
+      character.raceAncestry =
+        [
+          {
+            id:
+              matching.id,
+
+            percent:
+              100
+          }
+        ];
+
+
+      characterChanged =
+        true;
+
+    }
+  );
+
+
+  if (libraryChanged) {
+    saveLibraries();
+  }
+
+
+  if (characterChanged) {
+    saveCharacters();
+  }
+
+}
+
+
+/* =========================================================
+   ANCESTRY ENGINE
+========================================================= */
+
+/*
+  Founder:
+  manual ancestry.
+
+  Has parent(s):
+  automatic ancestry.
+
+  Override:
+  manual ancestry even with parents.
+*/
+
+function usesManualAncestry(
+  character
+) {
+
+  if (!character) {
+    return true;
+  }
+
+
+  const hasParent =
+    Boolean(
+      character.motherId ||
+      character.fatherId
+    );
+
+
+  return (
+    !hasParent ||
+    character.ancestryOverride
+  );
+
+}
+
+
+/*
+  Public function.
+
+  kind:
+  "race"
+  "species"
+*/
+
+function calculateAncestry(
+  characterId,
+  kind
+) {
+
+  return calculateAncestryInternal(
+    characterId,
+    kind,
+    new Map(),
+    new Set()
+  );
+
+}
+
+
+function calculateAncestryInternal(
+  characterId,
+  kind,
+  memo,
+  visiting
+) {
+
+  const memoKey =
+    `${kind}:${characterId}`;
+
+
+  if (
+    memo.has(
+      memoKey
+    )
+  ) {
+
+    return cloneAncestry(
+      memo.get(
+        memoKey
+      )
+    );
+
+  }
+
+
+  if (
+    visiting.has(
+      memoKey
+    )
+  ) {
+
+    return [
+      {
+        id:
+          UNKNOWN_ANCESTRY_ID,
+
+        percent:
+          100
+      }
+    ];
+
+  }
+
+
+  const character =
+    getCharacter(
+      characterId
+    );
+
+
+  if (!character) {
+
+    return [
+      {
+        id:
+          UNKNOWN_ANCESTRY_ID,
+
+        percent:
+          100
+      }
+    ];
+
+  }
+
+
+  visiting.add(
+    memoKey
+  );
+
+
+  /*
+    FOUNDERS / OVERRIDES
+  */
+
+  if (
+    usesManualAncestry(
+      character
+    )
+  ) {
+
+    const source =
+      kind === "race"
+        ? character.raceAncestry
+        : character.speciesAncestry;
+
+
+    const result =
+      ancestryWithUnknownRemainder(
+        source
+      );
+
+
+    memo.set(
+      memoKey,
+      result
+    );
+
+
+    visiting.delete(
+      memoKey
+    );
+
+
+    return cloneAncestry(
+      result
+    );
+
+  }
+
+
+  /*
+    AUTOMATIC CHILD
+  */
+
+  const combined =
+    new Map();
+
+
+  addParentContribution(
+    character.motherId,
+    kind,
+    combined,
+    memo,
+    visiting
+  );
+
+
+  addParentContribution(
+    character.fatherId,
+    kind,
+    combined,
+    memo,
+    visiting
+  );
+
+
+  const result =
+    ancestryMapToArray(
+      combined
+    );
+
+
+  memo.set(
+    memoKey,
+    result
+  );
+
+
+  visiting.delete(
+    memoKey
+  );
+
+
+  return cloneAncestry(
+    result
+  );
+
+}
+
+
+function addParentContribution(
+  parentId,
+  kind,
+  combined,
+  memo,
+  visiting
+) {
+
+  /*
+    Missing parent =
+    unknown half.
+  */
+
+  if (!parentId) {
+
+    addAncestryValue(
+      combined,
+      UNKNOWN_ANCESTRY_ID,
+      50
+    );
+
+
+    return;
+
+  }
+
+
+  const parent =
+    getCharacter(
+      parentId
+    );
+
+
+  if (!parent) {
+
+    addAncestryValue(
+      combined,
+      UNKNOWN_ANCESTRY_ID,
+      50
+    );
+
+
+    return;
+
+  }
+
+
+  const parentAncestry =
+    calculateAncestryInternal(
+      parent.id,
+      kind,
+      memo,
+      visiting
+    );
+
+
+  parentAncestry.forEach(
+    entry => {
+
+      addAncestryValue(
+        combined,
+        entry.id,
+        entry.percent * 0.5
+      );
+
+    }
+  );
+
+}
+
+
+function ancestryWithUnknownRemainder(
+  ancestry
+) {
+
+  const combined =
+    new Map();
+
+
+  ancestry.forEach(
+    entry => {
+
+      addAncestryValue(
+        combined,
+        entry.id,
+        entry.percent
+      );
+
+    }
+  );
+
+
+  const total =
+    Array.from(
+      combined.values()
+    )
+      .reduce(
+        (sum,value) =>
+          sum + value,
+        0
+      );
+
+
+  if (
+    total < 100
+  ) {
+
+    addAncestryValue(
+      combined,
+      UNKNOWN_ANCESTRY_ID,
+      100 - total
+    );
+
+  }
+
+
+  return ancestryMapToArray(
+    combined
+  );
+
+}
+
+
+function addAncestryValue(
+  map,
+  id,
+  amount
+) {
+
+  map.set(
+    id,
+    (
+      map.get(id) || 0
+    ) + amount
+  );
+
+}
+
+
+function ancestryMapToArray(
+  map
+) {
+
+  return Array.from(
+    map.entries()
+  )
+    .map(
+      ([id,percent]) => ({
+
+        id,
+
+        percent:
+          cleanPercent(
+            percent
+          )
+
+      })
+    )
+    .filter(
+      entry =>
+        entry.percent >
+        0.0000001
+    )
+    .sort(
+      (a,b) =>
+        b.percent -
+        a.percent
+    );
+
+}
+
+
+function cloneAncestry(
+  ancestry
+) {
+
+  return ancestry.map(
+    entry => ({
+      ...entry
+    })
+  );
+
+}
+
+
+function cleanPercent(
+  value
+) {
+
+  return Math.round(
+    value * 100000000
+  ) / 100000000;
+
+}
+
+
+/* =========================================================
+   ANCESTRY NAMES / DISPLAY
+========================================================= */
+
+function getAncestryLibrary(
+  kind
+) {
+
+  return kind === "race"
+    ? raceLibrary
+    : speciesLibrary;
+
+}
+
+
+function getAncestryName(
+  kind,
+  id
+) {
+
+  if (
+    id ===
+    UNKNOWN_ANCESTRY_ID
+  ) {
+
+    return "Unknown";
+
+  }
+
+
+  const item =
+    getAncestryLibrary(
+      kind
+    )
+      .find(
+        entry =>
+          entry.id === id
+      );
+
+
+  return item
+    ? item.name
+    : "Unknown";
+
+}
+
+
+function renderAncestryList(
+  container,
+  ancestry,
+  kind
+) {
+
+  container.innerHTML =
+    "";
+
+
+  if (!ancestry.length) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+
+    empty.className =
+      "ancestry-empty";
+
+
+    empty.textContent =
+      "Unknown";
+
+
+    container.appendChild(
+      empty
+    );
+
+
+    return;
+
+  }
+
+
+  ancestry.forEach(
+    entry => {
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "ancestry-profile-row";
+
+
+      if (
+        entry.id ===
+        UNKNOWN_ANCESTRY_ID
+      ) {
+
+        row.classList.add(
+          "ancestry-unknown"
+        );
+
+      }
+
+
+      const name =
+        document.createElement(
+          "span"
+        );
+
+
+      name.textContent =
+        getAncestryName(
+          kind,
+          entry.id
+        );
+
+
+      const percent =
+        document.createElement(
+          "strong"
+        );
+
+
+      percent.textContent =
+        `${formatPercent(
+          entry.percent
+        )}%`;
+
+
+      row.appendChild(
+        name
+      );
+
+
+      row.appendChild(
+        percent
+      );
+
+
+      container.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+function formatPercent(
+  number
+) {
+
+  if (
+    Math.abs(
+      number -
+      Math.round(number)
+    ) <
+    0.0000001
+  ) {
+
+    return String(
+      Math.round(number)
+    );
+
+  }
+
+
+  if (
+    number >= 1
+  ) {
+
+    return number
+      .toFixed(2)
+      .replace(
+        /0+$/,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      );
+
+  }
+
+
+  if (
+    number >= 0.01
+  ) {
+
+    return number
+      .toFixed(4)
+      .replace(
+        /0+$/,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      );
+
+  }
+
+
+  return number
+    .toFixed(6)
+    .replace(
+      /0+$/,
+      ""
+    )
+    .replace(
+      /\.$/,
+      ""
+    );
+
+}
+
+
+/* =========================================================
+   MANUAL ANCESTRY EDITOR
+========================================================= */
+
+function populateManualAncestryEditor(
+  character
+) {
+
+  raceAncestryRows.innerHTML =
+    "";
+
+
+  speciesAncestryRows.innerHTML =
+    "";
+
+
+  character.raceAncestry.forEach(
+    entry => {
+
+      addAncestryEditorRow(
+        "race",
+        entry
+      );
+
+    }
+  );
+
+
+  character.speciesAncestry.forEach(
+    entry => {
+
+      addAncestryEditorRow(
+        "species",
+        entry
+      );
+
+    }
+  );
+
+
+  updateAncestryTotals();
+
+}
+
+
+function addAncestryEditorRow(
+  kind,
+  entry = null
+) {
+
+  const library =
+    getAncestryLibrary(
+      kind
+    );
+
+
+  if (
+    library.length === 0
+  ) {
+
+    showToast(
+      kind === "race"
+        ? "Create a Race in the World library first"
+        : "Create a Species in the World library first"
+    );
+
+
+    return;
+
+  }
+
+
+  const container =
+    kind === "race"
+      ? raceAncestryRows
+      : speciesAncestryRows;
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+
+  row.className =
+    "ancestry-editor-row";
+
+
+  const select =
+    document.createElement(
+      "select"
+    );
+
+
+  [...library]
+    .sort(
+      (a,b) =>
+        a.name.localeCompare(
+          b.name
+        )
+    )
+    .forEach(
+      item => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          item.id;
+
+
+        option.textContent =
+          item.name;
+
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+  if (
+    entry &&
+    entry.id
+  ) {
+
+    select.value =
+      entry.id;
+
+  }
+
+
+  const percent =
+    document.createElement(
+      "input"
+    );
+
+
+  percent.type =
+    "number";
+
+
+  percent.min =
+    "0";
+
+
+  percent.max =
+    "100";
+
+
+  percent.step =
+    "0.01";
+
+
+  percent.inputMode =
+    "decimal";
+
+
+  percent.value =
+    entry
+      ? entry.percent
+      : "";
+
+
+  const remove =
+    document.createElement(
+      "button"
+    );
+
+
+  remove.type =
+    "button";
+
+
+  remove.className =
+    "remove-distribution-button";
+
+
+  remove.textContent =
+    "×";
+
+
+  remove.addEventListener(
+    "click",
+
+    function() {
+
+      row.remove();
+
+      updateAncestryTotals();
+
+      refreshAncestryMode();
+
+    }
+  );
+
+
+  percent.addEventListener(
+    "input",
+
+    function() {
+
+      updateAncestryTotals();
+
+      refreshAncestryMode();
+
+    }
+  );
+
+
+  select.addEventListener(
+    "change",
+    refreshAncestryMode
+  );
+
+
+  row.appendChild(
+    select
+  );
+
+
+  row.appendChild(
+    percent
+  );
+
+
+  row.appendChild(
+    remove
+  );
+
+
+  container.appendChild(
+    row
+  );
+
+
+  updateAncestryTotals();
+
+}
+
+
+addRaceAncestryButton.addEventListener(
+  "click",
+
+  function() {
+
+    addAncestryEditorRow(
+      "race"
+    );
+
+  }
+);
+
+
+addSpeciesAncestryButton.addEventListener(
+  "click",
+
+  function() {
+
+    addAncestryEditorRow(
+      "species"
+    );
+
+  }
+);
+
+
+function readManualAncestry(
+  kind
+) {
+
+  const container =
+    kind === "race"
+      ? raceAncestryRows
+      : speciesAncestryRows;
+
+
+  return Array.from(
+    container.querySelectorAll(
+      ".ancestry-editor-row"
+    )
+  )
+    .map(
+      row => ({
+
+        id:
+          row
+            .querySelector(
+              "select"
+            )
+            .value,
+
+        percent:
+          Number(
+            row
+              .querySelector(
+                "input"
+              )
+              .value
+          ) || 0
+
+      })
+    )
+    .filter(
+      entry =>
+        entry.id &&
+        entry.percent > 0
+    );
+
+}
+
+
+function updateAncestryTotals() {
+
+  updateOneAncestryTotal(
+    "race",
+    raceAncestryTotal
+  );
+
+
+  updateOneAncestryTotal(
+    "species",
+    speciesAncestryTotal
+  );
+
+}
+
+
+function updateOneAncestryTotal(
+  kind,
+  element
+) {
+
+  const ancestry =
+    readManualAncestry(
+      kind
+    );
+
+
+  const total =
+    ancestry.reduce(
+      (sum,entry) =>
+        sum + entry.percent,
+      0
+    );
+
+
+  element.textContent =
+    `Total: ${formatPercent(total)}%`;
+
+
+  element.classList.remove(
+    "valid",
+    "invalid"
+  );
+
+
+  if (!ancestry.length) {
+    return;
+  }
+
+
+  if (
+    approximately100(total)
+  ) {
+
+    element.classList.add(
+      "valid"
+    );
+
+  } else {
+
+    element.classList.add(
+      "invalid"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   EDITOR ANCESTRY MODE
+========================================================= */
+
+editMother.addEventListener(
+  "change",
+  refreshAncestryMode
+);
+
+
+editFather.addEventListener(
+  "change",
+  refreshAncestryMode
+);
+
+
+editAncestryOverride.addEventListener(
+  "change",
+  refreshAncestryMode
+);
+
+
+function refreshAncestryMode() {
+
+  const character =
+    getCharacter(
+      selectedCharacterId
+    );
+
+
+  if (!character) {
+    return;
+  }
+
+
+  const motherId =
+    getSelectedSingleId(
+      "editMother"
+    );
+
+
+  const fatherId =
+    getSelectedSingleId(
+      "editFather"
+    );
+
+
+  const hasParent =
+    Boolean(
+      motherId ||
+      fatherId
+    );
+
+
+  if (!hasParent) {
+
+    ancestryModeTitle.textContent =
+      "Founder Ancestry";
+
+
+    ancestryModeDescription.textContent =
+      "No parents are assigned, so Race and Species are entered manually.";
+
+
+    ancestryOverrideWrap.classList.add(
+      "hidden"
+    );
+
+
+    editAncestryOverride.checked =
+      false;
+
+
+    automaticAncestryPreview.classList.add(
+      "hidden"
+    );
+
+
+    manualAncestryEditor.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  ancestryOverrideWrap.classList.remove(
+    "hidden"
+  );
+
+
+  const override =
+    editAncestryOverride.checked;
+
+
+  if (override) {
+
+    ancestryModeTitle.textContent =
+      "Manual Ancestry Override";
+
+
+    ancestryModeDescription.textContent =
+      "This character has parents, but automatic ancestry has been overridden.";
+
+
+    automaticAncestryPreview.classList.add(
+      "hidden"
+    );
+
+
+    manualAncestryEditor.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  ancestryModeTitle.textContent =
+    "Inherited Automatically";
+
+
+  ancestryModeDescription.textContent =
+    "Each recorded parent contributes 50%. Missing parent ancestry is shown as Unknown.";
+
+
+  manualAncestryEditor.classList.add(
+    "hidden"
+  );
+
+
+  automaticAncestryPreview.classList.remove(
+    "hidden"
+  );
+
+
+  /*
+    Preview with the CURRENT
+    unsaved parent selections.
+  */
+
+  const previewRace =
+    calculateEditorPreviewAncestry(
+      motherId,
+      fatherId,
+      "race"
+    );
+
+
+  const previewSpecies =
+    calculateEditorPreviewAncestry(
+      motherId,
+      fatherId,
+      "species"
+    );
+
+
+  renderAncestryList(
+    automaticRacePreview,
+    previewRace,
+    "race"
+  );
+
+
+  renderAncestryList(
+    automaticSpeciesPreview,
+    previewSpecies,
+    "species"
+  );
+
+}
+
+
+function calculateEditorPreviewAncestry(
+  motherId,
+  fatherId,
+  kind
+) {
+
+  const map =
+    new Map();
+
+
+  [
+    motherId,
+    fatherId
+  ]
+    .forEach(
+      parentId => {
+
+        if (!parentId) {
+
+          addAncestryValue(
+            map,
+            UNKNOWN_ANCESTRY_ID,
+            50
+          );
+
+
+          return;
+
+        }
+
+
+        const parentAncestry =
+          calculateAncestry(
+            parentId,
+            kind
+          );
+
+
+        parentAncestry.forEach(
+          entry => {
+
+            addAncestryValue(
+              map,
+              entry.id,
+              entry.percent * 0.5
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  return ancestryMapToArray(
+    map
+  );
+
+}
+
+
+/* =========================================================
+   COLORS
 ========================================================= */
 
 function migrateColor(
@@ -1078,9 +2592,7 @@ function getColorName(
   if (
     id === "custom"
   ) {
-
     return "Custom";
-
   }
 
 
@@ -1172,10 +2684,6 @@ function populateCharacterColorSelect(
 
 }
 
-
-/* =========================================================
-   CHARACTER COLOR EDITOR
-========================================================= */
 
 function setupCharacterColorEditors() {
 
@@ -1395,14 +2903,7 @@ function openLibrary(
       : "+ Add Species";
 
 
-  worldBackdrop.classList.add(
-    "hidden"
-  );
-
-
-  worldPanel.classList.add(
-    "hidden"
-  );
+  closeWorldPanel();
 
 
   libraryBackdrop.classList.remove(
@@ -1468,9 +2969,7 @@ function renderLibraryList() {
     "";
 
 
-  if (
-    library.length === 0
-  ) {
+  if (!library.length) {
 
     const empty =
       document.createElement(
@@ -1522,17 +3021,17 @@ function renderLibraryList() {
           [
             makeDistributionSummary(
               item.hairDistribution,
-              "hair"
+              "Hair"
             ),
 
             makeDistributionSummary(
               item.eyeDistribution,
-              "eyes"
+              "Eyes"
             ),
 
             makeDistributionSummary(
               item.skinDistribution,
-              "skin"
+              "Skin"
             )
           ]
             .filter(Boolean)
@@ -1605,7 +3104,7 @@ function renderLibraryList() {
 
               openConfirmation(
                 `Delete ${item.name}?`,
-                "This removes the preset from your library. Characters are not deleted.",
+                "This removes the preset from the library. Characters are not deleted, but ancestry using this preset may become Unknown.",
                 function() {
 
                   deleteLibraryItem(
@@ -1632,7 +3131,7 @@ function renderLibraryList() {
 
 function makeDistributionSummary(
   distribution,
-  trait
+  label
 ) {
 
   if (!distribution.length) {
@@ -1640,7 +3139,7 @@ function makeDistributionSummary(
   }
 
 
-  return `${capitalize(trait)} ${distribution.length}`;
+  return `${label} ${distribution.length}`;
 
 }
 
@@ -1674,8 +3173,7 @@ function openLibraryEditor(
     itemId
       ? library.find(
           entry =>
-            entry.id ===
-            itemId
+            entry.id === itemId
         )
       : null;
 
@@ -1799,15 +3297,9 @@ cancelLibraryEditorButton.addEventListener(
 );
 
 
-libraryEditorBackdrop.addEventListener(
-  "click",
-  closeLibraryEditor
-);
-
-
 document
   .querySelectorAll(
-    ".add-distribution-button"
+    ".add-distribution-button[data-trait]"
   )
   .forEach(
     button => {
@@ -1901,22 +3393,17 @@ function addDistributionRow(
   percent.type =
     "number";
 
-
   percent.min =
     "0";
-
 
   percent.max =
     "100";
 
-
   percent.step =
     "0.1";
 
-
   percent.inputMode =
     "decimal";
-
 
   percent.value =
     entry
@@ -1933,10 +3420,8 @@ function addDistributionRow(
   remove.type =
     "button";
 
-
   remove.className =
     "remove-distribution-button";
-
 
   remove.textContent =
     "×";
@@ -1948,7 +3433,6 @@ function addDistributionRow(
     function() {
 
       row.remove();
-
 
       updateAllDistributionTotals();
 
@@ -1966,11 +3450,9 @@ function addDistributionRow(
     select
   );
 
-
   row.appendChild(
     percent
   );
-
 
   row.appendChild(
     remove
@@ -2014,49 +3496,34 @@ function readDistribution(
   trait
 ) {
 
-  const container =
+  return Array.from(
     getDistributionContainer(
       trait
-    );
-
-
-  const rows =
-    Array.from(
-      container.querySelectorAll(
+    )
+      .querySelectorAll(
         ".distribution-row"
       )
-    );
-
-
-  return rows
+  )
     .map(
-      row => {
+      row => ({
 
-        const select =
-          row.querySelector(
-            "select"
-          );
+        colorId:
+          row
+            .querySelector(
+              "select"
+            )
+            .value,
 
+        percent:
+          Number(
+            row
+              .querySelector(
+                "input"
+              )
+              .value
+          ) || 0
 
-        const input =
-          row.querySelector(
-            "input"
-          );
-
-
-        return {
-
-          colorId:
-            select.value,
-
-          percent:
-            Number(
-              input.value
-            ) || 0
-
-        };
-
-      }
+      })
     )
     .filter(
       entry =>
@@ -2071,11 +3538,8 @@ function distributionTotal(
 ) {
 
   return distribution.reduce(
-    (total,entry) =>
-      total +
-      Number(
-        entry.percent
-      ),
+    (sum,entry) =>
+      sum + entry.percent,
     0
   );
 
@@ -2122,7 +3586,7 @@ function updateDistributionTotalDisplay(
 
 
   element.textContent =
-    `Total: ${roundNumber(total)}%`;
+    `Total: ${formatPercent(total)}%`;
 
 
   element.classList.remove(
@@ -2131,30 +3595,16 @@ function updateDistributionTotalDisplay(
   );
 
 
-  if (
-    distribution.length === 0
-  ) {
+  if (!distribution.length) {
     return;
   }
 
 
-  if (
-    approximately100(
-      total
-    )
-  ) {
-
-    element.classList.add(
-      "valid"
-    );
-
-  } else {
-
-    element.classList.add(
-      "invalid"
-    );
-
-  }
+  element.classList.add(
+    approximately100(total)
+      ? "valid"
+      : "invalid"
+  );
 
 }
 
@@ -2188,12 +3638,10 @@ function saveLibraryItem() {
       "hair"
     );
 
-
   const eyeDistribution =
     readDistribution(
       "eyes"
     );
-
 
   const skinDistribution =
     readDistribution(
@@ -2209,19 +3657,17 @@ function saveLibraryItem() {
     ];
 
 
-  const invalid =
+  if (
     distributions.some(
       distribution =>
-        distribution.length > 0 &&
+        distribution.length &&
         !approximately100(
           distributionTotal(
             distribution
           )
         )
-    );
-
-
-  if (invalid) {
+    )
+  ) {
 
     showToast(
       "Each used probability list must total 100%"
@@ -2233,16 +3679,8 @@ function saveLibraryItem() {
 
 
   if (
-    hasDuplicateColors(
-      hairDistribution
-    )
-    ||
-    hasDuplicateColors(
-      eyeDistribution
-    )
-    ||
-    hasDuplicateColors(
-      skinDistribution
+    distributions.some(
+      hasDuplicateColors
     )
   ) {
 
@@ -2279,14 +3717,11 @@ function saveLibraryItem() {
     item.name =
       name;
 
-
     item.hairDistribution =
       hairDistribution;
 
-
     item.eyeDistribution =
       eyeDistribution;
-
 
     item.skinDistribution =
       skinDistribution;
@@ -2313,9 +3748,7 @@ function saveLibraryItem() {
 
   saveLibraries();
 
-
   closeLibraryEditor();
-
 
   showToast(
     `${name} saved`
@@ -2338,19 +3771,6 @@ function hasDuplicateColors(
   return (
     new Set(ids).size !==
     ids.length
-  );
-
-}
-
-
-function approximately100(
-  number
-) {
-
-  return (
-    Math.abs(
-      number - 100
-    ) < 0.01
   );
 
 }
@@ -2383,12 +3803,9 @@ function deleteLibraryItem(
 
   saveLibraries();
 
-
   renderLibraryList();
 
-
   updateWorldStats();
-
 
   showToast(
     "Library item deleted"
@@ -2436,7 +3853,6 @@ worldBackdrop.addEventListener(
 function openWorldPanel() {
 
   populateVantageSelect();
-
 
   updateWorldStats();
 
@@ -2510,7 +3926,6 @@ function populateVantageSelect() {
   none.value =
     "";
 
-
   none.textContent =
     "— No Vantage Point —";
 
@@ -2576,13 +3991,11 @@ vantageSelect.addEventListener(
 
     saveVantage();
 
-
     updateVantageStatus();
 
     updateWorldStats();
 
     renderTree();
-
 
     showToast(
       "Vantage point changed"
@@ -2626,7 +4039,7 @@ function exportWorld() {
       "Fantasy Family Tree",
 
     version:
-      3,
+      4,
 
     exportedAt:
       new Date().toISOString(),
@@ -2692,8 +4105,15 @@ function exportWorld() {
   link.remove();
 
 
-  URL.revokeObjectURL(
-    url
+  setTimeout(
+    function() {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
   );
 
 
@@ -2711,7 +4131,6 @@ importWorldButton.addEventListener(
 
     importWorldFile.value =
       "";
-
 
     importWorldFile.click();
 
@@ -2763,13 +4182,6 @@ importWorldFile.addEventListener(
         "Your current browser world will be replaced by this backup.",
         function() {
 
-          characters =
-            importedCharacters
-              .map(
-                normalizeCharacter
-              );
-
-
           raceLibrary =
             Array.isArray(
               data.raceLibrary
@@ -2792,6 +4204,13 @@ importWorldFile.addEventListener(
               : [];
 
 
+          characters =
+            importedCharacters
+              .map(
+                normalizeCharacter
+              );
+
+
           vantageCharacterId =
             normalizeId(
               data.vantageCharacterId
@@ -2799,6 +4218,8 @@ importWorldFile.addEventListener(
 
 
           cleanBrokenRelationships();
+
+          migrateLegacyRaceFields();
 
 
           saveCharacters();
@@ -2809,7 +4230,6 @@ importWorldFile.addEventListener(
 
 
           renderTree();
-
 
           closeWorldPanel();
 
@@ -2914,13 +4334,44 @@ searchInput.addEventListener(
       characters.filter(
         character => {
 
+          const raceText =
+            calculateAncestry(
+              character.id,
+              "race"
+            )
+              .map(
+                entry =>
+                  getAncestryName(
+                    "race",
+                    entry.id
+                  )
+              )
+              .join(" ");
+
+
+          const speciesText =
+            calculateAncestry(
+              character.id,
+              "species"
+            )
+              .map(
+                entry =>
+                  getAncestryName(
+                    "species",
+                    entry.id
+                  )
+              )
+              .join(" ");
+
+
           const text =
             [
               character.title,
               character.givenName,
               character.familyName,
               character.maidenName,
-              character.race,
+              raceText,
+              speciesText,
               ...character.aliases
             ]
               .join(" ")
@@ -3024,7 +4475,6 @@ function renderSearchResults(
 
             closeSearch();
 
-
             focusCharacter(
               person.id
             );
@@ -3079,7 +4529,8 @@ function centerTree() {
 
 
   const rect =
-    treeCanvas.getBoundingClientRect();
+    treeCanvas
+      .getBoundingClientRect();
 
 
   zoom =
@@ -3170,7 +4621,8 @@ zoomInButton.addEventListener(
   function() {
 
     const rect =
-      treeCanvas.getBoundingClientRect();
+      treeCanvas
+        .getBoundingClientRect();
 
 
     zoomAtPoint(
@@ -3189,7 +4641,8 @@ zoomOutButton.addEventListener(
   function() {
 
     const rect =
-      treeCanvas.getBoundingClientRect();
+      treeCanvas
+        .getBoundingClientRect();
 
 
     zoomAtPoint(
@@ -3207,6 +4660,98 @@ resetViewButton.addEventListener(
   centerTree
 );
 
+
+/* DESKTOP DRAG */
+
+treeCanvas.addEventListener(
+  "pointerdown",
+
+  function(event) {
+
+    if (
+      event.pointerType === "touch"
+      ||
+      event.target.closest(
+        ".character-node"
+      )
+    ) {
+      return;
+    }
+
+
+    isPanning =
+      true;
+
+
+    panStartX =
+      event.clientX;
+
+    panStartY =
+      event.clientY;
+
+    startViewX =
+      viewX;
+
+    startViewY =
+      viewY;
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointermove",
+
+  function(event) {
+
+    if (!isPanning) {
+      return;
+    }
+
+
+    viewX =
+      startViewX +
+      event.clientX -
+      panStartX;
+
+
+    viewY =
+      startViewY +
+      event.clientY -
+      panStartY;
+
+
+    applyViewTransform();
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointerup",
+
+  function() {
+
+    isPanning =
+      false;
+
+  }
+);
+
+
+treeCanvas.addEventListener(
+  "pointercancel",
+
+  function() {
+
+    isPanning =
+      false;
+
+  }
+);
+
+
+/* PHONE DRAG / PINCH */
 
 treeCanvas.addEventListener(
   "touchstart",
@@ -3371,6 +4916,7 @@ treeCanvas.addEventListener(
           MIN_ZOOM,
           Math.min(
             MAX_ZOOM,
+
             pinchStartZoom *
             (
               distance /
@@ -3491,6 +5037,12 @@ cancelFormButton.addEventListener(
 );
 
 
+formBackdrop.addEventListener(
+  "click",
+  closeCharacterForm
+);
+
+
 characterForm.addEventListener(
   "submit",
 
@@ -3540,7 +5092,14 @@ characterForm.addEventListener(
         deathYear:
           getInputValue(
             "deathYear"
-          )
+          ),
+
+        raceAncestry: [],
+
+        speciesAncestry: [],
+
+        ancestryOverride:
+          false
 
       });
 
@@ -3566,7 +5125,7 @@ characterForm.addEventListener(
 
 
 /* =========================================================
-   TREE LAYOUT
+   TREE
 ========================================================= */
 
 function renderTree() {
@@ -3697,10 +5256,17 @@ function calculateTreeLayout() {
     WORLD_SIZE / 2;
 
 
-  let minX = center;
-  let maxX = center;
-  let minY = center;
-  let maxY = center;
+  let minX =
+    center;
+
+  let maxX =
+    center;
+
+  let minY =
+    center;
+
+  let maxY =
+    center;
 
 
   sorted.forEach(
@@ -3891,6 +5457,8 @@ function calculateGeneration(
     );
 
 
+    visiting.delete(id);
+
     return 0;
 
   }
@@ -3930,7 +5498,6 @@ function clusterSpouses(
   const result =
     [];
 
-
   const visited =
     new Set();
 
@@ -3957,38 +5524,37 @@ function clusterSpouses(
       );
 
 
-      person.spouseIds
-        .forEach(
-          spouseId => {
+      person.spouseIds.forEach(
+        spouseId => {
 
-            const spouse =
-              row.find(
-                entry =>
-                  entry.id ===
-                  spouseId
-              );
-
-
-            if (
-              spouse &&
-              !visited.has(
-                spouse.id
-              )
-            ) {
-
-              result.push(
-                spouse
-              );
+          const spouse =
+            row.find(
+              entry =>
+                entry.id ===
+                spouseId
+            );
 
 
-              visited.add(
-                spouse.id
-              );
+          if (
+            spouse &&
+            !visited.has(
+              spouse.id
+            )
+          ) {
 
-            }
+            result.push(
+              spouse
+            );
+
+
+            visited.add(
+              spouse.id
+            );
 
           }
-        );
+
+        }
+      );
 
     }
   );
@@ -4024,6 +5590,10 @@ function renderCharacterNode(
     );
 
   }
+
+
+  node.type =
+    "button";
 
 
   node.style.left =
@@ -4123,34 +5693,37 @@ function drawRelationshipLines(
       }
 
 
-      const parents =
-        [
-          child.motherId,
-          child.fatherId
-        ]
-          .filter(Boolean)
-          .map(
-            id =>
-              positions.get(id)
-          )
-          .filter(Boolean);
+      [
+        child.motherId,
+        child.fatherId
+      ]
+        .filter(Boolean)
+        .forEach(
+          parentId => {
+
+            const parentPosition =
+              positions.get(
+                parentId
+              );
 
 
-      parents.forEach(
-        parent => {
+            if (!parentPosition) {
+              return;
+            }
 
-          addSvgLine(
-            parent.x,
-            parent.y + 42,
 
-            childPosition.x,
-            childPosition.y,
+            addSvgLine(
+              parentPosition.x,
+              parentPosition.y + 42,
 
-            "tree-line"
-          );
+              childPosition.x,
+              childPosition.y,
 
-        }
-      );
+              "tree-line"
+            );
+
+          }
+        );
 
     }
   );
@@ -4179,7 +5752,10 @@ function drawPartnerLines(
               person.id,
               otherId
             ]
-              .sort()
+              .sort(
+                (a,b) =>
+                  a - b
+              )
               .join("-");
 
 
@@ -4251,24 +5827,20 @@ function addSvgLine(
     x1
   );
 
-
   line.setAttribute(
     "y1",
     y1
   );
-
 
   line.setAttribute(
     "x2",
     x2
   );
 
-
   line.setAttribute(
     "y2",
     y2
   );
-
 
   line.setAttribute(
     "class",
@@ -4340,9 +5912,31 @@ function openProfile(
   );
 
 
-  setProfileText(
-    "profileRace",
-    character.race
+  renderAncestryList(
+    document.getElementById(
+      "profileRaceAncestry"
+    ),
+
+    calculateAncestry(
+      character.id,
+      "race"
+    ),
+
+    "race"
+  );
+
+
+  renderAncestryList(
+    document.getElementById(
+      "profileSpeciesAncestry"
+    ),
+
+    calculateAncestry(
+      character.id,
+      "species"
+    ),
+
+    "species"
   );
 
 
@@ -4464,6 +6058,9 @@ function renderProfilePortrait(
     image.src =
       character.portraitData;
 
+    image.alt =
+      "";
+
 
     profilePortrait.appendChild(
       image
@@ -4550,8 +6147,6 @@ function renderVantageRelation(
 }
 
 
-/* Same genealogy logic */
-
 function describeRelationship(
   vantageId,
   subjectId
@@ -4593,9 +6188,7 @@ function describeRelationship(
       subject.id
     )
   ) {
-
     return "Spouse";
-
   }
 
 
@@ -4604,9 +6197,7 @@ function describeRelationship(
       subject.id
     )
   ) {
-
     return "Lover";
-
   }
 
 
@@ -4663,9 +6254,7 @@ function describeRelationship(
     sameMother &&
     sameFather
   ) {
-
     return "Sibling";
-
   }
 
 
@@ -4673,9 +6262,7 @@ function describeRelationship(
     sameMother ||
     sameFather
   ) {
-
     return "Half-Sibling";
-
   }
 
 
@@ -4718,9 +6305,7 @@ function describeRelationship(
 
 
   if (!common.length) {
-
     return "No known relation";
-
   }
 
 
@@ -4804,6 +6389,16 @@ function getAncestorMap(
     ];
 
 
+  const bestSeen =
+    new Map();
+
+
+  bestSeen.set(
+    id,
+    0
+  );
+
+
   while (
     queue.length
   ) {
@@ -4835,33 +6430,40 @@ function getAncestorMap(
             current.depth + 1;
 
 
-          if (
-            !result.has(
+          const previous =
+            bestSeen.get(
               parentId
-            )
-            ||
-            depth <
-            result.get(
-              parentId
-            )
-          ) {
-
-            result.set(
-              parentId,
-              depth
             );
 
 
-            queue.push({
-
-              id:
-                parentId,
-
-              depth
-
-            });
-
+          if (
+            previous !== undefined &&
+            previous <= depth
+          ) {
+            return;
           }
+
+
+          bestSeen.set(
+            parentId,
+            depth
+          );
+
+
+          result.set(
+            parentId,
+            depth
+          );
+
+
+          queue.push({
+
+            id:
+              parentId,
+
+            depth
+
+          });
 
         }
       );
@@ -4982,7 +6584,6 @@ function inferParentRole(
   let mother =
     false;
 
-
   let father =
     false;
 
@@ -5075,6 +6676,7 @@ function renderRelationshipProfile(
 
   renderRelationshipButtons(
     "profileMother",
+
     character.motherId
       ? [
           getCharacter(
@@ -5087,6 +6689,7 @@ function renderRelationshipProfile(
 
   renderRelationshipButtons(
     "profileFather",
+
     character.fatherId
       ? [
           getCharacter(
@@ -5254,7 +6857,7 @@ function getSiblings(
 
 
 /* =========================================================
-   PROFILE BUTTONS
+   PROFILE CLOSE / DELETE
 ========================================================= */
 
 function closeProfile() {
@@ -5287,7 +6890,11 @@ closeProfileFooterButton.addEventListener(
 );
 
 
-/* DELETE */
+profileBackdrop.addEventListener(
+  "click",
+  closeProfile
+);
+
 
 deleteCharacterButton.addEventListener(
   "click",
@@ -5358,6 +6965,19 @@ deleteCharacterButton.addEventListener(
 
           }
         );
+
+
+        if (
+          vantageCharacterId ===
+          person.id
+        ) {
+
+          vantageCharacterId =
+            null;
+
+          saveVantage();
+
+        }
 
 
         saveCharacters();
@@ -5450,12 +7070,6 @@ function openEditor() {
 
 
   document.getElementById(
-    "editRace"
-  ).value =
-    character.race;
-
-
-  document.getElementById(
     "editPhysicalFeature"
   ).value =
     character.physicalFeature;
@@ -5471,6 +7085,20 @@ function openEditor() {
     "editLife"
   ).value =
     character.life;
+
+
+  populateRelationshipSelectors(
+    character
+  );
+
+
+  populateManualAncestryEditor(
+    character
+  );
+
+
+  editAncestryOverride.checked =
+    character.ancestryOverride;
 
 
   setCharacterColorEditorValue(
@@ -5496,9 +7124,7 @@ function openEditor() {
   );
 
 
-  populateRelationshipSelectors(
-    character
-  );
+  refreshAncestryMode();
 
 
   profileBackdrop.classList.add(
@@ -5518,99 +7144,6 @@ function openEditor() {
 
   editPanel.classList.remove(
     "hidden"
-  );
-
-}
-
-
-function setCharacterColorEditorValue(
-  trait,
-  character
-) {
-
-  let select;
-  let custom;
-
-
-  if (
-    trait === "hair"
-  ) {
-
-    select =
-      editHairPreset;
-
-    custom =
-      editHairCustom;
-
-
-    select.value =
-      character.hairColorId || "";
-
-
-    custom.value =
-      isHexColor(
-        character.hairColor
-      )
-        ? character.hairColor
-        : "#242429";
-
-  }
-
-
-  if (
-    trait === "eyes"
-  ) {
-
-    select =
-      editEyePreset;
-
-    custom =
-      editEyeCustom;
-
-
-    select.value =
-      character.eyeColorId || "";
-
-
-    custom.value =
-      isHexColor(
-        character.eyeColor
-      )
-        ? character.eyeColor
-        : "#242429";
-
-  }
-
-
-  if (
-    trait === "skin"
-  ) {
-
-    select =
-      editSkinPreset;
-
-    custom =
-      editSkinCustom;
-
-
-    select.value =
-      character.skinColorId || "";
-
-
-    custom.value =
-      isHexColor(
-        character.skinColor
-      )
-        ? character.skinColor
-        : "#F3D2BF";
-
-  }
-
-
-  select.dispatchEvent(
-    new Event(
-      "change"
-    )
   );
 
 }
@@ -5798,6 +7331,74 @@ editCharacterForm.addEventListener(
     }
 
 
+    const motherId =
+      getSelectedSingleId(
+        "editMother"
+      );
+
+
+    const fatherId =
+      getSelectedSingleId(
+        "editFather"
+      );
+
+
+    if (
+      motherId &&
+      fatherId &&
+      motherId === fatherId
+    ) {
+
+      showToast(
+        "Mother and Father cannot be the same character"
+      );
+
+      return;
+
+    }
+
+
+    const hasParent =
+      Boolean(
+        motherId ||
+        fatherId
+      );
+
+
+    const ancestryOverride =
+      hasParent
+        ? editAncestryOverride.checked
+        : false;
+
+
+    const manualMode =
+      !hasParent ||
+      ancestryOverride;
+
+
+    const raceAncestry =
+      readManualAncestry(
+        "race"
+      );
+
+
+    const speciesAncestry =
+      readManualAncestry(
+        "species"
+      );
+
+
+    if (
+      manualMode &&
+      !validateManualAncestry(
+        raceAncestry,
+        speciesAncestry
+      )
+    ) {
+      return;
+    }
+
+
     const oldSpouses =
       [...character.spouseIds];
 
@@ -5850,22 +7451,12 @@ editCharacterForm.addEventListener(
       );
 
 
-    character.race =
-      getInputValue(
-        "editRace"
-      );
-
-
     character.motherId =
-      getSelectedSingleId(
-        "editMother"
-      );
+      motherId;
 
 
     character.fatherId =
-      getSelectedSingleId(
-        "editFather"
-      );
+      fatherId;
 
 
     character.spouseIds =
@@ -5878,6 +7469,27 @@ editCharacterForm.addEventListener(
       getSelectedMultipleIds(
         "editLovers"
       );
+
+
+    character.ancestryOverride =
+      ancestryOverride;
+
+
+    /*
+      We keep manual values even when
+      auto-mode is active.
+
+      They are simply ignored until
+      the character becomes a founder
+      again or Override is enabled.
+    */
+
+    character.raceAncestry =
+      raceAncestry;
+
+
+    character.speciesAncestry =
+      speciesAncestry;
 
 
     applyCharacterColorFromEditor(
@@ -5964,6 +7576,256 @@ editCharacterForm.addEventListener(
 );
 
 
+function validateManualAncestry(
+  raceAncestry,
+  speciesAncestry
+) {
+
+  if (
+    raceAncestry.length &&
+    !approximately100(
+      ancestryTotal(
+        raceAncestry
+      )
+    )
+  ) {
+
+    showToast(
+      "Race percentages must total 100%"
+    );
+
+    return false;
+
+  }
+
+
+  if (
+    speciesAncestry.length &&
+    !approximately100(
+      ancestryTotal(
+        speciesAncestry
+      )
+    )
+  ) {
+
+    showToast(
+      "Species percentages must total 100%"
+    );
+
+    return false;
+
+  }
+
+
+  if (
+    hasDuplicateAncestry(
+      raceAncestry
+    )
+  ) {
+
+    showToast(
+      "A Race can only appear once"
+    );
+
+    return false;
+
+  }
+
+
+  if (
+    hasDuplicateAncestry(
+      speciesAncestry
+    )
+  ) {
+
+    showToast(
+      "A Species can only appear once"
+    );
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+function ancestryTotal(
+  ancestry
+) {
+
+  return ancestry.reduce(
+    (sum,entry) =>
+      sum + entry.percent,
+    0
+  );
+
+}
+
+
+function hasDuplicateAncestry(
+  ancestry
+) {
+
+  const ids =
+    ancestry.map(
+      entry =>
+        entry.id
+    );
+
+
+  return (
+    new Set(ids).size !==
+    ids.length
+  );
+
+}
+
+
+/* CANCEL */
+
+function cancelEditor() {
+
+  editBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  editPanel.classList.add(
+    "hidden"
+  );
+
+
+  if (
+    selectedCharacterId
+  ) {
+
+    openProfile(
+      selectedCharacterId
+    );
+
+  }
+
+}
+
+
+closeEditButton.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+cancelEditButton.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+editBackdrop.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+/* =========================================================
+   CHARACTER COLOR EDIT
+========================================================= */
+
+function setCharacterColorEditorValue(
+  trait,
+  character
+) {
+
+  let select;
+  let custom;
+
+
+  if (
+    trait === "hair"
+  ) {
+
+    select =
+      editHairPreset;
+
+    custom =
+      editHairCustom;
+
+
+    select.value =
+      character.hairColorId || "";
+
+
+    custom.value =
+      isHexColor(
+        character.hairColor
+      )
+        ? character.hairColor
+        : "#242429";
+
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+
+    select =
+      editEyePreset;
+
+    custom =
+      editEyeCustom;
+
+
+    select.value =
+      character.eyeColorId || "";
+
+
+    custom.value =
+      isHexColor(
+        character.eyeColor
+      )
+        ? character.eyeColor
+        : "#242429";
+
+  }
+
+
+  if (
+    trait === "skin"
+  ) {
+
+    select =
+      editSkinPreset;
+
+    custom =
+      editSkinCustom;
+
+
+    select.value =
+      character.skinColorId || "";
+
+
+    custom.value =
+      isHexColor(
+        character.skinColor
+      )
+        ? character.skinColor
+        : "#F3D2BF";
+
+  }
+
+
+  select.dispatchEvent(
+    new Event(
+      "change"
+    )
+  );
+
+}
+
+
 function applyCharacterColorFromEditor(
   character,
   trait
@@ -6027,8 +7889,7 @@ function applyCharacterColorFromEditor(
     hex =
       custom.value;
 
-  }
-  else if (id) {
+  } else if (id) {
 
     const preset =
       findColorPreset(
@@ -6086,45 +7947,6 @@ function applyCharacterColorFromEditor(
 }
 
 
-/* CANCEL EDIT */
-
-function cancelEditor() {
-
-  editBackdrop.classList.add(
-    "hidden"
-  );
-
-
-  editPanel.classList.add(
-    "hidden"
-  );
-
-
-  if (
-    selectedCharacterId
-  ) {
-
-    openProfile(
-      selectedCharacterId
-    );
-
-  }
-
-}
-
-
-closeEditButton.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
-cancelEditButton.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
 /* =========================================================
    PORTRAITS
 ========================================================= */
@@ -6143,23 +7965,33 @@ editPortraitFile.addEventListener(
     }
 
 
-    pendingPortraitData =
-      await compressPortrait(
-        file
+    try {
+
+      pendingPortraitData =
+        await compressPortrait(
+          file
+        );
+
+
+      renderEditPortrait({
+
+        givenName:
+          getInputValue(
+            "editGivenName"
+          ),
+
+        portraitData:
+          pendingPortraitData
+
+      });
+
+    } catch {
+
+      showToast(
+        "That image could not be used"
       );
 
-
-    renderEditPortrait({
-
-      givenName:
-        getInputValue(
-          "editGivenName"
-        ),
-
-      portraitData:
-        pendingPortraitData
-
-    });
+    }
 
   }
 );
@@ -6305,7 +8137,10 @@ function readFile(
 ) {
 
   return new Promise(
-    resolve => {
+    function(
+      resolve,
+      reject
+    ) {
 
       const reader =
         new FileReader();
@@ -6316,6 +8151,10 @@ function readFile(
           resolve(
             reader.result
           );
+
+
+      reader.onerror =
+        reject;
 
 
       reader.readAsDataURL(
@@ -6333,7 +8172,10 @@ function loadImage(
 ) {
 
   return new Promise(
-    resolve => {
+    function(
+      resolve,
+      reject
+    ) {
 
       const image =
         new Image();
@@ -6344,6 +8186,10 @@ function loadImage(
           resolve(
             image
           );
+
+
+      image.onerror =
+        reject;
 
 
       image.src =
@@ -6383,11 +8229,12 @@ function syncTwoWay(
       if (other) {
 
         other[field] =
-          other[field].filter(
-            value =>
-              value !==
-              characterId
-          );
+          other[field]
+            .filter(
+              value =>
+                value !==
+                characterId
+            );
 
       }
 
@@ -6422,7 +8269,7 @@ function syncTwoWay(
 
 
 /* =========================================================
-   CONFIRM
+   CONFIRMATION
 ========================================================= */
 
 function openConfirmation(
@@ -6484,6 +8331,12 @@ confirmCancelButton.addEventListener(
 );
 
 
+confirmBackdrop.addEventListener(
+  "click",
+  closeConfirmation
+);
+
+
 confirmAcceptButton.addEventListener(
   "click",
 
@@ -6526,7 +8379,8 @@ function getCharactersFromIds(
 
   return ids
     .map(
-      getCharacter
+      id =>
+        getCharacter(id)
     )
     .filter(Boolean);
 
@@ -6757,33 +8611,15 @@ function escapeHTML(
 }
 
 
-function capitalize(
-  value
-) {
-
-  if (
-    value === "eyes"
-  ) {
-    return "Eyes";
-  }
-
-
-  return value
-    .charAt(0)
-    .toUpperCase()
-    +
-    value.slice(1);
-
-}
-
-
-function roundNumber(
+function approximately100(
   number
 ) {
 
-  return Math.round(
-    number * 100
-  ) / 100;
+  return (
+    Math.abs(
+      number - 100
+    ) < 0.01
+  );
 
 }
 
@@ -6823,17 +8659,19 @@ function cleanBrokenRelationships() {
 
 
       character.spouseIds =
-        character.spouseIds.filter(
-          id =>
-            ids.has(id)
-        );
+        character.spouseIds
+          .filter(
+            id =>
+              ids.has(id)
+          );
 
 
       character.loverIds =
-        character.loverIds.filter(
-          id =>
-            ids.has(id)
-        );
+        character.loverIds
+          .filter(
+            id =>
+              ids.has(id)
+          );
 
     }
   );
@@ -6887,7 +8725,8 @@ function focusCharacter(
   if (position) {
 
     const rect =
-      treeCanvas.getBoundingClientRect();
+      treeCanvas
+        .getBoundingClientRect();
 
 
     zoom =
@@ -6934,6 +8773,8 @@ function focusCharacter(
 setupCharacterColorEditors();
 
 cleanBrokenRelationships();
+
+migrateLegacyRaceFields();
 
 saveCharacters();
 
