@@ -17,479 +17,920 @@
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <header class="topbar">
+  <header class="topbar">
 
-      <div class="topbar-title">
-        <p class="eyebrow">Private Archive</p>
-        <h1>Family Tree</h1>
-      </div>
+    <div class="topbar-title">
+      <p class="eyebrow">Private Archive</p>
+      <h1>Family Tree</h1>
+    </div>
 
-      <div class="topbar-actions">
+    <div class="topbar-actions">
 
-        <button
-          id="searchButton"
-          class="top-icon-button"
-          type="button"
-          aria-label="Search"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="6"></circle>
-            <path d="M16 16l4 4"></path>
-          </svg>
-        </button>
+      <button id="searchButton" class="top-icon-button" type="button">
+        ⌕
+      </button>
 
-        <button
-          id="worldButton"
-          class="top-icon-button"
-          type="button"
-          aria-label="World settings"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="8"></circle>
-            <circle cx="12" cy="12" r="2"></circle>
-            <path d="M12 4v3"></path>
-            <path d="M12 17v3"></path>
-            <path d="M4 12h3"></path>
-            <path d="M17 12h3"></path>
-          </svg>
-        </button>
+      <button id="worldButton" class="top-icon-button" type="button">
+        ◉
+      </button>
 
-        <button
-          id="addCharacterButton"
-          class="add-button"
-          type="button"
-        >
-          <span class="plus">+</span>
-          <span>Add</span>
-        </button>
+      <button id="addCharacterButton" class="add-button" type="button">
+        <span class="plus">+</span>
+        <span>Add</span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <main id="treeCanvas" class="tree-canvas">
+
+    <div id="treeViewport" class="tree-viewport">
+
+      <div id="treeWorld" class="tree-world">
+
+        <svg
+          id="treeLines"
+          class="tree-lines"
+          aria-hidden="true"
+        ></svg>
+
+        <div
+          id="characterLayer"
+          class="character-layer"
+        ></div>
 
       </div>
 
-    </header>
+    </div>
 
 
-    <main id="treeCanvas" class="tree-canvas">
+    <div id="emptyState" class="empty-state">
 
-      <div id="treeViewport" class="tree-viewport">
+      <div class="empty-symbol">✦</div>
 
-        <div id="treeWorld" class="tree-world">
+      <h2>Your tree is empty</h2>
 
-          <svg
-            id="treeLines"
-            class="tree-lines"
-            aria-hidden="true"
-          ></svg>
+      <p>
+        Add your first character to begin recording the lineage.
+      </p>
 
-          <div
-            id="characterLayer"
-            class="character-layer"
-          ></div>
-
-        </div>
-
-      </div>
-
-
-      <div id="emptyState" class="empty-state">
-
-        <div class="empty-symbol">✦</div>
-
-        <p class="empty-kicker">
-          The Archive Awaits
-        </p>
-
-        <h2>Your tree is empty</h2>
-
-        <p>
-          Add your first character to begin recording the lineage.
-        </p>
-
-        <button
-          id="addFirstCharacterButton"
-          class="primary-button"
-          type="button"
-        >
-          + Add First Character
-        </button>
-
-      </div>
-
-
-      <div class="canvas-controls">
-
-        <button
-          id="zoomOutButton"
-          class="canvas-control-button"
-          type="button"
-          aria-label="Zoom out"
-        >
-          −
-        </button>
-
-        <button
-          id="resetViewButton"
-          class="canvas-control-button center-button"
-          type="button"
-        >
-          Center
-        </button>
-
-        <button
-          id="zoomInButton"
-          class="canvas-control-button"
-          type="button"
-          aria-label="Zoom in"
-        >
-          +
-        </button>
-
-      </div>
-
-
-      <div
-        id="zoomIndicator"
-        class="zoom-indicator"
+      <button
+        id="addFirstCharacterButton"
+        class="primary-button"
+        type="button"
       >
-        100%
-      </div>
+        + Add First Character
+      </button>
 
-    </main>
+    </div>
+
+
+    <div class="canvas-controls">
+
+      <button
+        id="zoomOutButton"
+        class="canvas-control-button"
+        type="button"
+      >
+        −
+      </button>
+
+      <button
+        id="resetViewButton"
+        class="canvas-control-button center-button"
+        type="button"
+      >
+        Center
+      </button>
+
+      <button
+        id="zoomInButton"
+        class="canvas-control-button"
+        type="button"
+      >
+        +
+      </button>
+
+    </div>
+
+
+    <div id="zoomIndicator" class="zoom-indicator">
+      100%
+    </div>
+
+  </main>
+
+</div>
+
+
+
+<!-- SEARCH -->
+
+<div id="searchBackdrop" class="backdrop hidden"></div>
+
+<section id="searchPanel" class="floating-panel hidden">
+
+  <div class="floating-header">
+
+    <div>
+      <p class="eyebrow">Find Person</p>
+      <h2>Search Archive</h2>
+    </div>
+
+    <button
+      id="closeSearchButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
 
   </div>
 
 
+  <div class="floating-body">
 
-  <!-- SEARCH -->
+    <input
+      id="searchInput"
+      class="search-input"
+      type="search"
+      autocomplete="off"
+    >
 
-  <div
-    id="searchBackdrop"
-    class="backdrop hidden"
-  ></div>
+    <div id="searchResults" class="search-results"></div>
 
-  <section
-    id="searchPanel"
-    class="floating-panel hidden"
-  >
+  </div>
 
-    <div class="floating-header">
+</section>
 
-      <div>
-        <p class="eyebrow">Find Person</p>
-        <h2>Search Archive</h2>
+
+
+<!-- WORLD -->
+
+<div id="worldBackdrop" class="backdrop hidden"></div>
+
+<section id="worldPanel" class="floating-panel hidden">
+
+  <div class="floating-header">
+
+    <div>
+      <p class="eyebrow">Archive Controls</p>
+      <h2>Your World</h2>
+    </div>
+
+    <button
+      id="closeWorldButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="floating-body world-body">
+
+    <div class="world-stats">
+
+      <div class="world-stat">
+        <span>Characters</span>
+        <strong id="characterCount">0</strong>
       </div>
 
-      <button
-        id="closeSearchButton"
-        class="icon-button"
-        type="button"
-        aria-label="Close"
-      >
-        ×
-      </button>
+      <div class="world-stat">
+        <span>Vantage</span>
+        <strong id="worldVantageName">None</strong>
+      </div>
 
     </div>
 
 
-    <div class="floating-body">
+    <section class="world-section">
+
+      <p class="world-label">
+        Vantage Point
+      </p>
+
+      <select
+        id="vantageSelect"
+        class="world-select"
+      ></select>
+
+      <div id="vantageStatus" class="vantage-status"></div>
+
+    </section>
+
+
+    <section class="world-section">
+
+      <p class="world-label">
+        Genetics Libraries
+      </p>
+
+      <p class="world-description">
+        Create the reusable Races and Species used by your world.
+      </p>
+
+      <div class="library-main-buttons">
+
+        <button
+          id="manageRacesButton"
+          class="world-action-button"
+          type="button"
+        >
+          Manage Races
+        </button>
+
+        <button
+          id="manageSpeciesButton"
+          class="world-action-button secondary-world-button"
+          type="button"
+        >
+          Manage Species
+        </button>
+
+      </div>
+
+      <div class="library-counts">
+
+        <span>
+          <strong id="raceLibraryCount">0</strong>
+          Races
+        </span>
+
+        <span>
+          <strong id="speciesLibraryCount">0</strong>
+          Species
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <section class="world-section">
+
+      <p class="world-label">
+        Backup
+      </p>
+
+      <button
+        id="exportWorldButton"
+        class="world-action-button"
+        type="button"
+      >
+        Export World
+      </button>
+
+      <button
+        id="importWorldButton"
+        class="world-action-button secondary-world-button"
+        type="button"
+      >
+        Import World
+      </button>
 
       <input
-        id="searchInput"
-        class="search-input"
-        type="search"
-        autocomplete="off"
+        id="importWorldFile"
+        class="hidden"
+        type="file"
+        accept=".json,application/json"
       >
 
-      <div
-        id="searchResults"
-        class="search-results"
-      ></div>
+    </section>
+
+  </div>
+
+</section>
+
+
+
+<!-- LIBRARY LIST -->
+
+<div id="libraryBackdrop" class="backdrop hidden"></div>
+
+<section id="libraryPanel" class="floating-panel library-panel hidden">
+
+  <div class="floating-header">
+
+    <div>
+      <p class="eyebrow">Genetics Library</p>
+      <h2 id="libraryPanelTitle">Races</h2>
+    </div>
+
+    <button
+      id="closeLibraryButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="floating-body">
+
+    <button
+      id="addLibraryItemButton"
+      class="world-action-button"
+      type="button"
+    >
+      + Add
+    </button>
+
+    <div id="libraryList" class="library-list"></div>
+
+  </div>
+
+</section>
+
+
+
+<!-- LIBRARY EDITOR -->
+
+<div id="libraryEditorBackdrop" class="backdrop hidden"></div>
+
+<section
+  id="libraryEditorPanel"
+  class="bottom-panel library-editor-panel hidden"
+>
+
+  <div class="panel-handle"></div>
+
+  <div class="panel-header">
+
+    <div>
+      <p id="libraryEditorEyebrow" class="eyebrow">
+        Genetics Library
+      </p>
+
+      <h2 id="libraryEditorTitle">
+        New Race
+      </h2>
+    </div>
+
+    <button
+      id="closeLibraryEditorButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="form-body">
+
+    <label class="field">
+      <span>Name *</span>
+      <input id="libraryNameInput" type="text">
+    </label>
+
+
+    <div class="editor-heading">
+      Base Hair Probabilities
+    </div>
+
+    <p class="genetics-helper">
+      Optional. If used, percentages must total 100%.
+    </p>
+
+    <div
+      id="hairDistributionEditor"
+      class="distribution-editor"
+    ></div>
+
+    <button
+      class="add-distribution-button"
+      data-trait="hair"
+      type="button"
+    >
+      + Add Hair Color
+    </button>
+
+    <div
+      id="hairDistributionTotal"
+      class="distribution-total"
+    >
+      Total: 0%
+    </div>
+
+
+    <div class="editor-heading">
+      Base Eye Probabilities
+    </div>
+
+    <p class="genetics-helper">
+      Optional. If used, percentages must total 100%.
+    </p>
+
+    <div
+      id="eyeDistributionEditor"
+      class="distribution-editor"
+    ></div>
+
+    <button
+      class="add-distribution-button"
+      data-trait="eyes"
+      type="button"
+    >
+      + Add Eye Color
+    </button>
+
+    <div
+      id="eyeDistributionTotal"
+      class="distribution-total"
+    >
+      Total: 0%
+    </div>
+
+
+    <div class="editor-heading">
+      Base Skin Probabilities
+    </div>
+
+    <p class="genetics-helper">
+      Optional. If used, percentages must total 100%.
+    </p>
+
+    <div
+      id="skinDistributionEditor"
+      class="distribution-editor"
+    ></div>
+
+    <button
+      class="add-distribution-button"
+      data-trait="skin"
+      type="button"
+    >
+      + Add Skin Color
+    </button>
+
+    <div
+      id="skinDistributionTotal"
+      class="distribution-total"
+    >
+      Total: 0%
+    </div>
+
+  </div>
+
+
+  <div class="form-footer">
+
+    <button
+      id="cancelLibraryEditorButton"
+      class="secondary-button"
+      type="button"
+    >
+      Cancel
+    </button>
+
+    <button
+      id="saveLibraryItemButton"
+      class="save-button"
+      type="button"
+    >
+      Save
+    </button>
+
+  </div>
+
+</section>
+
+
+
+<!-- ADD CHARACTER -->
+
+<div id="formBackdrop" class="backdrop hidden"></div>
+
+<section id="characterFormPanel" class="bottom-panel hidden">
+
+  <div class="panel-handle"></div>
+
+  <div class="panel-header">
+
+    <div>
+      <p class="eyebrow">New Record</p>
+      <h2>Add Character</h2>
+    </div>
+
+    <button
+      id="closeFormButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <form id="characterForm">
+
+    <div class="form-body">
+
+      <label class="field">
+        <span>Title</span>
+        <input id="title" type="text">
+      </label>
+
+      <label class="field">
+        <span>Given Name *</span>
+        <input id="givenName" type="text" required>
+      </label>
+
+      <label class="field">
+        <span>Aliases</span>
+        <input id="aliases" type="text">
+      </label>
+
+      <label class="field">
+        <span>Maiden Name</span>
+        <input id="maidenName" type="text">
+      </label>
+
+      <label class="field">
+        <span>Family Name *</span>
+        <input id="familyName" type="text" required>
+      </label>
+
+      <div class="field-row">
+
+        <label class="field">
+          <span>Birth Year</span>
+          <input id="birthYear" type="text" inputmode="numeric">
+        </label>
+
+        <label class="field">
+          <span>Death Year</span>
+          <input id="deathYear" type="text" inputmode="numeric">
+        </label>
+
+      </div>
 
     </div>
 
-  </section>
 
-
-
-  <!-- WORLD -->
-
-  <div
-    id="worldBackdrop"
-    class="backdrop hidden"
-  ></div>
-
-  <section
-    id="worldPanel"
-    class="floating-panel hidden"
-  >
-
-    <div class="floating-header">
-
-      <div>
-        <p class="eyebrow">Archive Controls</p>
-        <h2>Your World</h2>
-      </div>
+    <div class="form-footer">
 
       <button
-        id="closeWorldButton"
-        class="icon-button"
+        id="cancelFormButton"
+        class="secondary-button"
         type="button"
-        aria-label="Close"
       >
-        ×
+        Cancel
+      </button>
+
+      <button class="save-button" type="submit">
+        Save Character
       </button>
 
     </div>
 
+  </form>
 
-    <div class="floating-body world-body">
+</section>
 
-      <div class="world-stats">
 
-        <div class="world-stat">
-          <span>Characters</span>
-          <strong id="characterCount">0</strong>
-        </div>
 
-        <div class="world-stat">
-          <span>Vantage</span>
-          <strong id="worldVantageName">None</strong>
-        </div>
+<!-- PROFILE -->
+
+<div id="profileBackdrop" class="backdrop hidden"></div>
+
+<section id="profilePanel" class="profile-panel hidden">
+
+  <div class="profile-topbar">
+
+    <p class="eyebrow">
+      Character Record
+    </p>
+
+    <button
+      id="closeProfileButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="profile-scroll">
+
+    <div class="profile-hero">
+
+      <div
+        id="profilePortrait"
+        class="profile-portrait"
+      ></div>
+
+      <div class="profile-hero-text">
+
+        <p
+          id="profileTitleHero"
+          class="profile-hero-title"
+        ></p>
+
+        <h2
+          id="profileFullName"
+          class="profile-main-name"
+        ></h2>
+
+        <p
+          id="profileYearsTop"
+          class="profile-main-years"
+        ></p>
+
+        <button
+          id="setVantageButton"
+          class="vantage-profile-button"
+          type="button"
+        >
+          Set as Vantage
+        </button>
 
       </div>
 
+    </div>
 
-      <section class="world-section">
 
-        <p class="world-label">
-          Vantage Point
-        </p>
+    <div class="profile-dashboard">
 
-        <p class="world-description">
-          Choose whose perspective is used when calculating every character's relation.
-        </p>
+      <section class="profile-box title-box">
 
-        <select
-          id="vantageSelect"
-          class="world-select"
-        ></select>
+        <span class="box-label">
+          Title
+        </span>
 
         <div
-          id="vantageStatus"
-          class="vantage-status"
+          id="profileTitle"
+          class="box-value big-value"
         ></div>
 
       </section>
 
 
-      <section class="world-section">
+      <section class="profile-box aliases-box">
 
-        <p class="world-label">
-          Backup
-        </p>
+        <span class="box-label">
+          Aliases
+        </span>
 
-        <p class="world-description">
-          Export the entire archive into one file, or restore a previous world.
-        </p>
+        <div
+          id="profileAliases"
+          class="box-value"
+        ></div>
 
-        <button
-          id="exportWorldButton"
-          class="world-action-button"
-          type="button"
+      </section>
+
+
+      <section class="colors-box">
+
+        <div class="color-profile-item">
+          <div id="hairColorSwatch" class="large-color-swatch"></div>
+          <span>Hair</span>
+          <small id="profileHairColor"></small>
+        </div>
+
+        <div class="color-profile-item">
+          <div id="eyeColorSwatch" class="large-color-swatch"></div>
+          <span>Eyes</span>
+          <small id="profileEyeColor"></small>
+        </div>
+
+        <div class="color-profile-item">
+          <div id="skinColorSwatch" class="large-color-swatch"></div>
+          <span>Skin</span>
+          <small id="profileSkinColor"></small>
+        </div>
+
+      </section>
+
+
+      <section class="profile-box family-box">
+
+        <span class="box-label">
+          Family
+        </span>
+
+        <div
+          id="vantageRelation"
+          class="vantage-relation hidden"
         >
-          Export World
-        </button>
 
-        <button
-          id="importWorldButton"
-          class="world-action-button secondary-world-button"
-          type="button"
-        >
-          Import World
-        </button>
+          <span
+            id="vantageRelationLabel"
+            class="vantage-relation-label"
+          ></span>
 
-        <input
-          id="importWorldFile"
-          class="hidden"
-          type="file"
-          accept=".json,application/json"
-        >
+          <strong
+            id="vantageRelationText"
+            class="vantage-relation-text"
+          ></strong>
+
+        </div>
+
+
+        <div class="family-list">
+
+          <div class="family-group">
+            <span>Mother</span>
+            <div id="profileMother" class="relationship-values"></div>
+          </div>
+
+          <div class="family-group">
+            <span>Father</span>
+            <div id="profileFather" class="relationship-values"></div>
+          </div>
+
+          <div class="family-group">
+            <span>Siblings</span>
+            <div id="profileSiblings" class="relationship-values"></div>
+          </div>
+
+          <div class="family-group">
+            <span>Spouses</span>
+            <div id="profileSpouses" class="relationship-values"></div>
+          </div>
+
+          <div class="family-group">
+            <span>Lovers</span>
+            <div id="profileLovers" class="relationship-values"></div>
+          </div>
+
+          <div class="family-group">
+            <span>Children</span>
+            <div id="profileChildren" class="relationship-values"></div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <section class="profile-box race-box">
+
+        <span class="box-label">
+          Race
+        </span>
+
+        <div
+          id="profileRace"
+          class="box-value centered-value"
+        ></div>
+
+      </section>
+
+
+      <section class="profile-box feature-box">
+
+        <span class="box-label">
+          Notable Physical Feature
+        </span>
+
+        <div
+          id="profilePhysicalFeature"
+          class="box-value"
+        ></div>
+
+      </section>
+
+
+      <section class="profile-box achievements-box">
+
+        <span class="box-label">
+          Noteworthy Achievements
+        </span>
+
+        <div
+          id="profileAchievements"
+          class="box-value"
+        ></div>
+
+      </section>
+
+
+      <section class="profile-box life-box">
+
+        <span class="box-label">
+          Life
+        </span>
+
+        <div
+          id="profileLife"
+          class="life-text"
+        ></div>
 
       </section>
 
     </div>
 
-  </section>
+  </div>
+
+
+  <div class="profile-footer profile-footer-three">
+
+    <button
+      id="editCharacterButton"
+      class="edit-button"
+      type="button"
+    >
+      Edit
+    </button>
+
+    <button
+      id="deleteCharacterButton"
+      class="delete-button"
+      type="button"
+    >
+      Delete
+    </button>
+
+    <button
+      id="closeProfileFooterButton"
+      class="secondary-button"
+      type="button"
+    >
+      Close
+    </button>
+
+  </div>
+
+</section>
 
 
 
-  <!-- ADD CHARACTER -->
+<!-- EDIT CHARACTER -->
 
-  <div
-    id="formBackdrop"
-    class="backdrop hidden"
-  ></div>
+<div id="editBackdrop" class="backdrop hidden"></div>
 
-  <section
-    id="characterFormPanel"
-    class="bottom-panel hidden"
-  >
+<section id="editPanel" class="bottom-panel editor-panel hidden">
 
-    <div class="panel-handle"></div>
+  <div class="panel-handle"></div>
 
-    <div class="panel-header">
+  <div class="panel-header">
 
-      <div>
-        <p class="eyebrow">New Record</p>
-        <h2>Add Character</h2>
-      </div>
-
-      <button
-        id="closeFormButton"
-        class="icon-button"
-        type="button"
-      >
-        ×
-      </button>
-
+    <div>
+      <p class="eyebrow">Character Editor</p>
+      <h2>Edit Character</h2>
     </div>
 
+    <button
+      id="closeEditButton"
+      class="icon-button"
+      type="button"
+    >
+      ×
+    </button>
 
-    <form id="characterForm">
+  </div>
 
-      <div class="form-body">
 
-        <label class="field">
-          <span>Title</span>
-          <input id="title" type="text">
-        </label>
+  <form id="editCharacterForm">
 
-        <label class="field">
-          <span>Given Name *</span>
-          <input id="givenName" type="text" required>
-        </label>
+    <div class="form-body">
 
-        <label class="field">
-          <span>Aliases</span>
-          <input id="aliases" type="text">
-        </label>
 
-        <label class="field">
-          <span>Maiden Name</span>
-          <input id="maidenName" type="text">
-        </label>
-
-        <label class="field">
-          <span>Family Name *</span>
-          <input id="familyName" type="text" required>
-        </label>
-
-        <div class="field-row">
-
-          <label class="field">
-            <span>Birth Year</span>
-            <input id="birthYear" type="text" inputmode="numeric">
-          </label>
-
-          <label class="field">
-            <span>Death Year</span>
-            <input id="deathYear" type="text" inputmode="numeric">
-          </label>
-
-        </div>
-
+      <div class="editor-heading">
+        Portrait
       </div>
 
-
-      <div class="form-footer">
-
-        <button
-          id="cancelFormButton"
-          class="secondary-button"
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <button
-          class="save-button"
-          type="submit"
-        >
-          Save Character
-        </button>
-
-      </div>
-
-    </form>
-
-  </section>
-
-
-
-  <!-- PROFILE -->
-
-  <div
-    id="profileBackdrop"
-    class="backdrop hidden"
-  ></div>
-
-  <section
-    id="profilePanel"
-    class="profile-panel hidden"
-  >
-
-    <div class="profile-topbar">
-
-      <p class="eyebrow">
-        Character Record
-      </p>
-
-      <button
-        id="closeProfileButton"
-        class="icon-button"
-        type="button"
-      >
-        ×
-      </button>
-
-    </div>
-
-
-    <div class="profile-scroll">
-
-      <div class="profile-hero">
+      <div class="portrait-editor">
 
         <div
-          id="profilePortrait"
-          class="profile-portrait"
-        >
-          <span id="profilePortraitInitial"></span>
-        </div>
+          id="editPortraitPreview"
+          class="portrait-preview"
+        ></div>
 
-        <div class="profile-hero-text">
+        <div class="portrait-actions">
 
-          <p
-            id="profileTitleHero"
-            class="profile-hero-title"
-          ></p>
+          <label class="portrait-upload-button">
 
-          <h2
-            id="profileFullName"
-            class="profile-main-name"
-          ></h2>
+            Choose Portrait
 
-          <p
-            id="profileYearsTop"
-            class="profile-main-years"
-          ></p>
+            <input
+              id="editPortraitFile"
+              type="file"
+              accept="image/*"
+            >
+
+          </label>
 
           <button
-            id="setVantageButton"
-            class="vantage-profile-button"
+            id="removePortraitButton"
+            class="portrait-remove-button"
             type="button"
           >
-            Set as Vantage
+            Remove Portrait
           </button>
 
         </div>
@@ -497,606 +938,296 @@
       </div>
 
 
-      <div class="profile-dashboard">
-
-        <section class="profile-box title-box">
-
-          <span class="box-label">
-            Title
-          </span>
-
-          <div
-            id="profileTitle"
-            class="box-value big-value"
-          ></div>
-
-        </section>
-
-
-        <section class="profile-box aliases-box">
-
-          <span class="box-label">
-            Aliases
-          </span>
-
-          <div
-            id="profileAliases"
-            class="box-value"
-          ></div>
-
-        </section>
-
-
-        <section class="colors-box">
-
-          <div class="color-profile-item">
-
-            <div
-              id="hairColorSwatch"
-              class="large-color-swatch"
-            ></div>
-
-            <span>Hair</span>
-
-            <small
-              id="profileHairColor"
-            ></small>
-
-          </div>
-
-
-          <div class="color-profile-item">
-
-            <div
-              id="eyeColorSwatch"
-              class="large-color-swatch"
-            ></div>
-
-            <span>Eyes</span>
-
-            <small
-              id="profileEyeColor"
-            ></small>
-
-          </div>
-
-
-          <div class="color-profile-item">
-
-            <div
-              id="skinColorSwatch"
-              class="large-color-swatch"
-            ></div>
-
-            <span>Skin</span>
-
-            <small
-              id="profileSkinColor"
-            ></small>
-
-          </div>
-
-        </section>
-
-
-        <section class="profile-box family-box">
-
-          <span class="box-label">
-            Family
-          </span>
-
-
-          <div
-            id="vantageRelation"
-            class="vantage-relation hidden"
-          >
-
-            <span
-              id="vantageRelationLabel"
-              class="vantage-relation-label"
-            ></span>
-
-            <strong
-              id="vantageRelationText"
-              class="vantage-relation-text"
-            ></strong>
-
-          </div>
-
-
-          <div class="family-list">
-
-            <div class="family-group">
-              <span>Mother</span>
-              <div id="profileMother" class="relationship-values"></div>
-            </div>
-
-            <div class="family-group">
-              <span>Father</span>
-              <div id="profileFather" class="relationship-values"></div>
-            </div>
-
-            <div class="family-group">
-              <span>Siblings</span>
-              <div id="profileSiblings" class="relationship-values"></div>
-            </div>
-
-            <div class="family-group">
-              <span>Spouses</span>
-              <div id="profileSpouses" class="relationship-values"></div>
-            </div>
-
-            <div class="family-group">
-              <span>Lovers</span>
-              <div id="profileLovers" class="relationship-values"></div>
-            </div>
-
-            <div class="family-group">
-              <span>Children</span>
-              <div id="profileChildren" class="relationship-values"></div>
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <section class="profile-box race-box">
-
-          <span class="box-label">
-            Race
-          </span>
-
-          <div
-            id="profileRace"
-            class="box-value centered-value"
-          ></div>
-
-        </section>
-
-
-        <section class="profile-box feature-box">
-
-          <span class="box-label">
-            Notable Physical Feature
-          </span>
-
-          <div
-            id="profilePhysicalFeature"
-            class="box-value"
-          ></div>
-
-        </section>
-
-
-        <section class="profile-box achievements-box">
-
-          <span class="box-label">
-            Noteworthy Achievements
-          </span>
-
-          <div
-            id="profileAchievements"
-            class="box-value long-value"
-          ></div>
-
-        </section>
-
-
-        <section class="profile-box life-box">
-
-          <span class="box-label">
-            Life
-          </span>
-
-          <div
-            id="profileLife"
-            class="life-text"
-          ></div>
-
-        </section>
-
+      <div class="editor-heading">
+        Identity
       </div>
 
-    </div>
+      <label class="field">
+        <span>Title</span>
+        <input id="editTitle" type="text">
+      </label>
+
+      <label class="field">
+        <span>Given Name *</span>
+        <input id="editGivenName" type="text" required>
+      </label>
+
+      <label class="field">
+        <span>Aliases</span>
+        <input id="editAliases" type="text">
+      </label>
+
+      <label class="field">
+        <span>Maiden Name</span>
+        <input id="editMaidenName" type="text">
+      </label>
+
+      <label class="field">
+        <span>Family Name *</span>
+        <input id="editFamilyName" type="text" required>
+      </label>
 
 
-    <div class="profile-footer profile-footer-three">
-
-      <button
-        id="editCharacterButton"
-        class="edit-button"
-        type="button"
-      >
-        Edit
-      </button>
-
-      <button
-        id="deleteCharacterButton"
-        class="delete-button"
-        type="button"
-      >
-        Delete
-      </button>
-
-      <button
-        id="closeProfileFooterButton"
-        class="secondary-button"
-        type="button"
-      >
-        Close
-      </button>
-
-    </div>
-
-  </section>
-
-
-
-  <!-- EDIT CHARACTER -->
-
-  <div
-    id="editBackdrop"
-    class="backdrop hidden"
-  ></div>
-
-  <section
-    id="editPanel"
-    class="bottom-panel editor-panel hidden"
-  >
-
-    <div class="panel-handle"></div>
-
-    <div class="panel-header">
-
-      <div>
-        <p class="eyebrow">Character Editor</p>
-        <h2>Edit Character</h2>
+      <div class="editor-heading">
+        Dates
       </div>
 
-      <button
-        id="closeEditButton"
-        class="icon-button"
-        type="button"
-      >
-        ×
-      </button>
-
-    </div>
-
-
-    <form id="editCharacterForm">
-
-      <div class="form-body">
-
-
-        <div class="editor-heading">
-          Portrait
-        </div>
-
-
-        <div class="portrait-editor">
-
-          <div
-            id="editPortraitPreview"
-            class="portrait-preview"
-          >
-            <span id="editPortraitInitial"></span>
-          </div>
-
-
-          <div class="portrait-actions">
-
-            <label class="portrait-upload-button">
-
-              Choose Portrait
-
-              <input
-                id="editPortraitFile"
-                type="file"
-                accept="image/*"
-              >
-
-            </label>
-
-            <button
-              id="removePortraitButton"
-              class="portrait-remove-button"
-              type="button"
-            >
-              Remove Portrait
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <div class="editor-heading">
-          Identity
-        </div>
+      <div class="field-row">
 
         <label class="field">
-          <span>Title</span>
-          <input id="editTitle" type="text">
+          <span>Birth Year</span>
+          <input id="editBirthYear" type="text" inputmode="numeric">
         </label>
 
         <label class="field">
-          <span>Given Name *</span>
-          <input id="editGivenName" type="text" required>
-        </label>
-
-        <label class="field">
-          <span>Aliases</span>
-          <input id="editAliases" type="text">
-        </label>
-
-        <label class="field">
-          <span>Maiden Name</span>
-          <input id="editMaidenName" type="text">
-        </label>
-
-        <label class="field">
-          <span>Family Name *</span>
-          <input id="editFamilyName" type="text" required>
-        </label>
-
-
-        <div class="editor-heading">
-          Dates
-        </div>
-
-
-        <div class="field-row">
-
-          <label class="field">
-            <span>Birth Year</span>
-            <input id="editBirthYear" type="text" inputmode="numeric">
-          </label>
-
-          <label class="field">
-            <span>Death Year</span>
-            <input id="editDeathYear" type="text" inputmode="numeric">
-          </label>
-
-        </div>
-
-
-        <div class="editor-heading">
-          Relationships
-        </div>
-
-
-        <label class="field">
-          <span>Mother</span>
-          <select id="editMother"></select>
-        </label>
-
-
-        <label class="field">
-          <span>Father</span>
-          <select id="editFather"></select>
-        </label>
-
-
-        <label class="field">
-          <span>Spouses</span>
-
-          <select
-            id="editSpouses"
-            class="relationship-multi"
-            multiple
-          ></select>
-
-        </label>
-
-
-        <label class="field">
-          <span>Lovers</span>
-
-          <select
-            id="editLovers"
-            class="relationship-multi"
-            multiple
-          ></select>
-
-        </label>
-
-
-        <div class="editor-heading">
-          Appearance
-        </div>
-
-
-        <label class="field">
-          <span>Race</span>
-          <input id="editRace" type="text">
-        </label>
-
-
-        <div class="color-editor-grid">
-
-          <label class="color-editor-field">
-
-            <span>Hair</span>
-
-            <input
-              id="editHairColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editHairColorValue">
-              #242429
-            </strong>
-
-          </label>
-
-
-          <label class="color-editor-field">
-
-            <span>Eyes</span>
-
-            <input
-              id="editEyeColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editEyeColorValue">
-              #242429
-            </strong>
-
-          </label>
-
-
-          <label class="color-editor-field">
-
-            <span>Skin</span>
-
-            <input
-              id="editSkinColor"
-              type="color"
-              value="#242429"
-            >
-
-            <strong id="editSkinColorValue">
-              #242429
-            </strong>
-
-          </label>
-
-        </div>
-
-
-        <label class="field">
-
-          <span>
-            Notable Physical Feature
-          </span>
-
-          <textarea
-            id="editPhysicalFeature"
-            rows="4"
-          ></textarea>
-
-        </label>
-
-
-        <div class="editor-heading">
-          Noteworthy Achievements
-        </div>
-
-        <label class="field">
-
-          <textarea
-            id="editAchievements"
-            rows="7"
-          ></textarea>
-
-        </label>
-
-
-        <div class="editor-heading">
-          Life
-        </div>
-
-        <label class="field">
-
-          <textarea
-            id="editLife"
-            class="life-editor"
-            rows="15"
-          ></textarea>
-
+          <span>Death Year</span>
+          <input id="editDeathYear" type="text" inputmode="numeric">
         </label>
 
       </div>
 
 
-      <div class="form-footer">
+      <div class="editor-heading">
+        Relationships
+      </div>
 
-        <button
-          id="cancelEditButton"
-          class="secondary-button"
-          type="button"
+      <label class="field">
+        <span>Mother</span>
+        <select id="editMother"></select>
+      </label>
+
+      <label class="field">
+        <span>Father</span>
+        <select id="editFather"></select>
+      </label>
+
+      <label class="field">
+        <span>Spouses</span>
+
+        <select
+          id="editSpouses"
+          class="relationship-multi"
+          multiple
+        ></select>
+
+      </label>
+
+      <label class="field">
+        <span>Lovers</span>
+
+        <select
+          id="editLovers"
+          class="relationship-multi"
+          multiple
+        ></select>
+
+      </label>
+
+
+      <div class="editor-heading">
+        Appearance
+      </div>
+
+
+      <label class="field">
+        <span>Race</span>
+        <input id="editRace" type="text">
+      </label>
+
+
+      <!-- HAIR PRESET -->
+
+      <div class="appearance-preset">
+
+        <label class="field">
+          <span>Hair Color</span>
+          <select id="editHairPreset"></select>
+        </label>
+
+        <div class="appearance-preview-row">
+
+          <div
+            id="editHairPresetSwatch"
+            class="preset-preview-swatch"
+          ></div>
+
+          <strong id="editHairPresetName"></strong>
+
+        </div>
+
+        <label
+          id="editHairCustomWrap"
+          class="custom-color-field hidden"
         >
-          Cancel
-        </button>
-
-        <button
-          class="save-button"
-          type="submit"
-        >
-          Save Changes
-        </button>
+          <span>Custom Hair Color</span>
+          <input id="editHairCustom" type="color">
+        </label>
 
       </div>
 
-    </form>
 
-  </section>
+      <!-- EYES PRESET -->
+
+      <div class="appearance-preset">
+
+        <label class="field">
+          <span>Eye Color</span>
+          <select id="editEyePreset"></select>
+        </label>
+
+        <div class="appearance-preview-row">
+
+          <div
+            id="editEyePresetSwatch"
+            class="preset-preview-swatch"
+          ></div>
+
+          <strong id="editEyePresetName"></strong>
+
+        </div>
+
+        <label
+          id="editEyeCustomWrap"
+          class="custom-color-field hidden"
+        >
+          <span>Custom Eye Color</span>
+          <input id="editEyeCustom" type="color">
+        </label>
+
+      </div>
 
 
+      <!-- SKIN PRESET -->
 
-  <!-- CONFIRMATION SHEET -->
+      <div class="appearance-preset">
 
-  <div
-    id="confirmBackdrop"
-    class="backdrop hidden"
-  ></div>
+        <label class="field">
+          <span>Skin Color</span>
+          <select id="editSkinPreset"></select>
+        </label>
 
-  <section
-    id="confirmPanel"
-    class="confirm-panel hidden"
-  >
+        <div class="appearance-preview-row">
 
-    <div class="confirm-symbol">
-      ✦
+          <div
+            id="editSkinPresetSwatch"
+            class="preset-preview-swatch"
+          ></div>
+
+          <strong id="editSkinPresetName"></strong>
+
+        </div>
+
+        <label
+          id="editSkinCustomWrap"
+          class="custom-color-field hidden"
+        >
+          <span>Custom Skin Color</span>
+          <input id="editSkinCustom" type="color">
+        </label>
+
+      </div>
+
+
+      <label class="field">
+
+        <span>
+          Notable Physical Feature
+        </span>
+
+        <textarea
+          id="editPhysicalFeature"
+          rows="4"
+        ></textarea>
+
+      </label>
+
+
+      <div class="editor-heading">
+        Noteworthy Achievements
+      </div>
+
+      <label class="field">
+        <textarea id="editAchievements" rows="7"></textarea>
+      </label>
+
+
+      <div class="editor-heading">
+        Life
+      </div>
+
+      <label class="field">
+        <textarea id="editLife" class="life-editor" rows="15"></textarea>
+      </label>
+
     </div>
 
-    <p class="eyebrow">
-      Please Confirm
-    </p>
 
-    <h2 id="confirmTitle"></h2>
-
-    <p id="confirmMessage"></p>
-
-
-    <div class="confirm-actions">
+    <div class="form-footer">
 
       <button
-        id="confirmCancelButton"
+        id="cancelEditButton"
         class="secondary-button"
         type="button"
       >
         Cancel
       </button>
 
-      <button
-        id="confirmAcceptButton"
-        class="danger-confirm-button"
-        type="button"
-      >
-        Confirm
+      <button class="save-button" type="submit">
+        Save Changes
       </button>
 
     </div>
 
-  </section>
+  </form>
+
+</section>
 
 
 
-  <!-- TOAST -->
+<!-- CONFIRM -->
 
-  <div
-    id="toast"
-    class="toast hidden"
-  ></div>
+<div id="confirmBackdrop" class="backdrop hidden"></div>
+
+<section id="confirmPanel" class="confirm-panel hidden">
+
+  <div class="confirm-symbol">✦</div>
+
+  <p class="eyebrow">
+    Please Confirm
+  </p>
+
+  <h2 id="confirmTitle"></h2>
+
+  <p id="confirmMessage"></p>
+
+  <div class="confirm-actions">
+
+    <button
+      id="confirmCancelButton"
+      class="secondary-button"
+      type="button"
+    >
+      Cancel
+    </button>
+
+    <button
+      id="confirmAcceptButton"
+      class="danger-confirm-button"
+      type="button"
+    >
+      Confirm
+    </button>
+
+  </div>
+
+</section>
 
 
-  <script src="app.js"></script>
+<div id="toast" class="toast hidden"></div>
+
+
+<script src="data.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
