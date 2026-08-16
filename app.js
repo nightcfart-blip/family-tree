@@ -2,10 +2,6 @@ const STORAGE_KEY =
   "fantasyFamilyTreeCharacters";
 
 
-/* -------------------------
-   TREE SETTINGS
-------------------------- */
-
 const NODE_GAP_X = 230;
 const GENERATION_GAP_Y = 230;
 const WORLD_SIZE = 4000;
@@ -14,10 +10,6 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.15;
 
-
-/* -------------------------
-   CANVAS STATE
-------------------------- */
 
 let viewX = 0;
 let viewY = 0;
@@ -37,10 +29,10 @@ let pinchStartZoom = 1;
 let pinchWorldX = 0;
 let pinchWorldY = 0;
 
+let lastLayout = null;
 
-/* -------------------------
-   MAIN ELEMENTS
-------------------------- */
+
+/* MAIN */
 
 const treeCanvas =
   document.getElementById("treeCanvas");
@@ -79,9 +71,28 @@ const zoomIndicator =
   document.getElementById("zoomIndicator");
 
 
-/* -------------------------
-   CREATE
-------------------------- */
+/* SEARCH */
+
+const searchButton =
+  document.getElementById("searchButton");
+
+const searchBackdrop =
+  document.getElementById("searchBackdrop");
+
+const searchPanel =
+  document.getElementById("searchPanel");
+
+const closeSearchButton =
+  document.getElementById("closeSearchButton");
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const searchResults =
+  document.getElementById("searchResults");
+
+
+/* CREATE */
 
 const formBackdrop =
   document.getElementById("formBackdrop");
@@ -99,9 +110,7 @@ const characterForm =
   document.getElementById("characterForm");
 
 
-/* -------------------------
-   PROFILE
-------------------------- */
+/* PROFILE */
 
 const profileBackdrop =
   document.getElementById("profileBackdrop");
@@ -118,10 +127,11 @@ const closeProfileFooterButton =
 const editCharacterButton =
   document.getElementById("editCharacterButton");
 
+const deleteCharacterButton =
+  document.getElementById("deleteCharacterButton");
 
-/* -------------------------
-   EDITOR
-------------------------- */
+
+/* EDIT */
 
 const editBackdrop =
   document.getElementById("editBackdrop");
@@ -139,10 +149,6 @@ const cancelEditButton =
   document.getElementById("cancelEditButton");
 
 
-/* -------------------------
-   DATA
-------------------------- */
-
 let characters =
   loadCharacters();
 
@@ -150,9 +156,7 @@ let selectedCharacterId =
   null;
 
 
-/* -------------------------
-   STORAGE
-------------------------- */
+/* STORAGE */
 
 function loadCharacters() {
 
@@ -180,10 +184,7 @@ function loadCharacters() {
 
   } catch (error) {
 
-    console.error(
-      "Could not load characters:",
-      error
-    );
+    console.error(error);
 
     return [];
 
@@ -274,9 +275,310 @@ function normalizeCharacter(character) {
 }
 
 
-/* =========================================================
-   PAN + ZOOM
-========================================================= */
+/* SEARCH */
+
+function openSearch() {
+
+  searchBackdrop.classList.remove(
+    "hidden"
+  );
+
+  searchPanel.classList.remove(
+    "hidden"
+  );
+
+  searchInput.value =
+    "";
+
+  renderSearchResults(
+    characters
+  );
+
+  setTimeout(
+    () => searchInput.focus(),
+    100
+  );
+
+}
+
+
+function closeSearch() {
+
+  searchBackdrop.classList.add(
+    "hidden"
+  );
+
+  searchPanel.classList.add(
+    "hidden"
+  );
+
+}
+
+
+searchButton.addEventListener(
+  "click",
+  openSearch
+);
+
+closeSearchButton.addEventListener(
+  "click",
+  closeSearch
+);
+
+searchBackdrop.addEventListener(
+  "click",
+  closeSearch
+);
+
+
+searchInput.addEventListener(
+  "input",
+
+  function() {
+
+    const query =
+      searchInput.value
+        .trim()
+        .toLowerCase();
+
+
+    if (!query) {
+
+      renderSearchResults(
+        characters
+      );
+
+      return;
+
+    }
+
+
+    const matches =
+      characters.filter(
+        character => {
+
+          const searchable =
+            [
+              character.givenName,
+              character.familyName,
+              character.maidenName,
+              character.title,
+              ...character.aliases
+            ]
+              .join(" ")
+              .toLowerCase();
+
+
+          return searchable.includes(
+            query
+          );
+
+        }
+      );
+
+
+    renderSearchResults(
+      matches
+    );
+
+  }
+);
+
+
+function renderSearchResults(
+  people
+) {
+
+  searchResults.innerHTML =
+    "";
+
+
+  if (
+    people.length === 0
+  ) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+
+    empty.className =
+      "search-empty";
+
+
+    empty.textContent =
+      "No characters found.";
+
+
+    searchResults.appendChild(
+      empty
+    );
+
+
+    return;
+
+  }
+
+
+  people
+    .slice()
+    .sort(
+      (a,b) =>
+        getTreeName(a)
+          .localeCompare(
+            getTreeName(b)
+          )
+    )
+    .forEach(
+      person => {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.type =
+          "button";
+
+
+        button.className =
+          "search-result";
+
+
+        const initial =
+          person.givenName
+            .charAt(0)
+            .toUpperCase();
+
+
+        button.innerHTML = `
+
+          <span class="search-result-circle">
+            ${escapeHTML(initial)}
+          </span>
+
+          <span class="search-result-text">
+
+            <span class="search-result-name">
+              ${escapeHTML(
+                getTreeName(person)
+              )}
+            </span>
+
+            <span class="search-result-meta">
+              ${escapeHTML(
+                makeYearText(person)
+              )}
+            </span>
+
+          </span>
+
+        `;
+
+
+        button.addEventListener(
+          "click",
+
+          function() {
+
+            closeSearch();
+
+            focusCharacter(
+              person.id
+            );
+
+          }
+        );
+
+
+        searchResults.appendChild(
+          button
+        );
+
+      }
+    );
+
+}
+
+
+/* MOVE TREE TO PERSON */
+
+function focusCharacter(
+  characterId
+) {
+
+  if (!lastLayout) {
+
+    lastLayout =
+      calculateTreeLayout();
+
+  }
+
+
+  const position =
+    lastLayout.positions.get(
+      characterId
+    );
+
+
+  if (!position) {
+
+    openProfile(
+      characterId
+    );
+
+    return;
+
+  }
+
+
+  const rect =
+    treeCanvas
+      .getBoundingClientRect();
+
+
+  zoom =
+    Math.max(
+      0.85,
+      Math.min(
+        1.25,
+        zoom
+      )
+    );
+
+
+  viewX =
+    rect.width / 2
+    -
+    position.x * zoom;
+
+
+  viewY =
+    rect.height / 2
+    -
+    position.y * zoom;
+
+
+  applyViewTransform();
+
+
+  setTimeout(
+    function() {
+
+      openProfile(
+        characterId
+      );
+
+    },
+    220
+  );
+
+}
+
+
+/* PAN + ZOOM */
 
 function applyViewTransform() {
 
@@ -289,10 +591,6 @@ function applyViewTransform() {
 
 }
 
-
-/* -------------------------
-   CENTER TREE
-------------------------- */
 
 function centerTree() {
 
@@ -311,10 +609,16 @@ function centerTree() {
         MIN_ZOOM,
         Math.min(
           canvasRect.width /
-            Math.max(layout.contentWidth, 600),
+            Math.max(
+              layout.contentWidth,
+              600
+            ),
 
           canvasRect.height /
-            Math.max(layout.contentHeight, 500)
+            Math.max(
+              layout.contentHeight,
+              500
+            )
         ) * 0.82
       )
     );
@@ -339,10 +643,6 @@ function centerTree() {
 
 }
 
-
-/* -------------------------
-   ZOOM AROUND SCREEN POINT
-------------------------- */
 
 function zoomAtPoint(
   newZoom,
@@ -389,16 +689,14 @@ function zoomAtPoint(
 }
 
 
-/* -------------------------
-   BUTTON ZOOM
-------------------------- */
-
 zoomInButton.addEventListener(
   "click",
   function() {
 
     const rect =
-      treeCanvas.getBoundingClientRect();
+      treeCanvas
+        .getBoundingClientRect();
+
 
     zoomAtPoint(
       zoom + ZOOM_STEP,
@@ -415,7 +713,9 @@ zoomOutButton.addEventListener(
   function() {
 
     const rect =
-      treeCanvas.getBoundingClientRect();
+      treeCanvas
+        .getBoundingClientRect();
+
 
     zoomAtPoint(
       zoom - ZOOM_STEP,
@@ -433,9 +733,7 @@ resetViewButton.addEventListener(
 );
 
 
-/* -------------------------
-   POINTER PAN
-------------------------- */
+/* MOUSE PAN */
 
 treeCanvas.addEventListener(
   "pointerdown",
@@ -451,7 +749,8 @@ treeCanvas.addEventListener(
 
 
     if (
-      event.pointerType === "touch"
+      event.pointerType ===
+      "touch"
     ) {
       return;
     }
@@ -471,11 +770,6 @@ treeCanvas.addEventListener(
     startViewY =
       viewY;
 
-
-    treeCanvas.setPointerCapture(
-      event.pointerId
-    );
-
   }
 );
 
@@ -491,18 +785,14 @@ treeCanvas.addEventListener(
 
     viewX =
       startViewX +
-      (
-        event.clientX -
-        panStartX
-      );
+      event.clientX -
+      panStartX;
 
 
     viewY =
       startViewY +
-      (
-        event.clientY -
-        panStartY
-      );
+      event.clientY -
+      panStartY;
 
 
     applyViewTransform();
@@ -513,27 +803,21 @@ treeCanvas.addEventListener(
 
 treeCanvas.addEventListener(
   "pointerup",
-  function() {
-
+  () => {
     isPanning = false;
-
   }
 );
 
 
 treeCanvas.addEventListener(
   "pointercancel",
-  function() {
-
+  () => {
     isPanning = false;
-
   }
 );
 
 
-/* -------------------------
-   TOUCH PAN + PINCH
-------------------------- */
+/* TOUCH PAN + PINCH */
 
 treeCanvas.addEventListener(
   "touchstart",
@@ -642,18 +926,14 @@ treeCanvas.addEventListener(
 
       viewX =
         startViewX +
-        (
-          touch.clientX -
-          panStartX
-        );
+        touch.clientX -
+        panStartX;
 
 
       viewY =
         startViewY +
-        (
-          touch.clientY -
-          panStartY
-        );
+        touch.clientY -
+        panStartY;
 
 
       applyViewTransform();
@@ -742,33 +1022,6 @@ treeCanvas.addEventListener(
 
     }
 
-
-    if (
-      event.touches.length === 1
-    ) {
-
-      const touch =
-        event.touches[0];
-
-
-      panStartX =
-        touch.clientX;
-
-      panStartY =
-        touch.clientY;
-
-      startViewX =
-        viewX;
-
-      startViewY =
-        viewY;
-
-
-      isPanning =
-        true;
-
-    }
-
   }
 );
 
@@ -813,9 +1066,7 @@ function getTouchMidpoint(
 }
 
 
-/* =========================================================
-   CHARACTER CREATION
-========================================================= */
+/* CHARACTER CREATION */
 
 function openCharacterForm() {
 
@@ -896,16 +1147,24 @@ characterForm.addEventListener(
         ),
 
       maidenName:
-        getInputValue("maidenName"),
+        getInputValue(
+          "maidenName"
+        ),
 
       familyName:
-        getInputValue("familyName"),
+        getInputValue(
+          "familyName"
+        ),
 
       birthYear:
-        getInputValue("birthYear"),
+        getInputValue(
+          "birthYear"
+        ),
 
       deathYear:
-        getInputValue("deathYear"),
+        getInputValue(
+          "deathYear"
+        ),
 
       race: "",
 
@@ -947,9 +1206,7 @@ characterForm.addEventListener(
 );
 
 
-/* =========================================================
-   TREE LAYOUT
-========================================================= */
+/* TREE */
 
 function renderTree() {
 
@@ -968,6 +1225,9 @@ function renderTree() {
       "hidden"
     );
 
+    lastLayout =
+      calculateTreeLayout();
+
     return;
 
   }
@@ -980,6 +1240,10 @@ function renderTree() {
 
   const layout =
     calculateTreeLayout();
+
+
+  lastLayout =
+    layout;
 
 
   drawRelationshipLines(
@@ -1219,11 +1483,6 @@ function calculateAllGenerations() {
   );
 
 
-  /*
-    Keep spouses visually
-    on the same generation.
-  */
-
   for (
     let pass = 0;
     pass < 5;
@@ -1237,7 +1496,9 @@ function calculateAllGenerations() {
           spouseId => {
 
             if (
-              !memo.has(spouseId)
+              !memo.has(
+                spouseId
+              )
             ) {
               return;
             }
@@ -1273,10 +1534,6 @@ function calculateAllGenerations() {
 
   }
 
-
-  /*
-    Re-enforce child below parents.
-  */
 
   for (
     let pass = 0;
@@ -1321,7 +1578,7 @@ function calculateAllGenerations() {
         }
 
 
-        const minimumChildLevel =
+        const minimum =
           Math.max(
             ...parentLevels
           ) + 1;
@@ -1334,12 +1591,12 @@ function calculateAllGenerations() {
             ) || 0
           )
           <
-          minimumChildLevel
+          minimum
         ) {
 
           memo.set(
             character.id,
-            minimumChildLevel
+            minimum
           );
 
         }
@@ -1460,7 +1717,9 @@ function calculateGeneration(
 }
 
 
-function clusterSpouses(row) {
+function clusterSpouses(
+  row
+) {
 
   const rowIds =
     new Set(
@@ -1636,7 +1895,6 @@ function renderCharacterNode(
 
       event.stopPropagation();
 
-
       openProfile(
         character.id
       );
@@ -1652,9 +1910,7 @@ function renderCharacterNode(
 }
 
 
-/* =========================================================
-   CONNECTION LINES
-========================================================= */
+/* LINES */
 
 function drawRelationshipLines(
   positions
@@ -1665,20 +1921,17 @@ function drawRelationshipLines(
   );
 
 
-  const familyGroups =
-    buildParentChildGroups();
+  buildParentChildGroups()
+    .forEach(
+      group => {
 
+        drawParentChildGroup(
+          group,
+          positions
+        );
 
-  familyGroups.forEach(
-    group => {
-
-      drawParentChildGroup(
-        group,
-        positions
-      );
-
-    }
-  );
+      }
+    );
 
 }
 
@@ -1722,7 +1975,6 @@ function drawSpouseLines(
             positions.get(
               character.id
             );
-
 
           const second =
             positions.get(
@@ -1921,16 +2173,10 @@ function drawParentChildGroup(
   ) {
 
     addSvgLine(
-      Math.min(
-        ...childXs
-      ),
-
+      Math.min(...childXs),
       branchY,
 
-      Math.max(
-        ...childXs
-      ),
-
+      Math.max(...childXs),
       branchY,
 
       "tree-line"
@@ -2006,9 +2252,7 @@ function addSvgLine(
 }
 
 
-/* =========================================================
-   PROFILE
-========================================================= */
+/* PROFILE */
 
 function openProfile(
   characterId
@@ -2295,7 +2539,6 @@ function getChildren(
 
   return characters.filter(
     character =>
-
       character.motherId === parentId
       ||
       character.fatherId === parentId
@@ -2387,9 +2630,127 @@ profileBackdrop.addEventListener(
 );
 
 
-/* =========================================================
-   EDITOR
-========================================================= */
+/* DELETE */
+
+deleteCharacterButton.addEventListener(
+  "click",
+
+  function() {
+
+    const character =
+      getCharacter(
+        selectedCharacterId
+      );
+
+
+    if (!character) {
+      return;
+    }
+
+
+    const confirmed =
+      confirm(
+        `Delete ${getTreeName(character)}?\n\nThis cannot be undone.`
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    deleteCharacter(
+      character.id
+    );
+
+  }
+);
+
+
+function deleteCharacter(
+  characterId
+) {
+
+  characters =
+    characters.filter(
+      character =>
+        character.id !==
+        characterId
+    );
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        character.motherId ===
+        characterId
+      ) {
+
+        character.motherId =
+          null;
+
+      }
+
+
+      if (
+        character.fatherId ===
+        characterId
+      ) {
+
+        character.fatherId =
+          null;
+
+      }
+
+
+      character.spouseIds =
+        character.spouseIds.filter(
+          id =>
+            id !==
+            characterId
+        );
+
+
+      character.loverIds =
+        character.loverIds.filter(
+          id =>
+            id !==
+            characterId
+        );
+
+    }
+  );
+
+
+  saveCharacters();
+
+
+  profileBackdrop.classList.add(
+    "hidden"
+  );
+
+  profilePanel.classList.add(
+    "hidden"
+  );
+
+
+  selectedCharacterId =
+    null;
+
+
+  renderTree();
+
+
+  setTimeout(
+    centerTree,
+    50
+  );
+
+}
+
+
+/* EDITOR */
 
 editCharacterButton.addEventListener(
   "click",
@@ -2751,7 +3112,9 @@ editCharacterForm.addEventListener(
 
 
     character.title =
-      getInputValue("editTitle");
+      getInputValue(
+        "editTitle"
+      );
 
 
     character.givenName =
@@ -2972,9 +3335,7 @@ function syncTwoWayRelationship(
 }
 
 
-/* -------------------------
-   SELECT HELPERS
-------------------------- */
+/* SELECTS */
 
 function getSelectedSingleId(
   selectId
@@ -3012,9 +3373,7 @@ function getSelectedMultipleIds(
 }
 
 
-/* -------------------------
-   COLORS
-------------------------- */
+/* COLORS */
 
 setupColorInput(
   "editHairColor",
@@ -3055,8 +3414,7 @@ function setupColorInput(
     function() {
 
       label.textContent =
-        input.value
-          .toUpperCase();
+        input.value.toUpperCase();
 
     }
   );
@@ -3064,13 +3422,9 @@ function setupColorInput(
 }
 
 
-/* =========================================================
-   HELPERS
-========================================================= */
+/* HELPERS */
 
-function getCharacter(
-  id
-) {
+function getCharacter(id) {
 
   return characters.find(
     character =>
@@ -3169,9 +3523,7 @@ function makeYearText(
     birth &&
     death
   ) {
-
     return `${birth} – ${death}`;
-
   }
 
 
@@ -3242,9 +3594,7 @@ function setEditColor(
 }
 
 
-function isHexColor(
-  value
-) {
+function isHexColor(value) {
 
   return /^#[0-9A-Fa-f]{6}$/.test(
     value
@@ -3267,9 +3617,7 @@ function getInputValue(
 }
 
 
-function escapeHTML(
-  value
-) {
+function escapeHTML(value) {
 
   const element =
     document.createElement(
@@ -3286,24 +3634,15 @@ function escapeHTML(
 }
 
 
-/* -------------------------
-   ROTATION / RESIZE
-------------------------- */
-
 window.addEventListener(
   "resize",
-
   function() {
-
     renderTree();
-
   }
 );
 
 
-/* -------------------------
-   START
-------------------------- */
+/* START */
 
 renderTree();
 
