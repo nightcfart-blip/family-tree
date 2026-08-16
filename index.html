@@ -32,7 +32,6 @@
         id="searchButton"
         class="top-icon-button"
         type="button"
-        aria-label="Search"
       >
         ⌕
       </button>
@@ -41,7 +40,6 @@
         id="worldButton"
         class="top-icon-button"
         type="button"
-        aria-label="World"
       >
         ◉
       </button>
@@ -64,12 +62,11 @@
 
     <div id="treeViewport" class="tree-viewport">
 
-      <div id="treeWorld" class="tree-world">
+      <div class="tree-world">
 
         <svg
           id="treeLines"
           class="tree-lines"
-          aria-hidden="true"
         ></svg>
 
         <div
@@ -131,7 +128,6 @@
 
     </div>
 
-
     <div id="zoomIndicator" class="zoom-indicator">
       100%
     </div>
@@ -164,7 +160,6 @@
     </button>
 
   </div>
-
 
   <div class="floating-body">
 
@@ -253,7 +248,7 @@
       </p>
 
       <p class="world-description">
-        Create the reusable Races and Species used by your world.
+        Create your world's Races and Species and define their genetic appearance tendencies.
       </p>
 
       <button
@@ -285,6 +280,38 @@
         </span>
 
       </div>
+
+    </section>
+
+
+    <section class="world-section">
+
+      <p class="world-label">
+        Genetic Model
+      </p>
+
+      <div class="model-summary">
+
+        <div>
+          <strong>70%</strong>
+          <span>Family</span>
+        </div>
+
+        <div>
+          <strong>20%</strong>
+          <span>Race</span>
+        </div>
+
+        <div>
+          <strong>10%</strong>
+          <span>Species</span>
+        </div>
+
+      </div>
+
+      <p class="world-description genetics-model-description">
+        Parent genetics already contain earlier generations, allowing grandparents and deeper ancestry to continue influencing descendants.
+      </p>
 
     </section>
 
@@ -326,7 +353,7 @@
 
 
 
-<!-- LIBRARY LIST -->
+<!-- LIBRARY -->
 
 <div id="libraryBackdrop" class="backdrop hidden"></div>
 
@@ -373,7 +400,10 @@
 
 <!-- LIBRARY EDITOR -->
 
-<div id="libraryEditorBackdrop" class="backdrop hidden"></div>
+<div
+  id="libraryEditorBackdrop"
+  class="backdrop hidden"
+></div>
 
 <section
   id="libraryEditorPanel"
@@ -405,6 +435,16 @@
     <label class="field">
       <span>Name *</span>
       <input id="libraryNameInput" type="text">
+    </label>
+
+
+    <label class="field">
+      <span>Additional Information</span>
+
+      <textarea
+        id="libraryInfoInput"
+        rows="7"
+      ></textarea>
     </label>
 
 
@@ -603,10 +643,7 @@
         Cancel
       </button>
 
-      <button
-        class="save-button"
-        type="submit"
-      >
+      <button class="save-button" type="submit">
         Save Character
       </button>
 
@@ -713,21 +750,44 @@
       <section class="colors-box">
 
         <div class="color-profile-item">
-          <div id="hairColorSwatch" class="large-color-swatch"></div>
+
+          <div
+            id="hairColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
           <span>Hair</span>
+
           <small id="profileHairColor"></small>
+
         </div>
 
+
         <div class="color-profile-item">
-          <div id="eyeColorSwatch" class="large-color-swatch"></div>
+
+          <div
+            id="eyeColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
           <span>Eyes</span>
+
           <small id="profileEyeColor"></small>
+
         </div>
 
+
         <div class="color-profile-item">
-          <div id="skinColorSwatch" class="large-color-swatch"></div>
+
+          <div
+            id="skinColorSwatch"
+            class="large-color-swatch"
+          ></div>
+
           <span>Skin</span>
+
           <small id="profileSkinColor"></small>
+
         </div>
 
       </section>
@@ -818,6 +878,61 @@
           id="profileSpeciesAncestry"
           class="ancestry-profile-list"
         ></div>
+
+      </section>
+
+
+      <section class="profile-box genetics-box">
+
+        <span class="box-label">
+          Genetic Appearance Probabilities
+        </span>
+
+        <p class="genetics-profile-note">
+          Fantasy inheritance model based on family, Race and Species.
+        </p>
+
+
+        <div class="genetic-trait-card">
+
+          <div class="genetic-trait-heading">
+            Hair
+          </div>
+
+          <div
+            id="profileHairProbabilities"
+            class="probability-list"
+          ></div>
+
+        </div>
+
+
+        <div class="genetic-trait-card">
+
+          <div class="genetic-trait-heading">
+            Eyes
+          </div>
+
+          <div
+            id="profileEyeProbabilities"
+            class="probability-list"
+          ></div>
+
+        </div>
+
+
+        <div class="genetic-trait-card">
+
+          <div class="genetic-trait-heading">
+            Skin
+          </div>
+
+          <div
+            id="profileSkinProbabilities"
+            class="probability-list"
+          ></div>
+
+        </div>
 
       </section>
 
@@ -929,7 +1044,6 @@
   <form id="editCharacterForm">
 
     <div class="form-body">
-
 
       <div class="editor-heading">
         Portrait
@@ -1055,8 +1169,6 @@
       </label>
 
 
-      <!-- ANCESTRY -->
-
       <div class="editor-heading">
         Ancestry
       </div>
@@ -1068,9 +1180,7 @@
           Founder Ancestry
         </strong>
 
-        <p id="ancestryModeDescription">
-          No parents are assigned, so Race and Species are entered manually.
-        </p>
+        <p id="ancestryModeDescription"></p>
 
         <label
           id="ancestryOverrideWrap"
@@ -1131,10 +1241,6 @@
 
           <h3>Race</h3>
 
-          <p class="genetics-helper">
-            Add one or more saved Races. If used, the percentages must total 100%.
-          </p>
-
           <div
             id="raceAncestryRows"
             class="ancestry-editor-rows"
@@ -1161,10 +1267,6 @@
         <div class="ancestry-editor-section">
 
           <h3>Species</h3>
-
-          <p class="genetics-helper">
-            Add one or more saved Species. If used, the percentages must total 100%.
-          </p>
 
           <div
             id="speciesAncestryRows"
@@ -1196,8 +1298,6 @@
       </div>
 
 
-      <!-- HAIR -->
-
       <div class="appearance-preset">
 
         <label class="field">
@@ -1227,8 +1327,6 @@
       </div>
 
 
-      <!-- EYES -->
-
       <div class="appearance-preset">
 
         <label class="field">
@@ -1257,8 +1355,6 @@
 
       </div>
 
-
-      <!-- SKIN -->
 
       <div class="appearance-preset">
 
@@ -1333,10 +1429,7 @@
         Cancel
       </button>
 
-      <button
-        class="save-button"
-        type="submit"
-      >
+      <button class="save-button" type="submit">
         Save Changes
       </button>
 
