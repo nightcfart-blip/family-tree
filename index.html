@@ -238,6 +238,10 @@
         class="vantage-status"
       ></div>
 
+      <p class="world-description">
+        The tree visually focuses around this character. Direct ancestors remain clear regardless of generation.
+      </p>
+
     </section>
 
 
@@ -378,7 +382,7 @@
         </div>
 
         <p class="world-description">
-          Controls how much of a parent's contribution comes from their inherited possibilities versus the color they actually display.
+          Controls how much of a parent's contribution comes from inherited possibilities versus the color they actually display.
         </p>
 
 
@@ -754,6 +758,7 @@
         </select>
       </label>
 
+
       <div class="field-row">
 
         <label class="field">
@@ -950,6 +955,7 @@
         <span class="box-label">
           Family
         </span>
+
 
         <div
           id="vantageRelation"
@@ -1309,7 +1315,26 @@
         <select id="editFather"></select>
       </label>
 
+
       <label class="field">
+
+        <span>Manual Siblings</span>
+
+        <p class="field-helper">
+          Use this when characters are siblings even if their parents are unknown or different.
+        </p>
+
+        <select
+          id="editSiblings"
+          class="relationship-multi"
+          multiple
+        ></select>
+
+      </label>
+
+
+      <label class="field">
+
         <span>Spouses</span>
 
         <select
@@ -1320,7 +1345,9 @@
 
       </label>
 
+
       <label class="field">
+
         <span>Lovers</span>
 
         <select
