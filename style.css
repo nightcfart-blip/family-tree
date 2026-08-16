@@ -22,11 +22,9 @@
     sans-serif;
 }
 
-
 * {
   box-sizing: border-box;
 }
-
 
 html,
 body {
@@ -35,16 +33,12 @@ body {
   height: 100%;
 }
 
-
 body {
   overflow: hidden;
-
   background: var(--bg);
   color: var(--ivory);
-
   font-family: var(--sans);
 }
-
 
 button,
 input,
@@ -53,28 +47,23 @@ select {
   font: inherit;
 }
 
-
 input,
 textarea,
 select {
   color: var(--ivory);
 }
 
-
 button {
   -webkit-tap-highlight-color: transparent;
 }
-
 
 .hidden {
   display: none !important;
 }
 
-
 .app {
   width: 100vw;
   height: 100dvh;
-
   display: flex;
   flex-direction: column;
 
@@ -87,17 +76,12 @@ button {
     );
 }
 
-
 .eyebrow {
   margin: 0 0 4px;
-
   color: var(--muted);
-
   font-size: 10px;
   font-weight: 650;
-
   letter-spacing: 0.18em;
-
   text-transform: uppercase;
 }
 
@@ -106,11 +90,9 @@ button {
 
 .topbar {
   min-height: 86px;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 10px;
 
   padding:
@@ -127,24 +109,18 @@ button {
   z-index: 30;
 }
 
-
 .topbar h1 {
   margin: 0;
-
   font-family: var(--serif);
-
   font-size: 25px;
   font-weight: 500;
 }
 
-
 .topbar-actions {
   display: flex;
   align-items: center;
-
   gap: 7px;
 }
-
 
 .top-icon-button {
   width: 43px;
@@ -159,10 +135,8 @@ button {
     rgba(255,255,255,0.04);
 
   color: var(--ivory-soft);
-
   font-size: 21px;
 }
-
 
 .add-button {
   min-width: 74px;
@@ -175,7 +149,6 @@ button {
   gap: 6px;
 
   border: 0;
-
   border-radius: 13px;
 
   background: #e8ded0;
@@ -183,7 +156,6 @@ button {
 
   font-weight: 700;
 }
-
 
 .plus {
   font-size: 20px;
@@ -194,11 +166,8 @@ button {
 
 .tree-canvas {
   position: relative;
-
   flex: 1;
-
   overflow: hidden;
-
   touch-action: none;
 
   user-select: none;
@@ -216,66 +185,49 @@ button {
   background-size: 30px 30px;
 }
 
-
 .tree-viewport {
   position: absolute;
-
   inset: 0;
-
   transform-origin: 0 0;
-
   will-change: transform;
 }
 
-
 .tree-world {
   position: absolute;
-
   width: 6000px;
   height: 6000px;
 }
 
-
 .tree-lines,
 .character-layer {
   position: absolute;
-
   inset: 0;
 }
-
 
 .tree-lines {
   width: 100%;
   height: 100%;
-
   overflow: visible;
-
   pointer-events: none;
-
   z-index: 1;
 }
-
 
 .character-layer {
   z-index: 2;
 }
-
 
 .tree-line {
   stroke:
     rgba(218,200,169,0.34);
 
   stroke-width: 2;
-
   fill: none;
 }
-
 
 .partner-line {
   stroke:
     rgba(218,190,140,0.56);
 }
-
 
 .lover-line {
   stroke:
@@ -285,10 +237,8 @@ button {
     7 8;
 }
 
-
 .character-node {
   position: absolute;
-
   width: 190px;
 
   transform:
@@ -299,7 +249,6 @@ button {
   align-items: center;
 
   padding: 0;
-
   border: 0;
 
   background: transparent;
@@ -308,6 +257,11 @@ button {
   text-align: center;
 }
 
+.character-node:active {
+  transform:
+    translateX(-50%)
+    scale(0.97);
+}
 
 .character-circle {
   width: 84px;
@@ -331,36 +285,26 @@ button {
     );
 
   font-family: var(--serif);
-
   font-size: 29px;
 }
-
 
 .character-portrait {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
 }
 
-
 .character-name {
   margin-top: 10px;
-
   font-family: var(--serif);
-
   font-size: 16px;
 }
 
-
 .character-years {
   margin-top: 4px;
-
   color: var(--muted);
-
   font-size: 11px;
 }
-
 
 .vantage-node .character-circle {
   border-color: #d5b777;
@@ -370,12 +314,10 @@ button {
     0 0 28px rgba(213,183,119,0.22);
 }
 
-
 .zoomed-far .character-name,
 .zoomed-far .character-years {
   opacity: 0;
 }
-
 
 .zoomed-very-far .character-circle {
   width: 50px;
@@ -387,7 +329,6 @@ button {
 
 .empty-state {
   position: absolute;
-
   top: 50%;
   left: 50%;
 
@@ -397,10 +338,8 @@ button {
     translate(-50%,-50%);
 
   text-align: center;
-
   z-index: 10;
 }
-
 
 .empty-symbol {
   width: 72px;
@@ -417,21 +356,16 @@ button {
   border-radius: 50%;
 
   color: #c4a568;
-
   font-size: 27px;
 }
 
-
 .empty-state h2 {
   font-family: var(--serif);
-
   font-weight: 500;
 }
 
-
 .empty-state p {
   color: var(--muted);
-
   line-height: 1.55;
 }
 
@@ -440,7 +374,6 @@ button {
 
 .canvas-controls {
   position: absolute;
-
   right: 13px;
 
   bottom:
@@ -450,12 +383,10 @@ button {
     );
 
   display: flex;
-
   gap: 7px;
 
   z-index: 15;
 }
-
 
 .canvas-control-button {
   min-width: 45px;
@@ -474,17 +405,13 @@ button {
   color: var(--ivory-soft);
 }
 
-
 .center-button {
   font-size: 12px;
-
   font-weight: 700;
 }
 
-
 .zoom-indicator {
   position: absolute;
-
   left: 13px;
 
   bottom:
@@ -494,7 +421,6 @@ button {
     );
 
   padding: 7px 9px;
-
   border-radius: 9px;
 
   background:
@@ -514,22 +440,16 @@ button {
 .save-button,
 .edit-button {
   border: 0;
-
   background: #e8ded0;
   color: #17130f;
-
   font-weight: 700;
 }
 
-
 .primary-button {
   min-height: 50px;
-
   padding: 0 20px;
-
   border-radius: 14px;
 }
-
 
 .secondary-button {
   border:
@@ -539,10 +459,8 @@ button {
     rgba(255,255,255,0.035);
 
   color: var(--ivory);
-
   font-weight: 650;
 }
-
 
 button:active {
   transform: scale(0.97);
@@ -553,7 +471,6 @@ button:active {
 
 .backdrop {
   position: fixed;
-
   inset: 0;
 
   background:
@@ -564,7 +481,6 @@ button:active {
 
   z-index: 100;
 }
-
 
 .floating-panel {
   position: fixed;
@@ -579,7 +495,6 @@ button:active {
     );
 
   max-height: 82dvh;
-
   overflow: hidden;
 
   border:
@@ -600,7 +515,6 @@ button:active {
   z-index: 130;
 }
 
-
 .floating-header {
   display: flex;
   align-items: center;
@@ -612,25 +526,18 @@ button:active {
     1px solid rgba(220,200,170,0.08);
 }
 
-
 .floating-header h2 {
   margin: 0;
-
   font-family: var(--serif);
-
   font-size: 25px;
   font-weight: 500;
 }
 
-
 .floating-body {
   max-height: 68dvh;
-
   overflow-y: auto;
-
   padding: 14px;
 }
-
 
 .icon-button {
   width: 41px;
@@ -645,7 +552,6 @@ button:active {
     rgba(255,255,255,0.035);
 
   color: var(--ivory-soft);
-
   font-size: 25px;
 }
 
@@ -654,7 +560,6 @@ button:active {
 
 .search-input {
   width: 100%;
-
   min-height: 51px;
 
   padding: 12px 14px;
@@ -663,25 +568,19 @@ button:active {
     1px solid rgba(220,200,170,0.11);
 
   border-radius: 14px;
-
   outline: none;
 
   background: #201d19;
-
   color: var(--ivory);
 
   font-size: 16px;
 }
 
-
 .search-results {
   display: grid;
-
   gap: 8px;
-
   margin-top: 12px;
 }
-
 
 .search-result {
   width: 100%;
@@ -690,7 +589,6 @@ button:active {
   align-items: center;
 
   gap: 12px;
-
   padding: 11px;
 
   border:
@@ -702,10 +600,8 @@ button:active {
     rgba(255,255,255,0.025);
 
   color: var(--ivory);
-
   text-align: left;
 }
-
 
 .search-result-circle {
   width: 46px;
@@ -715,39 +611,28 @@ button:active {
   place-items: center;
 
   overflow: hidden;
-
   border-radius: 50%;
 
   background: #26211c;
-
   font-family: var(--serif);
 }
-
 
 .search-result-circle img {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
 }
 
-
 .search-result-name {
   display: block;
-
   font-family: var(--serif);
-
   font-size: 17px;
 }
 
-
 .search-result-meta {
   display: block;
-
   margin-top: 3px;
-
   color: var(--muted);
-
   font-size: 11px;
 }
 
@@ -756,20 +641,14 @@ button:active {
 
 .world-body {
   display: grid;
-
   gap: 13px;
 }
 
-
 .world-stats {
   display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
+  grid-template-columns: 1fr 1fr;
   gap: 9px;
 }
-
 
 .world-stat,
 .world-section {
@@ -784,49 +663,34 @@ button:active {
     rgba(255,255,255,0.022);
 }
 
-
 .world-stat span {
   display: block;
-
   color: var(--muted);
-
   font-size: 10px;
 }
 
-
 .world-stat strong {
   display: block;
-
   margin-top: 4px;
-
   font-family: var(--serif);
-
   font-size: 18px;
 }
-
 
 .world-label {
   margin: 0 0 7px;
-
   font-family: var(--serif);
-
   font-size: 18px;
 }
-
 
 .world-description,
 .genetics-helper {
   color: var(--muted);
-
   font-size: 12px;
-
   line-height: 1.5;
 }
 
-
 .world-select {
   width: 100%;
-
   min-height: 50px;
 
   padding: 10px 12px;
@@ -839,25 +703,18 @@ button:active {
   background: #211d18;
 }
 
-
 .vantage-status {
   margin-top: 9px;
-
   color: #a18e6e;
-
   font-size: 11px;
 }
 
-
 .world-action-button {
   width: 100%;
-
   min-height: 49px;
-
   margin-top: 7px;
 
   border: 0;
-
   border-radius: 13px;
 
   background: #e8ded0;
@@ -865,7 +722,6 @@ button:active {
 
   font-weight: 700;
 }
-
 
 .secondary-world-button {
   border:
@@ -877,75 +733,101 @@ button:active {
   color: var(--ivory);
 }
 
-
 .library-counts {
   display: flex;
-
   justify-content: center;
-
   gap: 22px;
 
   margin-top: 13px;
 
   color: var(--muted);
-
   font-size: 11px;
 }
 
 
-.model-summary {
-  display: grid;
+/* GENETIC MODEL SETTINGS */
 
-  grid-template-columns:
-    repeat(3,1fr);
-
-  gap: 8px;
-
-  margin-top: 12px;
-}
-
-
-.model-summary div {
-  padding: 12px 6px;
+.genetic-settings-group {
+  margin-top: 14px;
+  padding: 13px;
 
   border:
     1px solid rgba(184,154,99,0.11);
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   background:
-    rgba(184,154,99,0.035);
-
-  text-align: center;
+    rgba(184,154,99,0.025);
 }
 
-
-.model-summary strong {
-  display: block;
-
-  color: #d4bc8e;
-
+.genetic-settings-title {
+  margin-bottom: 10px;
+  color: #c9ad7d;
   font-family: var(--serif);
-
-  font-size: 20px;
+  font-size: 16px;
 }
 
+.genetic-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-.model-summary span {
-  display: block;
+  gap: 12px;
+  min-height: 48px;
 
-  margin-top: 3px;
+  border-bottom:
+    1px solid rgba(220,200,170,0.06);
 
+  color: #cfc4b5;
+  font-size: 12px;
+}
+
+.genetic-setting-row:last-of-type {
+  border-bottom: 0;
+}
+
+.genetic-setting-row > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.genetic-setting-row input {
+  width: 72px;
+  min-height: 38px;
+
+  padding: 7px;
+
+  border:
+    1px solid rgba(220,200,170,0.1);
+
+  border-radius: 10px;
+  outline: none;
+
+  background: #211e1a;
+  color: var(--ivory);
+
+  text-align: right;
+}
+
+.genetic-setting-row strong {
   color: var(--muted);
-
-  font-size: 9px;
-
-  text-transform: uppercase;
+  font-size: 11px;
 }
 
+.genetic-setting-total {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
 
-.genetics-model-description {
-  margin-top: 12px;
+.genetic-setting-total.valid {
+  color: #94b78b;
+}
+
+.genetic-setting-total.invalid {
+  color: #d79890;
 }
 
 
@@ -953,21 +835,15 @@ button:active {
 
 .library-list {
   display: grid;
-
   gap: 9px;
-
   margin-top: 13px;
 }
 
-
 .library-empty {
   padding: 28px 12px;
-
   color: var(--muted);
-
   text-align: center;
 }
-
 
 .library-card {
   padding: 14px;
@@ -981,7 +857,6 @@ button:active {
     rgba(255,255,255,0.025);
 }
 
-
 .library-card-header {
   display: flex;
   align-items: center;
@@ -990,24 +865,18 @@ button:active {
   gap: 10px;
 }
 
-
 .library-card-name {
   font-family: var(--serif);
-
   font-size: 18px;
 }
 
-
 .library-card-actions {
   display: flex;
-
   gap: 6px;
 }
 
-
 .library-mini-button {
   min-height: 34px;
-
   padding: 0 10px;
 
   border:
@@ -1019,10 +888,8 @@ button:active {
     rgba(255,255,255,0.035);
 
   color: var(--ivory-soft);
-
   font-size: 11px;
 }
-
 
 .library-info {
   margin-top: 10px;
@@ -1030,14 +897,11 @@ button:active {
   color: #aaa095;
 
   font-family: var(--serif);
-
   font-size: 13px;
-
   line-height: 1.55;
 
   white-space: pre-wrap;
 }
-
 
 .library-summary {
   margin-top: 10px;
@@ -1045,7 +909,6 @@ button:active {
   color: var(--muted);
 
   font-size: 10px;
-
   line-height: 1.5;
 }
 
@@ -1056,16 +919,12 @@ button:active {
   max-height: 96dvh;
 }
 
-
 .distribution-editor,
 .ancestry-editor-rows {
   display: grid;
-
   gap: 8px;
-
   margin-bottom: 9px;
 }
-
 
 .distribution-row,
 .ancestry-editor-row {
@@ -1075,17 +934,14 @@ button:active {
     1fr 78px 38px;
 
   gap: 7px;
-
   align-items: center;
 }
-
 
 .distribution-row select,
 .distribution-row input,
 .ancestry-editor-row select,
 .ancestry-editor-row input {
   min-width: 0;
-
   min-height: 44px;
 
   padding: 8px;
@@ -1096,16 +952,13 @@ button:active {
   border-radius: 11px;
 
   background: #211e1a;
-
   color: var(--ivory);
 }
-
 
 .distribution-row input,
 .ancestry-editor-row input {
   text-align: center;
 }
-
 
 .remove-distribution-button {
   width: 38px;
@@ -1122,7 +975,6 @@ button:active {
   color: #dfa09d;
 }
 
-
 .add-distribution-button {
   width: 100%;
   min-height: 43px;
@@ -1136,26 +988,19 @@ button:active {
     rgba(184,154,99,0.035);
 
   color: #c0a576;
-
   font-size: 12px;
 }
 
-
 .distribution-total {
   margin-top: 7px;
-
   color: var(--muted);
-
   font-size: 11px;
-
   text-align: right;
 }
-
 
 .distribution-total.valid {
   color: #94b78b;
 }
-
 
 .distribution-total.invalid {
   color: #d79890;
@@ -1172,7 +1017,6 @@ button:active {
   bottom: 0;
 
   max-height: 93dvh;
-
   overflow-y: auto;
 
   border-radius:
@@ -1194,11 +1038,9 @@ button:active {
     env(safe-area-inset-bottom);
 }
 
-
 .editor-panel {
   max-height: 96dvh;
 }
-
 
 .panel-handle {
   width: 40px;
@@ -1212,7 +1054,6 @@ button:active {
     rgba(220,200,170,0.17);
 }
 
-
 .panel-header {
   display: flex;
   align-items: center;
@@ -1224,12 +1065,9 @@ button:active {
     1px solid rgba(220,200,170,0.08);
 }
 
-
 .panel-header h2 {
   margin: 0;
-
   font-family: var(--serif);
-
   font-size: 25px;
   font-weight: 500;
 }
@@ -1241,18 +1079,14 @@ button:active {
   padding: 20px 18px 130px;
 }
 
-
 .field {
   display: block;
-
   margin-bottom: 18px;
 }
-
 
 .field > span,
 .custom-color-field > span {
   display: block;
-
   margin-bottom: 7px;
 
   color: #cfc4b5;
@@ -1261,60 +1095,46 @@ button:active {
   font-weight: 650;
 }
 
-
 .field input,
 .field textarea,
 .field select {
   width: 100%;
-
   padding: 12px 14px;
 
   border:
     1px solid rgba(220,200,170,0.1);
 
   border-radius: 13px;
-
   outline: none;
 
   background: #211e1a;
-
   color: var(--ivory);
 
   font-size: 16px;
 }
-
 
 .field input,
 .field select {
   min-height: 50px;
 }
 
-
 .field textarea {
   resize: vertical;
-
   line-height: 1.55;
 }
-
 
 .relationship-multi {
   min-height: 145px !important;
 }
 
-
 .field-row {
   display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-
 .form-footer {
   position: sticky;
-
   bottom: 0;
 
   display: grid;
@@ -1335,17 +1155,13 @@ button:active {
   z-index: 5;
 }
 
-
 .form-footer button {
   min-height: 51px;
-
   border-radius: 14px;
 }
 
-
 .editor-heading {
   margin: 27px 0 14px;
-
   padding-bottom: 8px;
 
   border-bottom:
@@ -1357,10 +1173,8 @@ button:active {
   font-weight: 700;
 
   letter-spacing: 0.16em;
-
   text-transform: uppercase;
 }
-
 
 .life-editor {
   min-height: 290px;
@@ -1381,38 +1195,27 @@ button:active {
     rgba(184,154,99,0.04);
 }
 
-
 .ancestry-mode-card > strong {
   display: block;
-
   font-family: var(--serif);
-
   font-size: 17px;
-
   font-weight: 500;
 }
 
-
 .ancestry-mode-card > p {
   margin: 6px 0 0;
-
   color: var(--muted);
-
   font-size: 12px;
-
   line-height: 1.5;
 }
 
-
 .ancestry-override-row {
   display: flex;
-
   align-items: center;
 
   gap: 9px;
 
   margin-top: 13px;
-
   padding-top: 12px;
 
   border-top:
@@ -1423,21 +1226,16 @@ button:active {
   font-size: 12px;
 }
 
-
 .ancestry-override-row input {
   width: 20px;
   height: 20px;
 }
 
-
 .automatic-ancestry-preview {
   display: grid;
-
   gap: 10px;
-
   margin-top: 13px;
 }
-
 
 .automatic-preview-box {
   padding: 14px;
@@ -1451,10 +1249,8 @@ button:active {
     rgba(255,255,255,0.02);
 }
 
-
 .automatic-preview-box > span {
   display: block;
-
   margin-bottom: 9px;
 
   color: #887b6e;
@@ -1463,19 +1259,14 @@ button:active {
   font-weight: 700;
 
   letter-spacing: 0.1em;
-
   text-transform: uppercase;
 }
 
-
 .manual-ancestry-editor {
   display: grid;
-
   gap: 16px;
-
   margin-top: 14px;
 }
-
 
 .ancestry-editor-section {
   padding: 15px;
@@ -1489,36 +1280,26 @@ button:active {
     rgba(255,255,255,0.018);
 }
 
-
 .ancestry-editor-section h3 {
   margin: 0 0 10px;
 
   font-family: var(--serif);
-
   font-size: 19px;
-
   font-weight: 500;
 }
 
-
 .ancestry-profile-list {
   display: grid;
-
   gap: 8px;
 }
 
-
 .ancestry-profile-row {
   display: grid;
-
-  grid-template-columns:
-    1fr auto;
+  grid-template-columns: 1fr auto;
 
   gap: 10px;
-
   align-items: center;
 }
-
 
 .ancestry-profile-row span {
   min-width: 0;
@@ -1526,19 +1307,14 @@ button:active {
   color: #ddd3c7;
 
   font-family: var(--serif);
-
   font-size: 14px;
 }
 
-
 .ancestry-profile-row strong {
   color: #b9a47f;
-
   font-size: 11px;
-
   white-space: nowrap;
 }
-
 
 .ancestry-unknown span,
 .ancestry-unknown strong {
@@ -1546,11 +1322,10 @@ button:active {
 }
 
 
-/* APPEARANCE EDITOR */
+/* APPEARANCE */
 
 .appearance-preset {
   margin-bottom: 24px;
-
   padding: 14px;
 
   border:
@@ -1562,22 +1337,17 @@ button:active {
     rgba(255,255,255,0.018);
 }
 
-
 .appearance-preset .field {
   margin-bottom: 10px;
 }
 
-
 .appearance-preview-row {
   display: flex;
-
   align-items: center;
 
   gap: 10px;
-
   min-height: 42px;
 }
-
 
 .preset-preview-swatch {
   width: 36px;
@@ -1589,22 +1359,16 @@ button:active {
   border-radius: 50%;
 }
 
-
 .appearance-preview-row strong {
   font-family: var(--serif);
-
   font-size: 15px;
-
   font-weight: 500;
 }
 
-
 .custom-color-field {
   display: block;
-
   margin-top: 12px;
 }
-
 
 .custom-color-field input[type="color"] {
   width: 60px;
@@ -1625,17 +1389,13 @@ button:active {
 
 .portrait-editor {
   display: grid;
-
-  grid-template-columns:
-    94px 1fr;
+  grid-template-columns: 94px 1fr;
 
   gap: 15px;
-
   align-items: center;
 
   margin-bottom: 22px;
 }
-
 
 .portrait-preview {
   width: 94px;
@@ -1645,31 +1405,24 @@ button:active {
   place-items: center;
 
   overflow: hidden;
-
   border-radius: 50%;
 
   background: #211e1a;
 
   font-family: var(--serif);
-
   font-size: 31px;
 }
-
 
 .portrait-preview img {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
 }
 
-
 .portrait-actions {
   display: grid;
-
   gap: 8px;
 }
-
 
 .portrait-upload-button,
 .portrait-remove-button {
@@ -1683,18 +1436,14 @@ button:active {
   font-size: 12px;
 }
 
-
 .portrait-upload-button {
   background: #e5dacb;
-
   color: #17130f;
 }
-
 
 .portrait-upload-button input {
   display: none;
 }
-
 
 .portrait-remove-button {
   border:
@@ -1711,7 +1460,6 @@ button:active {
 
 .profile-panel {
   position: fixed;
-
   inset: 0;
 
   display: flex;
@@ -1723,7 +1471,6 @@ button:active {
 
   z-index: 120;
 }
-
 
 .profile-topbar {
   min-height: 65px;
@@ -1741,15 +1488,11 @@ button:active {
     1px solid rgba(220,200,170,0.08);
 }
 
-
 .profile-scroll {
   flex: 1;
-
   overflow-y: auto;
-
   padding-bottom: 110px;
 }
-
 
 .profile-hero {
   display: grid;
@@ -1758,12 +1501,10 @@ button:active {
     108px 1fr;
 
   gap: 18px;
-
   align-items: center;
 
   padding: 25px 18px;
 }
-
 
 .profile-portrait {
   width: 108px;
@@ -1782,18 +1523,14 @@ button:active {
   background: #211e1a;
 
   font-family: var(--serif);
-
   font-size: 36px;
 }
-
 
 .profile-portrait img {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
 }
-
 
 .profile-hero-title {
   margin: 0 0 5px;
@@ -1801,10 +1538,8 @@ button:active {
   color: #a9926f;
 
   font-size: 11px;
-
   text-transform: uppercase;
 }
-
 
 .profile-main-name {
   margin: 0;
@@ -1817,19 +1552,15 @@ button:active {
   line-height: 1.05;
 }
 
-
 .profile-main-years {
   color: var(--muted);
-
   font-size: 12px;
 }
-
 
 .vantage-profile-button {
   margin-top: 10px;
 
   min-height: 35px;
-
   padding: 0 11px;
 
   border:
@@ -1845,7 +1576,6 @@ button:active {
   font-size: 10px;
 }
 
-
 .profile-dashboard {
   display: grid;
 
@@ -1854,6 +1584,7 @@ button:active {
 
   grid-template-areas:
     "title aliases"
+    "gender gender"
     "colors colors"
     "family race"
     "family species"
@@ -1863,14 +1594,11 @@ button:active {
     "life life";
 
   gap: 12px;
-
   padding: 14px;
 }
 
-
 .profile-box {
   min-width: 0;
-
   padding: 16px;
 
   border:
@@ -1882,10 +1610,8 @@ button:active {
     rgba(255,255,255,0.025);
 }
 
-
 .box-label {
   display: block;
-
   margin-bottom: 10px;
 
   color: #81766b;
@@ -1893,91 +1619,73 @@ button:active {
   font-size: 9px;
 
   letter-spacing: 0.13em;
-
   text-transform: uppercase;
 }
-
 
 .box-value {
   color: #e6ddd2;
 
   font-size: 14px;
-
   line-height: 1.55;
 
   white-space: pre-wrap;
 }
 
-
 .big-value {
   font-family: var(--serif);
-
   font-size: 18px;
 }
-
 
 .title-box {
   grid-area: title;
 }
 
-
 .aliases-box {
   grid-area: aliases;
 }
 
+.gender-box {
+  grid-area: gender;
+}
 
 .family-box {
   grid-area: family;
-
   min-height: 620px;
 }
 
-
 .race-box {
   grid-area: race;
-
   min-height: 170px;
 }
-
 
 .species-box {
   grid-area: species;
-
   min-height: 170px;
 }
 
-
 .feature-box {
   grid-area: feature;
-
   min-height: 240px;
 }
-
 
 .genetics-box {
   grid-area: genetics;
 }
 
-
 .achievements-box {
   grid-area: achievements;
 }
-
 
 .life-box {
   grid-area: life;
 }
 
-
 .colors-box {
   grid-area: colors;
 
   display: grid;
-
-  grid-template-columns:
-    repeat(3,1fr);
+  grid-template-columns: repeat(3,1fr);
 }
-
 
 .color-profile-item {
   display: flex;
@@ -1986,7 +1694,6 @@ button:active {
 
   padding: 12px 4px;
 }
-
 
 .large-color-swatch {
   width: 57px;
@@ -1998,13 +1705,10 @@ button:active {
   border-radius: 50%;
 }
 
-
 .color-profile-item span {
   margin-top: 8px;
-
   font-size: 11px;
 }
-
 
 .color-profile-item small {
   margin-top: 3px;
@@ -2012,7 +1716,6 @@ button:active {
   color: #8b8176;
 
   font-size: 9px;
-
   text-align: center;
 }
 
@@ -2020,20 +1723,16 @@ button:active {
 /* GENETIC PROBABILITIES */
 
 .genetics-profile-note {
-  margin:
-    -2px 0 14px;
+  margin: -2px 0 14px;
 
   color: var(--muted);
 
   font-size: 11px;
-
   line-height: 1.5;
 }
 
-
 .genetic-trait-card {
   margin-top: 10px;
-
   padding: 13px;
 
   border:
@@ -2045,24 +1744,19 @@ button:active {
     rgba(255,255,255,0.018);
 }
 
-
 .genetic-trait-heading {
   margin-bottom: 11px;
 
   color: #c7ab79;
 
   font-family: var(--serif);
-
   font-size: 18px;
 }
 
-
 .probability-list {
   display: grid;
-
   gap: 7px;
 }
-
 
 .probability-row {
   display: grid;
@@ -2071,10 +1765,8 @@ button:active {
     25px 1fr auto;
 
   gap: 9px;
-
   align-items: center;
 }
-
 
 .probability-swatch {
   width: 25px;
@@ -2086,33 +1778,27 @@ button:active {
   border-radius: 50%;
 }
 
-
 .probability-name {
   min-width: 0;
 
   color: #ddd4c9;
 
   font-family: var(--serif);
-
   font-size: 13px;
 }
-
 
 .probability-percent {
   color: #b8a177;
 
   font-size: 10px;
-
   font-weight: 700;
 
   white-space: nowrap;
 }
 
-
 .probability-actual {
   color: #eee2c9;
 }
-
 
 .probability-actual::after {
   content: "  • actual";
@@ -2120,18 +1806,15 @@ button:active {
   color: #8d7856;
 
   font-size: 8px;
-
   font-family: var(--sans);
 
   text-transform: uppercase;
 }
 
-
 .probability-empty {
   color: var(--muted);
 
   font-size: 11px;
-
   line-height: 1.5;
 }
 
@@ -2140,7 +1823,6 @@ button:active {
 
 .vantage-relation {
   margin-bottom: 17px;
-
   padding: 10px;
 
   border:
@@ -2152,38 +1834,29 @@ button:active {
     rgba(184,154,99,0.05);
 }
 
-
 .vantage-relation-label {
   display: block;
 
   color: #887457;
 
   font-size: 8px;
-
   text-transform: uppercase;
 }
 
-
 .vantage-relation-text {
   color: #dac5a3;
-
   font-family: var(--serif);
 }
 
-
 .family-list {
   display: grid;
-
   gap: 18px;
 }
 
-
 .family-group > span {
   color: #776d63;
-
   font-size: 10px;
 }
-
 
 .relationship-values {
   display: flex;
@@ -2193,14 +1866,11 @@ button:active {
   gap: 5px;
 }
 
-
 .relationship-button {
   padding: 3px 0;
-
   border: 0;
 
   background: transparent;
-
   color: #eee5d9;
 
   font-family: var(--serif);
@@ -2211,14 +1881,12 @@ button:active {
     rgba(184,154,99,0.25);
 }
 
-
 .life-text {
   min-height: 310px;
 
   font-family: var(--serif);
 
   font-size: 16px;
-
   line-height: 1.72;
 
   white-space: pre-wrap;
@@ -2235,7 +1903,6 @@ button:active {
   bottom: 0;
 
   display: grid;
-
   gap: 9px;
 
   padding:
@@ -2253,19 +1920,15 @@ button:active {
     rgba(13,12,10,0.94);
 }
 
-
 .profile-footer-three {
   grid-template-columns:
     1.2fr 1fr 1fr;
 }
 
-
 .profile-footer button {
   min-height: 49px;
-
   border-radius: 13px;
 }
-
 
 .delete-button {
   border:
@@ -2305,44 +1968,31 @@ button:active {
   z-index: 150;
 }
 
-
 .confirm-symbol {
   color: var(--gold);
-
   font-size: 25px;
 }
 
-
 .confirm-panel h2 {
   font-family: var(--serif);
-
   font-weight: 500;
 }
 
-
 .confirm-panel > p:not(.eyebrow) {
   color: var(--muted);
-
   line-height: 1.5;
 }
 
-
 .confirm-actions {
   display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
+  grid-template-columns: 1fr 1fr;
   gap: 9px;
 }
 
-
 .confirm-actions button {
   min-height: 49px;
-
   border-radius: 13px;
 }
-
 
 .danger-confirm-button {
   border:
@@ -2359,7 +2009,6 @@ button:active {
 
 .toast {
   position: fixed;
-
   left: 50%;
 
   bottom:
@@ -2396,12 +2045,10 @@ button:active {
     height: 39px;
   }
 
-
   .add-button {
     min-width: 62px;
     height: 39px;
   }
-
 
   .distribution-row,
   .ancestry-editor-row {
@@ -2409,131 +2056,18 @@ button:active {
       1fr 68px 36px;
   }
 
-
   .profile-hero {
     grid-template-columns:
       84px 1fr;
   }
-
 
   .profile-portrait {
     width: 82px;
     height: 82px;
   }
 
-
   .profile-main-name {
     font-size: 26px;
   }
 
-}
-
-/* GENETIC MODEL SETTINGS */
-
-.genetic-settings-group {
-  margin-top: 14px;
-
-  padding: 13px;
-
-  border:
-    1px solid rgba(184,154,99,0.11);
-
-  border-radius: 14px;
-
-  background:
-    rgba(184,154,99,0.025);
-}
-
-
-.genetic-settings-title {
-  margin-bottom: 10px;
-
-  color: #c9ad7d;
-
-  font-family: var(--serif);
-
-  font-size: 16px;
-}
-
-
-.genetic-setting-row {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  min-height: 48px;
-
-  border-bottom:
-    1px solid rgba(220,200,170,0.06);
-
-  color: #cfc4b5;
-
-  font-size: 12px;
-}
-
-
-.genetic-setting-row:last-of-type {
-  border-bottom: 0;
-}
-
-
-.genetic-setting-row > div {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-}
-
-
-.genetic-setting-row input {
-  width: 72px;
-
-  min-height: 38px;
-
-  padding: 7px;
-
-  border:
-    1px solid rgba(220,200,170,0.1);
-
-  border-radius: 10px;
-
-  outline: none;
-
-  background: #211e1a;
-
-  color: var(--ivory);
-
-  text-align: right;
-}
-
-
-.genetic-setting-row strong {
-  color: var(--muted);
-
-  font-size: 11px;
-}
-
-
-.genetic-setting-total {
-  margin-top: 10px;
-
-  color: var(--muted);
-
-  font-size: 11px;
-
-  text-align: right;
-}
-
-
-.genetic-setting-total.valid {
-  color: #94b78b;
-}
-
-
-.genetic-setting-total.invalid {
-  color: #d79890;
 }
