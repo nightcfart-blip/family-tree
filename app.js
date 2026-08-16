@@ -4,6 +4,16 @@ const STORAGE_KEY =
 const VANTAGE_KEY =
   "fantasyFamilyTreeVantage";
 
+const RACE_LIBRARY_KEY =
+  "fantasyFamilyTreeRaceLibrary";
+
+const SPECIES_LIBRARY_KEY =
+  "fantasyFamilyTreeSpeciesLibrary";
+
+
+const COLOR_PRESETS =
+  window.COLOR_PRESETS;
+
 
 /* TREE */
 
@@ -14,6 +24,28 @@ const WORLD_SIZE = 6000;
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.15;
+
+
+/* DATA */
+
+let characters =
+  loadCharacters();
+
+let vantageCharacterId =
+  loadVantage();
+
+let raceLibrary =
+  loadLibrary(
+    RACE_LIBRARY_KEY
+  );
+
+let speciesLibrary =
+  loadLibrary(
+    SPECIES_LIBRARY_KEY
+  );
+
+let selectedCharacterId =
+  null;
 
 
 /* VIEW */
@@ -39,235 +71,503 @@ let pinchWorldY = 0;
 let lastLayout = null;
 
 
-/* PORTRAIT TEMP */
+/* PORTRAIT */
 
-let pendingPortraitData = null;
-
-
-/* CONFIRMATION */
-
-let confirmAction = null;
+let pendingPortraitData =
+  null;
 
 
-/* MAIN */
+/* LIBRARY EDITING */
+
+let activeLibraryType =
+  "race";
+
+let editingLibraryId =
+  null;
+
+
+/* CONFIRM */
+
+let confirmAction =
+  null;
+
+
+/* ELEMENTS */
 
 const treeCanvas =
-  document.getElementById("treeCanvas");
+  document.getElementById(
+    "treeCanvas"
+  );
 
 const treeViewport =
-  document.getElementById("treeViewport");
+  document.getElementById(
+    "treeViewport"
+  );
 
 const treeLines =
-  document.getElementById("treeLines");
+  document.getElementById(
+    "treeLines"
+  );
 
 const characterLayer =
-  document.getElementById("characterLayer");
+  document.getElementById(
+    "characterLayer"
+  );
 
 const emptyState =
-  document.getElementById("emptyState");
+  document.getElementById(
+    "emptyState"
+  );
+
 
 const addCharacterButton =
-  document.getElementById("addCharacterButton");
+  document.getElementById(
+    "addCharacterButton"
+  );
 
 const addFirstCharacterButton =
-  document.getElementById("addFirstCharacterButton");
+  document.getElementById(
+    "addFirstCharacterButton"
+  );
+
 
 const zoomInButton =
-  document.getElementById("zoomInButton");
+  document.getElementById(
+    "zoomInButton"
+  );
 
 const zoomOutButton =
-  document.getElementById("zoomOutButton");
+  document.getElementById(
+    "zoomOutButton"
+  );
 
 const resetViewButton =
-  document.getElementById("resetViewButton");
+  document.getElementById(
+    "resetViewButton"
+  );
 
 const zoomIndicator =
-  document.getElementById("zoomIndicator");
+  document.getElementById(
+    "zoomIndicator"
+  );
 
 
 /* SEARCH */
 
 const searchButton =
-  document.getElementById("searchButton");
+  document.getElementById(
+    "searchButton"
+  );
 
 const searchBackdrop =
-  document.getElementById("searchBackdrop");
+  document.getElementById(
+    "searchBackdrop"
+  );
 
 const searchPanel =
-  document.getElementById("searchPanel");
+  document.getElementById(
+    "searchPanel"
+  );
 
 const closeSearchButton =
-  document.getElementById("closeSearchButton");
+  document.getElementById(
+    "closeSearchButton"
+  );
 
 const searchInput =
-  document.getElementById("searchInput");
+  document.getElementById(
+    "searchInput"
+  );
 
 const searchResults =
-  document.getElementById("searchResults");
+  document.getElementById(
+    "searchResults"
+  );
 
 
 /* WORLD */
 
 const worldButton =
-  document.getElementById("worldButton");
+  document.getElementById(
+    "worldButton"
+  );
 
 const worldBackdrop =
-  document.getElementById("worldBackdrop");
+  document.getElementById(
+    "worldBackdrop"
+  );
 
 const worldPanel =
-  document.getElementById("worldPanel");
+  document.getElementById(
+    "worldPanel"
+  );
 
 const closeWorldButton =
-  document.getElementById("closeWorldButton");
+  document.getElementById(
+    "closeWorldButton"
+  );
 
 const vantageSelect =
-  document.getElementById("vantageSelect");
+  document.getElementById(
+    "vantageSelect"
+  );
 
 const vantageStatus =
-  document.getElementById("vantageStatus");
+  document.getElementById(
+    "vantageStatus"
+  );
 
 const characterCount =
-  document.getElementById("characterCount");
+  document.getElementById(
+    "characterCount"
+  );
 
 const worldVantageName =
-  document.getElementById("worldVantageName");
+  document.getElementById(
+    "worldVantageName"
+  );
+
+const raceLibraryCount =
+  document.getElementById(
+    "raceLibraryCount"
+  );
+
+const speciesLibraryCount =
+  document.getElementById(
+    "speciesLibraryCount"
+  );
+
+const manageRacesButton =
+  document.getElementById(
+    "manageRacesButton"
+  );
+
+const manageSpeciesButton =
+  document.getElementById(
+    "manageSpeciesButton"
+  );
 
 const exportWorldButton =
-  document.getElementById("exportWorldButton");
+  document.getElementById(
+    "exportWorldButton"
+  );
 
 const importWorldButton =
-  document.getElementById("importWorldButton");
+  document.getElementById(
+    "importWorldButton"
+  );
 
 const importWorldFile =
-  document.getElementById("importWorldFile");
+  document.getElementById(
+    "importWorldFile"
+  );
+
+
+/* LIBRARY */
+
+const libraryBackdrop =
+  document.getElementById(
+    "libraryBackdrop"
+  );
+
+const libraryPanel =
+  document.getElementById(
+    "libraryPanel"
+  );
+
+const libraryPanelTitle =
+  document.getElementById(
+    "libraryPanelTitle"
+  );
+
+const closeLibraryButton =
+  document.getElementById(
+    "closeLibraryButton"
+  );
+
+const addLibraryItemButton =
+  document.getElementById(
+    "addLibraryItemButton"
+  );
+
+const libraryList =
+  document.getElementById(
+    "libraryList"
+  );
+
+
+/* LIBRARY EDITOR */
+
+const libraryEditorBackdrop =
+  document.getElementById(
+    "libraryEditorBackdrop"
+  );
+
+const libraryEditorPanel =
+  document.getElementById(
+    "libraryEditorPanel"
+  );
+
+const libraryEditorTitle =
+  document.getElementById(
+    "libraryEditorTitle"
+  );
+
+const closeLibraryEditorButton =
+  document.getElementById(
+    "closeLibraryEditorButton"
+  );
+
+const cancelLibraryEditorButton =
+  document.getElementById(
+    "cancelLibraryEditorButton"
+  );
+
+const saveLibraryItemButton =
+  document.getElementById(
+    "saveLibraryItemButton"
+  );
+
+const libraryNameInput =
+  document.getElementById(
+    "libraryNameInput"
+  );
+
+const hairDistributionEditor =
+  document.getElementById(
+    "hairDistributionEditor"
+  );
+
+const eyeDistributionEditor =
+  document.getElementById(
+    "eyeDistributionEditor"
+  );
+
+const skinDistributionEditor =
+  document.getElementById(
+    "skinDistributionEditor"
+  );
+
+const hairDistributionTotal =
+  document.getElementById(
+    "hairDistributionTotal"
+  );
+
+const eyeDistributionTotal =
+  document.getElementById(
+    "eyeDistributionTotal"
+  );
+
+const skinDistributionTotal =
+  document.getElementById(
+    "skinDistributionTotal"
+  );
 
 
 /* CREATE */
 
 const formBackdrop =
-  document.getElementById("formBackdrop");
+  document.getElementById(
+    "formBackdrop"
+  );
 
 const characterFormPanel =
-  document.getElementById("characterFormPanel");
+  document.getElementById(
+    "characterFormPanel"
+  );
 
 const closeFormButton =
-  document.getElementById("closeFormButton");
+  document.getElementById(
+    "closeFormButton"
+  );
 
 const cancelFormButton =
-  document.getElementById("cancelFormButton");
+  document.getElementById(
+    "cancelFormButton"
+  );
 
 const characterForm =
-  document.getElementById("characterForm");
+  document.getElementById(
+    "characterForm"
+  );
 
 
 /* PROFILE */
 
 const profileBackdrop =
-  document.getElementById("profileBackdrop");
+  document.getElementById(
+    "profileBackdrop"
+  );
 
 const profilePanel =
-  document.getElementById("profilePanel");
+  document.getElementById(
+    "profilePanel"
+  );
 
 const closeProfileButton =
-  document.getElementById("closeProfileButton");
+  document.getElementById(
+    "closeProfileButton"
+  );
 
 const closeProfileFooterButton =
-  document.getElementById("closeProfileFooterButton");
+  document.getElementById(
+    "closeProfileFooterButton"
+  );
 
 const editCharacterButton =
-  document.getElementById("editCharacterButton");
+  document.getElementById(
+    "editCharacterButton"
+  );
 
 const deleteCharacterButton =
-  document.getElementById("deleteCharacterButton");
+  document.getElementById(
+    "deleteCharacterButton"
+  );
 
 const setVantageButton =
-  document.getElementById("setVantageButton");
+  document.getElementById(
+    "setVantageButton"
+  );
 
 const profilePortrait =
-  document.getElementById("profilePortrait");
-
-const profilePortraitInitial =
-  document.getElementById("profilePortraitInitial");
+  document.getElementById(
+    "profilePortrait"
+  );
 
 const vantageRelation =
-  document.getElementById("vantageRelation");
+  document.getElementById(
+    "vantageRelation"
+  );
 
 const vantageRelationLabel =
-  document.getElementById("vantageRelationLabel");
+  document.getElementById(
+    "vantageRelationLabel"
+  );
 
 const vantageRelationText =
-  document.getElementById("vantageRelationText");
+  document.getElementById(
+    "vantageRelationText"
+  );
 
 
 /* EDIT */
 
 const editBackdrop =
-  document.getElementById("editBackdrop");
+  document.getElementById(
+    "editBackdrop"
+  );
 
 const editPanel =
-  document.getElementById("editPanel");
+  document.getElementById(
+    "editPanel"
+  );
 
 const editCharacterForm =
-  document.getElementById("editCharacterForm");
+  document.getElementById(
+    "editCharacterForm"
+  );
 
 const closeEditButton =
-  document.getElementById("closeEditButton");
+  document.getElementById(
+    "closeEditButton"
+  );
 
 const cancelEditButton =
-  document.getElementById("cancelEditButton");
+  document.getElementById(
+    "cancelEditButton"
+  );
 
 const editPortraitFile =
-  document.getElementById("editPortraitFile");
+  document.getElementById(
+    "editPortraitFile"
+  );
 
 const editPortraitPreview =
-  document.getElementById("editPortraitPreview");
-
-const editPortraitInitial =
-  document.getElementById("editPortraitInitial");
+  document.getElementById(
+    "editPortraitPreview"
+  );
 
 const removePortraitButton =
-  document.getElementById("removePortraitButton");
+  document.getElementById(
+    "removePortraitButton"
+  );
+
+
+/* COLOR PRESET ELEMENTS */
+
+const editHairPreset =
+  document.getElementById(
+    "editHairPreset"
+  );
+
+const editEyePreset =
+  document.getElementById(
+    "editEyePreset"
+  );
+
+const editSkinPreset =
+  document.getElementById(
+    "editSkinPreset"
+  );
+
+const editHairCustom =
+  document.getElementById(
+    "editHairCustom"
+  );
+
+const editEyeCustom =
+  document.getElementById(
+    "editEyeCustom"
+  );
+
+const editSkinCustom =
+  document.getElementById(
+    "editSkinCustom"
+  );
 
 
 /* CONFIRM */
 
 const confirmBackdrop =
-  document.getElementById("confirmBackdrop");
+  document.getElementById(
+    "confirmBackdrop"
+  );
 
 const confirmPanel =
-  document.getElementById("confirmPanel");
+  document.getElementById(
+    "confirmPanel"
+  );
 
 const confirmTitle =
-  document.getElementById("confirmTitle");
+  document.getElementById(
+    "confirmTitle"
+  );
 
 const confirmMessage =
-  document.getElementById("confirmMessage");
+  document.getElementById(
+    "confirmMessage"
+  );
 
 const confirmCancelButton =
-  document.getElementById("confirmCancelButton");
+  document.getElementById(
+    "confirmCancelButton"
+  );
 
 const confirmAcceptButton =
-  document.getElementById("confirmAcceptButton");
+  document.getElementById(
+    "confirmAcceptButton"
+  );
 
 
 /* TOAST */
 
 const toast =
-  document.getElementById("toast");
+  document.getElementById(
+    "toast"
+  );
 
-let toastTimer = null;
-
-
-/* DATA */
-
-let characters =
-  loadCharacters();
-
-let selectedCharacterId =
+let toastTimer =
   null;
-
-let vantageCharacterId =
-  loadVantage();
 
 
 /* =========================================================
@@ -302,9 +602,7 @@ function loadCharacters() {
       normalizeCharacter
     );
 
-  } catch (error) {
-
-    console.error(error);
+  } catch {
 
     return [];
 
@@ -322,15 +620,69 @@ function saveCharacters() {
       JSON.stringify(characters)
     );
 
-  } catch (error) {
-
-    console.error(error);
+  } catch {
 
     showToast(
-      "Browser storage is full. Try removing large portraits."
+      "Browser storage is full"
     );
 
   }
+
+}
+
+
+function loadLibrary(
+  key
+) {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        key
+      );
+
+
+    if (!saved) {
+      return [];
+    }
+
+
+    const parsed =
+      JSON.parse(saved);
+
+
+    return Array.isArray(parsed)
+      ? parsed.map(
+          normalizeLibraryItem
+        )
+      : [];
+
+  } catch {
+
+    return [];
+
+  }
+
+}
+
+
+function saveLibraries() {
+
+  localStorage.setItem(
+    RACE_LIBRARY_KEY,
+    JSON.stringify(
+      raceLibrary
+    )
+  );
+
+
+  localStorage.setItem(
+    SPECIES_LIBRARY_KEY,
+    JSON.stringify(
+      speciesLibrary
+    )
+  );
 
 }
 
@@ -382,9 +734,37 @@ function saveVantage() {
 }
 
 
+/* =========================================================
+   NORMALIZE
+========================================================= */
+
 function normalizeCharacter(
   character
 ) {
+
+  const hair =
+    migrateColor(
+      "hair",
+      character.hairColorId,
+      character.hairColor
+    );
+
+
+  const eyes =
+    migrateColor(
+      "eyes",
+      character.eyeColorId,
+      character.eyeColor
+    );
+
+
+  const skin =
+    migrateColor(
+      "skin",
+      character.skinColorId,
+      character.skinColor
+    );
+
 
   return {
 
@@ -398,7 +778,9 @@ function normalizeCharacter(
       character.givenName || "",
 
     aliases:
-      Array.isArray(character.aliases)
+      Array.isArray(
+        character.aliases
+      )
         ? character.aliases
         : [],
 
@@ -416,24 +798,6 @@ function normalizeCharacter(
 
     race:
       character.race || "",
-
-    eyeColor:
-      character.eyeColor || "",
-
-    hairColor:
-      character.hairColor || "",
-
-    skinColor:
-      character.skinColor || "",
-
-    physicalFeature:
-      character.physicalFeature || "",
-
-    life:
-      character.life || "",
-
-    achievements:
-      character.achievements || "",
 
     motherId:
       normalizeId(
@@ -455,10 +819,110 @@ function normalizeCharacter(
         character.loverIds
       ),
 
+    hairColorId:
+      hair.id,
+
+    hairColor:
+      hair.hex,
+
+    eyeColorId:
+      eyes.id,
+
+    eyeColor:
+      eyes.hex,
+
+    skinColorId:
+      skin.id,
+
+    skinColor:
+      skin.hex,
+
+    physicalFeature:
+      character.physicalFeature || "",
+
+    achievements:
+      character.achievements || "",
+
+    life:
+      character.life || "",
+
     portraitData:
       character.portraitData || ""
 
   };
+
+}
+
+
+function normalizeLibraryItem(
+  item
+) {
+
+  return {
+
+    id:
+      item.id ||
+      createLibraryId(),
+
+    name:
+      item.name || "",
+
+    hairDistribution:
+      normalizeDistribution(
+        item.hairDistribution
+      ),
+
+    eyeDistribution:
+      normalizeDistribution(
+        item.eyeDistribution
+      ),
+
+    skinDistribution:
+      normalizeDistribution(
+        item.skinDistribution
+      )
+
+  };
+
+}
+
+
+function normalizeDistribution(
+  distribution
+) {
+
+  if (
+    !Array.isArray(
+      distribution
+    )
+  ) {
+
+    return [];
+
+  }
+
+
+  return distribution
+    .map(
+      entry => ({
+
+        colorId:
+          String(
+            entry.colorId || ""
+          ),
+
+        percent:
+          Number(
+            entry.percent
+          ) || 0
+
+      })
+    )
+    .filter(
+      entry =>
+        entry.colorId &&
+        entry.percent > 0
+    );
 
 }
 
@@ -506,134 +970,1468 @@ function normalizeIdArray(
 
 
 /* =========================================================
-   TOAST
+   COLOR PRESETS
 ========================================================= */
 
-function showToast(
-  message
+function migrateColor(
+  trait,
+  existingId,
+  existingHex
 ) {
 
-  clearTimeout(
-    toastTimer
-  );
+  if (
+    existingId &&
+    findColorPreset(
+      trait,
+      existingId
+    )
+  ) {
+
+    const preset =
+      findColorPreset(
+        trait,
+        existingId
+      );
 
 
-  toast.textContent =
-    message;
+    return {
+      id:
+        preset.id,
+
+      hex:
+        preset.hex
+    };
+
+  }
 
 
-  toast.classList.remove(
-    "hidden"
-  );
+  if (existingHex) {
 
-
-  toastTimer =
-    setTimeout(
-      function() {
-
-        toast.classList.add(
-          "hidden"
+    const matching =
+      COLOR_PRESETS[trait]
+        .find(
+          preset =>
+            preset.hex
+              .toLowerCase()
+            ===
+            existingHex
+              .toLowerCase()
         );
 
-      },
-      2300
+
+    if (matching) {
+
+      return {
+        id:
+          matching.id,
+
+        hex:
+          matching.hex
+      };
+
+    }
+
+
+    return {
+      id:
+        "custom",
+
+      hex:
+        existingHex
+    };
+
+  }
+
+
+  return {
+    id: "",
+    hex: ""
+  };
+
+}
+
+
+function findColorPreset(
+  trait,
+  id
+) {
+
+  return COLOR_PRESETS[trait]
+    .find(
+      preset =>
+        preset.id === id
     );
 
 }
 
 
-/* =========================================================
-   CUSTOM CONFIRMATION
-========================================================= */
-
-function openConfirmation(
-  title,
-  message,
-  action,
-  buttonText = "Confirm"
+function getColorName(
+  trait,
+  id
 ) {
 
-  confirmTitle.textContent =
-    title;
+  if (!id) {
+    return "—";
+  }
 
 
-  confirmMessage.textContent =
-    message;
+  if (
+    id === "custom"
+  ) {
+
+    return "Custom";
+
+  }
 
 
-  confirmAcceptButton.textContent =
-    buttonText;
+  const preset =
+    findColorPreset(
+      trait,
+      id
+    );
 
 
-  confirmAction =
-    action;
+  return preset
+    ? preset.name
+    : "Custom";
+
+}
 
 
-  confirmBackdrop.classList.remove(
-    "hidden"
+function populateCharacterColorSelect(
+  select,
+  trait
+) {
+
+  select.innerHTML =
+    "";
+
+
+  const blank =
+    document.createElement(
+      "option"
+    );
+
+
+  blank.value =
+    "";
+
+
+  blank.textContent =
+    "— Not Set —";
+
+
+  select.appendChild(
+    blank
   );
 
 
-  confirmPanel.classList.remove(
-    "hidden"
+  COLOR_PRESETS[trait]
+    .forEach(
+      preset => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          preset.id;
+
+
+        option.textContent =
+          preset.name;
+
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+  const custom =
+    document.createElement(
+      "option"
+    );
+
+
+  custom.value =
+    "custom";
+
+
+  custom.textContent =
+    "Custom Color…";
+
+
+  select.appendChild(
+    custom
   );
 
 }
 
 
-function closeConfirmation() {
+/* =========================================================
+   CHARACTER COLOR EDITOR
+========================================================= */
 
-  confirmBackdrop.classList.add(
-    "hidden"
+function setupCharacterColorEditors() {
+
+  populateCharacterColorSelect(
+    editHairPreset,
+    "hair"
   );
 
 
-  confirmPanel.classList.add(
-    "hidden"
+  populateCharacterColorSelect(
+    editEyePreset,
+    "eyes"
   );
 
 
-  confirmAction =
-    null;
+  populateCharacterColorSelect(
+    editSkinPreset,
+    "skin"
+  );
+
+
+  setupOneColorEditor(
+    "hair",
+    editHairPreset,
+    editHairCustom,
+    "editHairCustomWrap",
+    "editHairPresetSwatch",
+    "editHairPresetName"
+  );
+
+
+  setupOneColorEditor(
+    "eyes",
+    editEyePreset,
+    editEyeCustom,
+    "editEyeCustomWrap",
+    "editEyePresetSwatch",
+    "editEyePresetName"
+  );
+
+
+  setupOneColorEditor(
+    "skin",
+    editSkinPreset,
+    editSkinCustom,
+    "editSkinCustomWrap",
+    "editSkinPresetSwatch",
+    "editSkinPresetName"
+  );
 
 }
 
 
-confirmCancelButton.addEventListener(
-  "click",
-  closeConfirmation
-);
+function setupOneColorEditor(
+  trait,
+  select,
+  customInput,
+  customWrapId,
+  swatchId,
+  nameId
+) {
+
+  function refresh() {
+
+    const value =
+      select.value;
 
 
-confirmBackdrop.addEventListener(
-  "click",
-  closeConfirmation
-);
+    const customWrap =
+      document.getElementById(
+        customWrapId
+      );
 
 
-confirmAcceptButton.addEventListener(
+    const swatch =
+      document.getElementById(
+        swatchId
+      );
+
+
+    const name =
+      document.getElementById(
+        nameId
+      );
+
+
+    if (!value) {
+
+      customWrap.classList.add(
+        "hidden"
+      );
+
+
+      swatch.style.background =
+        "#242429";
+
+
+      name.textContent =
+        "Not Set";
+
+
+      return;
+
+    }
+
+
+    if (
+      value === "custom"
+    ) {
+
+      customWrap.classList.remove(
+        "hidden"
+      );
+
+
+      swatch.style.background =
+        customInput.value;
+
+
+      name.textContent =
+        "Custom";
+
+
+      return;
+
+    }
+
+
+    customWrap.classList.add(
+      "hidden"
+    );
+
+
+    const preset =
+      findColorPreset(
+        trait,
+        value
+      );
+
+
+    if (!preset) {
+      return;
+    }
+
+
+    swatch.style.background =
+      preset.hex;
+
+
+    name.textContent =
+      preset.name;
+
+  }
+
+
+  select.addEventListener(
+    "change",
+    refresh
+  );
+
+
+  customInput.addEventListener(
+    "input",
+    refresh
+  );
+
+}
+
+
+/* =========================================================
+   LIBRARY MANAGEMENT
+========================================================= */
+
+manageRacesButton.addEventListener(
   "click",
 
   function() {
 
-    const action =
-      confirmAction;
-
-
-    closeConfirmation();
-
-
-    if (action) {
-      action();
-    }
+    openLibrary(
+      "race"
+    );
 
   }
 );
 
 
+manageSpeciesButton.addEventListener(
+  "click",
+
+  function() {
+
+    openLibrary(
+      "species"
+    );
+
+  }
+);
+
+
+function openLibrary(
+  type
+) {
+
+  activeLibraryType =
+    type;
+
+
+  libraryPanelTitle.textContent =
+    type === "race"
+      ? "Races"
+      : "Species";
+
+
+  addLibraryItemButton.textContent =
+    type === "race"
+      ? "+ Add Race"
+      : "+ Add Species";
+
+
+  worldBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  worldPanel.classList.add(
+    "hidden"
+  );
+
+
+  libraryBackdrop.classList.remove(
+    "hidden"
+  );
+
+
+  libraryPanel.classList.remove(
+    "hidden"
+  );
+
+
+  renderLibraryList();
+
+}
+
+
+function closeLibrary() {
+
+  libraryBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  libraryPanel.classList.add(
+    "hidden"
+  );
+
+
+  openWorldPanel();
+
+}
+
+
+closeLibraryButton.addEventListener(
+  "click",
+  closeLibrary
+);
+
+
+libraryBackdrop.addEventListener(
+  "click",
+  closeLibrary
+);
+
+
+function getActiveLibrary() {
+
+  return activeLibraryType === "race"
+    ? raceLibrary
+    : speciesLibrary;
+
+}
+
+
+function renderLibraryList() {
+
+  const library =
+    getActiveLibrary();
+
+
+  libraryList.innerHTML =
+    "";
+
+
+  if (
+    library.length === 0
+  ) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+
+    empty.className =
+      "library-empty";
+
+
+    empty.textContent =
+      activeLibraryType === "race"
+        ? "No Races created yet."
+        : "No Species created yet.";
+
+
+    libraryList.appendChild(
+      empty
+    );
+
+
+    return;
+
+  }
+
+
+  [...library]
+    .sort(
+      (a,b) =>
+        a.name.localeCompare(
+          b.name
+        )
+    )
+    .forEach(
+      item => {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+
+        card.className =
+          "library-card";
+
+
+        const summary =
+          [
+            makeDistributionSummary(
+              item.hairDistribution,
+              "hair"
+            ),
+
+            makeDistributionSummary(
+              item.eyeDistribution,
+              "eyes"
+            ),
+
+            makeDistributionSummary(
+              item.skinDistribution,
+              "skin"
+            )
+          ]
+            .filter(Boolean)
+            .join(" · ");
+
+
+        card.innerHTML = `
+
+          <div class="library-card-header">
+
+            <strong class="library-card-name">
+              ${escapeHTML(item.name)}
+            </strong>
+
+            <div class="library-card-actions">
+
+              <button
+                class="library-mini-button edit-library-item"
+                type="button"
+              >
+                Edit
+              </button>
+
+              <button
+                class="library-mini-button delete-library-item"
+                type="button"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="library-summary">
+            ${
+              summary ||
+              "No base appearance probabilities yet."
+            }
+          </div>
+
+        `;
+
+
+        card
+          .querySelector(
+            ".edit-library-item"
+          )
+          .addEventListener(
+            "click",
+
+            function() {
+
+              openLibraryEditor(
+                item.id
+              );
+
+            }
+          );
+
+
+        card
+          .querySelector(
+            ".delete-library-item"
+          )
+          .addEventListener(
+            "click",
+
+            function() {
+
+              openConfirmation(
+                `Delete ${item.name}?`,
+                "This removes the preset from your library. Characters are not deleted.",
+                function() {
+
+                  deleteLibraryItem(
+                    item.id
+                  );
+
+                },
+                "Delete"
+              );
+
+            }
+          );
+
+
+        libraryList.appendChild(
+          card
+        );
+
+      }
+    );
+
+}
+
+
+function makeDistributionSummary(
+  distribution,
+  trait
+) {
+
+  if (!distribution.length) {
+    return "";
+  }
+
+
+  return `${capitalize(trait)} ${distribution.length}`;
+
+}
+
+
+addLibraryItemButton.addEventListener(
+  "click",
+
+  function() {
+
+    openLibraryEditor(
+      null
+    );
+
+  }
+);
+
+
+function openLibraryEditor(
+  itemId
+) {
+
+  editingLibraryId =
+    itemId;
+
+
+  const library =
+    getActiveLibrary();
+
+
+  const item =
+    itemId
+      ? library.find(
+          entry =>
+            entry.id ===
+            itemId
+        )
+      : null;
+
+
+  libraryEditorTitle.textContent =
+    item
+      ? `Edit ${item.name}`
+      : activeLibraryType === "race"
+        ? "New Race"
+        : "New Species";
+
+
+  libraryNameInput.value =
+    item
+      ? item.name
+      : "";
+
+
+  hairDistributionEditor.innerHTML =
+    "";
+
+  eyeDistributionEditor.innerHTML =
+    "";
+
+  skinDistributionEditor.innerHTML =
+    "";
+
+
+  if (item) {
+
+    item.hairDistribution.forEach(
+      entry =>
+        addDistributionRow(
+          "hair",
+          entry
+        )
+    );
+
+
+    item.eyeDistribution.forEach(
+      entry =>
+        addDistributionRow(
+          "eyes",
+          entry
+        )
+    );
+
+
+    item.skinDistribution.forEach(
+      entry =>
+        addDistributionRow(
+          "skin",
+          entry
+        )
+    );
+
+  }
+
+
+  updateAllDistributionTotals();
+
+
+  libraryBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  libraryPanel.classList.add(
+    "hidden"
+  );
+
+
+  libraryEditorBackdrop.classList.remove(
+    "hidden"
+  );
+
+
+  libraryEditorPanel.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+function closeLibraryEditor() {
+
+  libraryEditorBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  libraryEditorPanel.classList.add(
+    "hidden"
+  );
+
+
+  libraryBackdrop.classList.remove(
+    "hidden"
+  );
+
+
+  libraryPanel.classList.remove(
+    "hidden"
+  );
+
+
+  renderLibraryList();
+
+}
+
+
+closeLibraryEditorButton.addEventListener(
+  "click",
+  closeLibraryEditor
+);
+
+
+cancelLibraryEditorButton.addEventListener(
+  "click",
+  closeLibraryEditor
+);
+
+
+libraryEditorBackdrop.addEventListener(
+  "click",
+  closeLibraryEditor
+);
+
+
+document
+  .querySelectorAll(
+    ".add-distribution-button"
+  )
+  .forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+
+        function() {
+
+          addDistributionRow(
+            button.dataset.trait
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+function addDistributionRow(
+  trait,
+  entry = null
+) {
+
+  const container =
+    getDistributionContainer(
+      trait
+    );
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+
+  row.className =
+    "distribution-row";
+
+
+  const select =
+    document.createElement(
+      "select"
+    );
+
+
+  COLOR_PRESETS[trait]
+    .forEach(
+      preset => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          preset.id;
+
+
+        option.textContent =
+          preset.name;
+
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+  if (
+    entry &&
+    entry.colorId
+  ) {
+
+    select.value =
+      entry.colorId;
+
+  }
+
+
+  const percent =
+    document.createElement(
+      "input"
+    );
+
+
+  percent.type =
+    "number";
+
+
+  percent.min =
+    "0";
+
+
+  percent.max =
+    "100";
+
+
+  percent.step =
+    "0.1";
+
+
+  percent.inputMode =
+    "decimal";
+
+
+  percent.value =
+    entry
+      ? entry.percent
+      : "";
+
+
+  const remove =
+    document.createElement(
+      "button"
+    );
+
+
+  remove.type =
+    "button";
+
+
+  remove.className =
+    "remove-distribution-button";
+
+
+  remove.textContent =
+    "×";
+
+
+  remove.addEventListener(
+    "click",
+
+    function() {
+
+      row.remove();
+
+
+      updateAllDistributionTotals();
+
+    }
+  );
+
+
+  percent.addEventListener(
+    "input",
+    updateAllDistributionTotals
+  );
+
+
+  row.appendChild(
+    select
+  );
+
+
+  row.appendChild(
+    percent
+  );
+
+
+  row.appendChild(
+    remove
+  );
+
+
+  container.appendChild(
+    row
+  );
+
+
+  updateAllDistributionTotals();
+
+}
+
+
+function getDistributionContainer(
+  trait
+) {
+
+  if (
+    trait === "hair"
+  ) {
+    return hairDistributionEditor;
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+    return eyeDistributionEditor;
+  }
+
+
+  return skinDistributionEditor;
+
+}
+
+
+function readDistribution(
+  trait
+) {
+
+  const container =
+    getDistributionContainer(
+      trait
+    );
+
+
+  const rows =
+    Array.from(
+      container.querySelectorAll(
+        ".distribution-row"
+      )
+    );
+
+
+  return rows
+    .map(
+      row => {
+
+        const select =
+          row.querySelector(
+            "select"
+          );
+
+
+        const input =
+          row.querySelector(
+            "input"
+          );
+
+
+        return {
+
+          colorId:
+            select.value,
+
+          percent:
+            Number(
+              input.value
+            ) || 0
+
+        };
+
+      }
+    )
+    .filter(
+      entry =>
+        entry.percent > 0
+    );
+
+}
+
+
+function distributionTotal(
+  distribution
+) {
+
+  return distribution.reduce(
+    (total,entry) =>
+      total +
+      Number(
+        entry.percent
+      ),
+    0
+  );
+
+}
+
+
+function updateAllDistributionTotals() {
+
+  updateDistributionTotalDisplay(
+    "hair",
+    hairDistributionTotal
+  );
+
+
+  updateDistributionTotalDisplay(
+    "eyes",
+    eyeDistributionTotal
+  );
+
+
+  updateDistributionTotalDisplay(
+    "skin",
+    skinDistributionTotal
+  );
+
+}
+
+
+function updateDistributionTotalDisplay(
+  trait,
+  element
+) {
+
+  const distribution =
+    readDistribution(
+      trait
+    );
+
+
+  const total =
+    distributionTotal(
+      distribution
+    );
+
+
+  element.textContent =
+    `Total: ${roundNumber(total)}%`;
+
+
+  element.classList.remove(
+    "valid",
+    "invalid"
+  );
+
+
+  if (
+    distribution.length === 0
+  ) {
+    return;
+  }
+
+
+  if (
+    approximately100(
+      total
+    )
+  ) {
+
+    element.classList.add(
+      "valid"
+    );
+
+  } else {
+
+    element.classList.add(
+      "invalid"
+    );
+
+  }
+
+}
+
+
+saveLibraryItemButton.addEventListener(
+  "click",
+  saveLibraryItem
+);
+
+
+function saveLibraryItem() {
+
+  const name =
+    libraryNameInput.value
+      .trim();
+
+
+  if (!name) {
+
+    showToast(
+      "Give it a name first"
+    );
+
+    return;
+
+  }
+
+
+  const hairDistribution =
+    readDistribution(
+      "hair"
+    );
+
+
+  const eyeDistribution =
+    readDistribution(
+      "eyes"
+    );
+
+
+  const skinDistribution =
+    readDistribution(
+      "skin"
+    );
+
+
+  const distributions =
+    [
+      hairDistribution,
+      eyeDistribution,
+      skinDistribution
+    ];
+
+
+  const invalid =
+    distributions.some(
+      distribution =>
+        distribution.length > 0 &&
+        !approximately100(
+          distributionTotal(
+            distribution
+          )
+        )
+    );
+
+
+  if (invalid) {
+
+    showToast(
+      "Each used probability list must total 100%"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    hasDuplicateColors(
+      hairDistribution
+    )
+    ||
+    hasDuplicateColors(
+      eyeDistribution
+    )
+    ||
+    hasDuplicateColors(
+      skinDistribution
+    )
+  ) {
+
+    showToast(
+      "A color can only appear once per list"
+    );
+
+    return;
+
+  }
+
+
+  const library =
+    getActiveLibrary();
+
+
+  if (
+    editingLibraryId
+  ) {
+
+    const item =
+      library.find(
+        entry =>
+          entry.id ===
+          editingLibraryId
+      );
+
+
+    if (!item) {
+      return;
+    }
+
+
+    item.name =
+      name;
+
+
+    item.hairDistribution =
+      hairDistribution;
+
+
+    item.eyeDistribution =
+      eyeDistribution;
+
+
+    item.skinDistribution =
+      skinDistribution;
+
+  } else {
+
+    library.push({
+
+      id:
+        createLibraryId(),
+
+      name,
+
+      hairDistribution,
+
+      eyeDistribution,
+
+      skinDistribution
+
+    });
+
+  }
+
+
+  saveLibraries();
+
+
+  closeLibraryEditor();
+
+
+  showToast(
+    `${name} saved`
+  );
+
+}
+
+
+function hasDuplicateColors(
+  distribution
+) {
+
+  const ids =
+    distribution.map(
+      entry =>
+        entry.colorId
+    );
+
+
+  return (
+    new Set(ids).size !==
+    ids.length
+  );
+
+}
+
+
+function approximately100(
+  number
+) {
+
+  return (
+    Math.abs(
+      number - 100
+    ) < 0.01
+  );
+
+}
+
+
+function deleteLibraryItem(
+  id
+) {
+
+  if (
+    activeLibraryType === "race"
+  ) {
+
+    raceLibrary =
+      raceLibrary.filter(
+        item =>
+          item.id !== id
+      );
+
+  } else {
+
+    speciesLibrary =
+      speciesLibrary.filter(
+        item =>
+          item.id !== id
+      );
+
+  }
+
+
+  saveLibraries();
+
+
+  renderLibraryList();
+
+
+  updateWorldStats();
+
+
+  showToast(
+    "Library item deleted"
+  );
+
+}
+
+
+function createLibraryId() {
+
+  return (
+    "lib_" +
+    Date.now() +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(2,8)
+  );
+
+}
+
+
 /* =========================================================
-   WORLD
+   WORLD PANEL
 ========================================================= */
+
+worldButton.addEventListener(
+  "click",
+  openWorldPanel
+);
+
+
+closeWorldButton.addEventListener(
+  "click",
+  closeWorldPanel
+);
+
+
+worldBackdrop.addEventListener(
+  "click",
+  closeWorldPanel
+);
+
 
 function openWorldPanel() {
 
@@ -669,28 +2467,18 @@ function closeWorldPanel() {
 }
 
 
-worldButton.addEventListener(
-  "click",
-  openWorldPanel
-);
-
-
-closeWorldButton.addEventListener(
-  "click",
-  closeWorldPanel
-);
-
-
-worldBackdrop.addEventListener(
-  "click",
-  closeWorldPanel
-);
-
-
 function updateWorldStats() {
 
   characterCount.textContent =
-    String(characters.length);
+    characters.length;
+
+
+  raceLibraryCount.textContent =
+    raceLibrary.length;
+
+
+  speciesLibraryCount.textContent =
+    speciesLibrary.length;
 
 
   const vantage =
@@ -746,9 +2534,7 @@ function populateVantageSelect() {
 
 
         option.value =
-          String(
-            character.id
-          );
+          character.id;
 
 
         option.textContent =
@@ -780,13 +2566,11 @@ vantageSelect.addEventListener(
 
   function() {
 
-    const value =
-      vantageSelect.value;
-
-
     vantageCharacterId =
-      value
-        ? Number(value)
+      vantageSelect.value
+        ? Number(
+            vantageSelect.value
+          )
         : null;
 
 
@@ -800,24 +2584,8 @@ vantageSelect.addEventListener(
     renderTree();
 
 
-    if (
-      selectedCharacterId &&
-      !profilePanel.classList.contains(
-        "hidden"
-      )
-    ) {
-
-      openProfile(
-        selectedCharacterId
-      );
-
-    }
-
-
     showToast(
-      vantageCharacterId
-        ? "Vantage point changed"
-        : "Vantage point cleared"
+      "Vantage point changed"
     );
 
   }
@@ -832,18 +2600,10 @@ function updateVantageStatus() {
     );
 
 
-  if (!person) {
-
-    vantageStatus.textContent =
-      "No vantage point selected.";
-
-    return;
-
-  }
-
-
   vantageStatus.textContent =
-    `Perspective: ${getTreeName(person)}`;
+    person
+      ? `Perspective: ${getTreeName(person)}`
+      : "No vantage point selected.";
 
 }
 
@@ -866,29 +2626,31 @@ function exportWorld() {
       "Fantasy Family Tree",
 
     version:
-      2,
+      3,
 
     exportedAt:
       new Date().toISOString(),
 
     vantageCharacterId,
 
-    characters
+    characters,
+
+    raceLibrary,
+
+    speciesLibrary
 
   };
 
 
-  const json =
-    JSON.stringify(
-      backup,
-      null,
-      2
-    );
-
-
   const blob =
     new Blob(
-      [json],
+      [
+        JSON.stringify(
+          backup,
+          null,
+          2
+        )
+      ],
       {
         type:
           "application/json"
@@ -908,18 +2670,16 @@ function exportWorld() {
     );
 
 
-  const date =
-    new Date()
-      .toISOString()
-      .slice(0,10);
-
-
   link.href =
     url;
 
 
   link.download =
-    `fantasy-world-${date}.json`;
+    `fantasy-world-${
+      new Date()
+        .toISOString()
+        .slice(0,10)
+    }.json`;
 
 
   document.body.appendChild(
@@ -932,15 +2692,8 @@ function exportWorld() {
   link.remove();
 
 
-  setTimeout(
-    function() {
-
-      URL.revokeObjectURL(
-        url
-      );
-
-    },
-    1000
+  URL.revokeObjectURL(
+    url
   );
 
 
@@ -958,6 +2711,7 @@ importWorldButton.addEventListener(
 
     importWorldFile.value =
       "";
+
 
     importWorldFile.click();
 
@@ -981,12 +2735,10 @@ importWorldFile.addEventListener(
 
     try {
 
-      const text =
-        await file.text();
-
-
       const data =
-        JSON.parse(text);
+        JSON.parse(
+          await file.text()
+        );
 
 
       const importedCharacters =
@@ -1001,47 +2753,49 @@ importWorldFile.addEventListener(
         )
       ) {
 
-        throw new Error(
-          "Invalid backup"
-        );
+        throw new Error();
 
       }
 
 
       openConfirmation(
         "Restore this world?",
-        "Your current browser world will be replaced with the contents of this backup.",
+        "Your current browser world will be replaced by this backup.",
         function() {
 
           characters =
             importedCharacters
               .map(
                 normalizeCharacter
-              )
-              .filter(
-                character =>
-                  Number.isFinite(
-                    character.id
-                  )
               );
 
 
-          const importedVantage =
-            Array.isArray(data)
-              ? null
-              : normalizeId(
-                  data.vantageCharacterId
-                );
+          raceLibrary =
+            Array.isArray(
+              data.raceLibrary
+            )
+              ? data.raceLibrary
+                  .map(
+                    normalizeLibraryItem
+                  )
+              : [];
+
+
+          speciesLibrary =
+            Array.isArray(
+              data.speciesLibrary
+            )
+              ? data.speciesLibrary
+                  .map(
+                    normalizeLibraryItem
+                  )
+              : [];
 
 
           vantageCharacterId =
-            characters.some(
-              character =>
-                character.id ===
-                importedVantage
-            )
-              ? importedVantage
-              : null;
+            normalizeId(
+              data.vantageCharacterId
+            );
 
 
           cleanBrokenRelationships();
@@ -1049,14 +2803,13 @@ importWorldFile.addEventListener(
 
           saveCharacters();
 
+          saveLibraries();
+
           saveVantage();
 
 
-          selectedCharacterId =
-            null;
-
-
           renderTree();
+
 
           closeWorldPanel();
 
@@ -1075,13 +2828,10 @@ importWorldFile.addEventListener(
         "Restore"
       );
 
-    } catch (error) {
-
-      console.error(error);
-
+    } catch {
 
       showToast(
-        "That file is not a valid world backup"
+        "That is not a valid world backup"
       );
 
     }
@@ -1093,6 +2843,24 @@ importWorldFile.addEventListener(
 /* =========================================================
    SEARCH
 ========================================================= */
+
+searchButton.addEventListener(
+  "click",
+  openSearch
+);
+
+
+closeSearchButton.addEventListener(
+  "click",
+  closeSearch
+);
+
+
+searchBackdrop.addEventListener(
+  "click",
+  closeSearch
+);
+
 
 function openSearch() {
 
@@ -1114,16 +2882,6 @@ function openSearch() {
     characters
   );
 
-
-  setTimeout(
-    function() {
-
-      searchInput.focus();
-
-    },
-    100
-  );
-
 }
 
 
@@ -1141,24 +2899,6 @@ function closeSearch() {
 }
 
 
-searchButton.addEventListener(
-  "click",
-  openSearch
-);
-
-
-closeSearchButton.addEventListener(
-  "click",
-  closeSearch
-);
-
-
-searchBackdrop.addEventListener(
-  "click",
-  closeSearch
-);
-
-
 searchInput.addEventListener(
   "input",
 
@@ -1170,22 +2910,11 @@ searchInput.addEventListener(
         .toLowerCase();
 
 
-    if (!query) {
-
-      renderSearchResults(
-        characters
-      );
-
-      return;
-
-    }
-
-
     const matches =
       characters.filter(
         character => {
 
-          const searchable =
+          const text =
             [
               character.title,
               character.givenName,
@@ -1198,7 +2927,7 @@ searchInput.addEventListener(
               .toLowerCase();
 
 
-          return searchable.includes(
+          return text.includes(
             query
           );
 
@@ -1222,28 +2951,10 @@ function renderSearchResults(
     "";
 
 
-  if (
-    people.length === 0
-  ) {
+  if (!people.length) {
 
-    const empty =
-      document.createElement(
-        "div"
-      );
-
-
-    empty.className =
-      "search-empty";
-
-
-    empty.textContent =
+    searchResults.textContent =
       "No characters found.";
-
-
-    searchResults.appendChild(
-      empty
-    );
-
 
     return;
 
@@ -1263,54 +2974,28 @@ function renderSearchResults(
           );
 
 
-        button.type =
-          "button";
-
-
         button.className =
           "search-result";
 
 
-        const portrait =
-          person.portraitData
-            ? `<img src="${person.portraitData}" alt="">`
-            : escapeHTML(
-                getInitial(person)
-              );
-
-
-        const relation =
-          vantageCharacterId
-            ? describeRelationship(
-                vantageCharacterId,
-                person.id
-              )
-            : "";
-
-
-        const metaParts =
-          [
-            makeYearText(person)
-          ];
-
-
-        if (
-          relation &&
-          relation !==
-          "Vantage Point"
-        ) {
-
-          metaParts.push(
-            relation
-          );
-
-        }
+        button.type =
+          "button";
 
 
         button.innerHTML = `
 
           <span class="search-result-circle">
-            ${portrait}
+
+            ${
+              person.portraitData
+
+                ? `<img src="${person.portraitData}" alt="">`
+
+                : escapeHTML(
+                    getInitial(person)
+                  )
+            }
+
           </span>
 
           <span>
@@ -1323,7 +3008,7 @@ function renderSearchResults(
 
             <span class="search-result-meta">
               ${escapeHTML(
-                metaParts.join(" · ")
+                makeYearText(person)
               )}
             </span>
 
@@ -1359,7 +3044,7 @@ function renderSearchResults(
 
 
 /* =========================================================
-   CANVAS
+   PAN / ZOOM
 ========================================================= */
 
 function applyViewTransform() {
@@ -1394,8 +3079,7 @@ function centerTree() {
 
 
   const rect =
-    treeCanvas
-      .getBoundingClientRect();
+    treeCanvas.getBoundingClientRect();
 
 
   zoom =
@@ -1403,6 +3087,7 @@ function centerTree() {
       1,
       Math.max(
         MIN_ZOOM,
+
         Math.min(
           rect.width /
           Math.max(
@@ -1438,78 +3123,23 @@ function centerTree() {
 }
 
 
-function focusCharacter(
-  characterId
+function zoomAtPoint(
+  newZoom,
+  x,
+  y
 ) {
 
-  const position =
-    lastLayout
-      ? lastLayout.positions.get(
-          characterId
-        )
-      : null;
+  const worldX =
+    (x - viewX) /
+    zoom;
 
 
-  if (!position) {
-
-    openProfile(
-      characterId
-    );
-
-    return;
-
-  }
-
-
-  const rect =
-    treeCanvas
-      .getBoundingClientRect();
+  const worldY =
+    (y - viewY) /
+    zoom;
 
 
   zoom =
-    Math.max(
-      0.9,
-      Math.min(
-        1.15,
-        zoom
-      )
-    );
-
-
-  viewX =
-    rect.width / 2 -
-    position.x * zoom;
-
-
-  viewY =
-    rect.height / 2 -
-    position.y * zoom;
-
-
-  applyViewTransform();
-
-
-  setTimeout(
-    function() {
-
-      openProfile(
-        characterId
-      );
-
-    },
-    230
-  );
-
-}
-
-
-function zoomAtPoint(
-  newZoom,
-  screenX,
-  screenY
-) {
-
-  newZoom =
     Math.max(
       MIN_ZOOM,
       Math.min(
@@ -1519,27 +3149,13 @@ function zoomAtPoint(
     );
 
 
-  const worldX =
-    (screenX - viewX) /
-    zoom;
-
-
-  const worldY =
-    (screenY - viewY) /
-    zoom;
-
-
-  zoom =
-    newZoom;
-
-
   viewX =
-    screenX -
+    x -
     worldX * zoom;
 
 
   viewY =
-    screenY -
+    y -
     worldY * zoom;
 
 
@@ -1554,8 +3170,7 @@ zoomInButton.addEventListener(
   function() {
 
     const rect =
-      treeCanvas
-        .getBoundingClientRect();
+      treeCanvas.getBoundingClientRect();
 
 
     zoomAtPoint(
@@ -1574,8 +3189,7 @@ zoomOutButton.addEventListener(
   function() {
 
     const rect =
-      treeCanvas
-        .getBoundingClientRect();
+      treeCanvas.getBoundingClientRect();
 
 
     zoomAtPoint(
@@ -1593,104 +3207,6 @@ resetViewButton.addEventListener(
   centerTree
 );
 
-
-/* POINTER PAN */
-
-treeCanvas.addEventListener(
-  "pointerdown",
-
-  function(event) {
-
-    if (
-      event.target.closest(
-        ".character-node"
-      )
-    ) {
-      return;
-    }
-
-
-    if (
-      event.pointerType ===
-      "touch"
-    ) {
-      return;
-    }
-
-
-    isPanning =
-      true;
-
-
-    panStartX =
-      event.clientX;
-
-    panStartY =
-      event.clientY;
-
-    startViewX =
-      viewX;
-
-    startViewY =
-      viewY;
-
-  }
-);
-
-
-treeCanvas.addEventListener(
-  "pointermove",
-
-  function(event) {
-
-    if (!isPanning) {
-      return;
-    }
-
-
-    viewX =
-      startViewX +
-      event.clientX -
-      panStartX;
-
-
-    viewY =
-      startViewY +
-      event.clientY -
-      panStartY;
-
-
-    applyViewTransform();
-
-  }
-);
-
-
-treeCanvas.addEventListener(
-  "pointerup",
-
-  function() {
-
-    isPanning =
-      false;
-
-  }
-);
-
-
-treeCanvas.addEventListener(
-  "pointercancel",
-
-  function() {
-
-    isPanning =
-      false;
-
-  }
-);
-
-
-/* TOUCH */
 
 treeCanvas.addEventListener(
   "touchstart",
@@ -1743,9 +3259,12 @@ treeCanvas.addEventListener(
 
 
       pinchStartDistance =
-        getTouchDistance(
-          first,
-          second
+        Math.hypot(
+          second.clientX -
+          first.clientX,
+
+          second.clientY -
+          first.clientY
         );
 
 
@@ -1753,11 +3272,21 @@ treeCanvas.addEventListener(
         zoom;
 
 
-      const midpoint =
-        getTouchMidpoint(
-          first,
-          second
-        );
+      const midpoint = {
+
+        x:
+          (
+            first.clientX +
+            second.clientX
+          ) / 2,
+
+        y:
+          (
+            first.clientY +
+            second.clientY
+          ) / 2
+
+      };
 
 
       pinchWorldX =
@@ -1828,13 +3357,16 @@ treeCanvas.addEventListener(
 
 
       const distance =
-        getTouchDistance(
-          first,
-          second
+        Math.hypot(
+          second.clientX -
+          first.clientX,
+
+          second.clientY -
+          first.clientY
         );
 
 
-      const newZoom =
+      zoom =
         Math.max(
           MIN_ZOOM,
           Math.min(
@@ -1848,15 +3380,21 @@ treeCanvas.addEventListener(
         );
 
 
-      const midpoint =
-        getTouchMidpoint(
-          first,
-          second
-        );
+      const midpoint = {
 
+        x:
+          (
+            first.clientX +
+            second.clientX
+          ) / 2,
 
-      zoom =
-        newZoom;
+        y:
+          (
+            first.clientY +
+            second.clientY
+          ) / 2
+
+      };
 
 
       viewX =
@@ -1885,59 +3423,13 @@ treeCanvas.addEventListener(
 treeCanvas.addEventListener(
   "touchend",
 
-  function(event) {
+  function() {
 
-    if (
-      event.touches.length === 0
-    ) {
-
-      isPanning =
-        false;
-
-    }
+    isPanning =
+      false;
 
   }
 );
-
-
-function getTouchDistance(
-  first,
-  second
-) {
-
-  return Math.hypot(
-    second.clientX -
-    first.clientX,
-
-    second.clientY -
-    first.clientY
-  );
-
-}
-
-
-function getTouchMidpoint(
-  first,
-  second
-) {
-
-  return {
-
-    x:
-      (
-        first.clientX +
-        second.clientX
-      ) / 2,
-
-    y:
-      (
-        first.clientY +
-        second.clientY
-      ) / 2
-
-  };
-
-}
 
 
 /* =========================================================
@@ -1999,12 +3491,6 @@ cancelFormButton.addEventListener(
 );
 
 
-formBackdrop.addEventListener(
-  "click",
-  closeCharacterForm
-);
-
-
 characterForm.addEventListener(
   "submit",
 
@@ -2013,73 +3499,50 @@ characterForm.addEventListener(
     event.preventDefault();
 
 
-    const character = {
+    const character =
+      normalizeCharacter({
 
-      id:
-        Date.now(),
+        id:
+          Date.now(),
 
-      title:
-        getInputValue(
-          "title"
-        ),
-
-      givenName:
-        getInputValue(
-          "givenName"
-        ),
-
-      aliases:
-        makeAliasArray(
+        title:
           getInputValue(
-            "aliases"
+            "title"
+          ),
+
+        givenName:
+          getInputValue(
+            "givenName"
+          ),
+
+        aliases:
+          makeAliasArray(
+            getInputValue(
+              "aliases"
+            )
+          ),
+
+        maidenName:
+          getInputValue(
+            "maidenName"
+          ),
+
+        familyName:
+          getInputValue(
+            "familyName"
+          ),
+
+        birthYear:
+          getInputValue(
+            "birthYear"
+          ),
+
+        deathYear:
+          getInputValue(
+            "deathYear"
           )
-        ),
 
-      maidenName:
-        getInputValue(
-          "maidenName"
-        ),
-
-      familyName:
-        getInputValue(
-          "familyName"
-        ),
-
-      birthYear:
-        getInputValue(
-          "birthYear"
-        ),
-
-      deathYear:
-        getInputValue(
-          "deathYear"
-        ),
-
-      race: "",
-
-      eyeColor: "",
-
-      hairColor: "",
-
-      skinColor: "",
-
-      physicalFeature: "",
-
-      life: "",
-
-      achievements: "",
-
-      motherId: null,
-
-      fatherId: null,
-
-      spouseIds: [],
-
-      loverIds: [],
-
-      portraitData: ""
-
-    };
+      });
 
 
     characters.push(
@@ -2089,15 +3552,13 @@ characterForm.addEventListener(
 
     saveCharacters();
 
-
     renderTree();
-
 
     closeCharacterForm();
 
 
     showToast(
-      `${getTreeName(character)} added`
+      "Character added"
     );
 
   }
@@ -2118,12 +3579,7 @@ function renderTree() {
     "";
 
 
-  cleanInvalidVantage();
-
-
-  if (
-    characters.length === 0
-  ) {
+  if (!characters.length) {
 
     emptyState.classList.remove(
       "hidden"
@@ -2223,7 +3679,7 @@ function calculateTreeLayout() {
   );
 
 
-  const sortedGenerations =
+  const sorted =
     Array.from(
       rows.keys()
     )
@@ -2237,39 +3693,28 @@ function calculateTreeLayout() {
     new Map();
 
 
-  const worldCenter =
+  const center =
     WORLD_SIZE / 2;
 
 
-  let minX =
-    worldCenter;
-
-  let maxX =
-    worldCenter;
-
-  let minY =
-    worldCenter;
-
-  let maxY =
-    worldCenter;
+  let minX = center;
+  let maxX = center;
+  let minY = center;
+  let maxY = center;
 
 
-  sortedGenerations.forEach(
+  sorted.forEach(
     generation => {
 
-      let row =
-        rows.get(
-          generation
-        );
-
-
-      row =
+      const row =
         clusterSpouses(
-          row
+          rows.get(
+            generation
+          )
         );
 
 
-      const rowWidth =
+      const width =
         (
           row.length - 1
         ) *
@@ -2277,12 +3722,12 @@ function calculateTreeLayout() {
 
 
       const startX =
-        worldCenter -
-        rowWidth / 2;
+        center -
+        width / 2;
 
 
       const y =
-        worldCenter -
+        center -
         650 +
         generation *
         GENERATION_GAP_Y;
@@ -2312,17 +3757,20 @@ function calculateTreeLayout() {
               x
             );
 
+
           maxX =
             Math.max(
               maxX,
               x
             );
 
+
           minY =
             Math.min(
               minY,
               y
             );
+
 
           maxY =
             Math.max(
@@ -2390,202 +3838,56 @@ function calculateAllGenerations() {
   );
 
 
-  for (
-    let pass = 0;
-    pass < 5;
-    pass++
-  ) {
-
-    characters.forEach(
-      character => {
-
-        character.spouseIds.forEach(
-          spouseId => {
-
-            if (
-              !memo.has(
-                spouseId
-              )
-            ) {
-              return;
-            }
-
-
-            const shared =
-              Math.max(
-                memo.get(
-                  character.id
-                ) || 0,
-
-                memo.get(
-                  spouseId
-                ) || 0
-              );
-
-
-            memo.set(
-              character.id,
-              shared
-            );
-
-
-            memo.set(
-              spouseId,
-              shared
-            );
-
-          }
-        );
-
-      }
-    );
-
-  }
-
-
-  for (
-    let pass = 0;
-    pass < characters.length;
-    pass++
-  ) {
-
-    characters.forEach(
-      character => {
-
-        const parentIds =
-          [
-            character.motherId,
-            character.fatherId
-          ]
-            .filter(Boolean);
-
-
-        if (
-          parentIds.length === 0
-        ) {
-          return;
-        }
-
-
-        const parentLevels =
-          parentIds
-            .map(
-              id =>
-                memo.get(id)
-            )
-            .filter(
-              level =>
-                level !==
-                undefined
-            );
-
-
-        if (
-          parentLevels.length === 0
-        ) {
-          return;
-        }
-
-
-        const minimum =
-          Math.max(
-            ...parentLevels
-          ) + 1;
-
-
-        if (
-          (
-            memo.get(
-              character.id
-            ) || 0
-          ) <
-          minimum
-        ) {
-
-          memo.set(
-            character.id,
-            minimum
-          );
-
-        }
-
-      }
-    );
-
-  }
-
-
   return memo;
 
 }
 
 
 function calculateGeneration(
-  characterId,
+  id,
   memo,
   visiting
 ) {
 
   if (
-    memo.has(
-      characterId
-    )
+    memo.has(id)
   ) {
-
-    return memo.get(
-      characterId
-    );
-
+    return memo.get(id);
   }
 
 
   if (
-    visiting.has(
-      characterId
-    )
+    visiting.has(id)
   ) {
-
-    return 0;
-
-  }
-
-
-  const character =
-    getCharacter(
-      characterId
-    );
-
-
-  if (!character) {
     return 0;
   }
 
 
-  visiting.add(
-    characterId
-  );
+  const person =
+    getCharacter(id);
 
 
-  const parentIds =
+  if (!person) {
+    return 0;
+  }
+
+
+  visiting.add(id);
+
+
+  const parents =
     [
-      character.motherId,
-      character.fatherId
+      person.motherId,
+      person.fatherId
     ]
       .filter(Boolean);
 
 
-  if (
-    parentIds.length === 0
-  ) {
+  if (!parents.length) {
 
     memo.set(
-      characterId,
+      id,
       0
-    );
-
-
-    visiting.delete(
-      characterId
     );
 
 
@@ -2594,35 +3896,29 @@ function calculateGeneration(
   }
 
 
-  const parentGenerations =
-    parentIds.map(
-      parentId =>
-        calculateGeneration(
-          parentId,
-          memo,
-          visiting
-        )
-    );
-
-
-  const generation =
+  const level =
     Math.max(
-      ...parentGenerations
+      ...parents.map(
+        parentId =>
+          calculateGeneration(
+            parentId,
+            memo,
+            visiting
+          )
+      )
     ) + 1;
 
 
   memo.set(
-    characterId,
-    generation
+    id,
+    level
   );
 
 
-  visiting.delete(
-    characterId
-  );
+  visiting.delete(id);
 
 
-  return generation;
+  return level;
 
 }
 
@@ -2631,21 +3927,12 @@ function clusterSpouses(
   row
 ) {
 
-  const rowIds =
-    new Set(
-      row.map(
-        person =>
-          person.id
-      )
-    );
+  const result =
+    [];
 
 
   const visited =
     new Set();
-
-
-  const groups =
-    [];
 
 
   row.forEach(
@@ -2660,56 +3947,25 @@ function clusterSpouses(
       }
 
 
-      const group =
-        [];
+      result.push(
+        person
+      );
 
 
-      const queue =
-        [person];
+      visited.add(
+        person.id
+      );
 
 
-      while (
-        queue.length
-      ) {
-
-        const current =
-          queue.shift();
-
-
-        if (
-          visited.has(
-            current.id
-          )
-        ) {
-          continue;
-        }
-
-
-        visited.add(
-          current.id
-        );
-
-
-        group.push(
-          current
-        );
-
-
-        current.spouseIds.forEach(
+      person.spouseIds
+        .forEach(
           spouseId => {
 
-            if (
-              !rowIds.has(
-                spouseId
-              )
-            ) {
-              return;
-            }
-
-
             const spouse =
-              getCharacter(
-                spouseId
+              row.find(
+                entry =>
+                  entry.id ===
+                  spouseId
               );
 
 
@@ -2720,8 +3976,13 @@ function clusterSpouses(
               )
             ) {
 
-              queue.push(
+              result.push(
                 spouse
+              );
+
+
+              visited.add(
+                spouse.id
               );
 
             }
@@ -2729,18 +3990,11 @@ function clusterSpouses(
           }
         );
 
-      }
-
-
-      groups.push(
-        group
-      );
-
     }
   );
 
 
-  return groups.flat();
+  return result;
 
 }
 
@@ -2772,10 +4026,6 @@ function renderCharacterNode(
   }
 
 
-  node.type =
-    "button";
-
-
   node.style.left =
     `${position.x}px`;
 
@@ -2784,42 +4034,22 @@ function renderCharacterNode(
     `${position.y}px`;
 
 
-  const accent =
-    getFamilyAccent(
-      character.familyName
-    );
-
-
-  node.style.setProperty(
-    "--family-accent",
-    accent.border
-  );
-
-
-  node.style.setProperty(
-    "--family-glow",
-    accent.glow
-  );
-
-
-  const circleContent =
-    character.portraitData
-      ? `
-        <img
-          class="character-portrait"
-          src="${character.portraitData}"
-          alt=""
-        >
-      `
-      : escapeHTML(
-          getInitial(character)
-        );
-
-
   node.innerHTML = `
 
     <div class="character-circle">
-      ${circleContent}
+
+      ${
+        character.portraitData
+
+          ? `<img class="character-portrait" src="${character.portraitData}" alt="">`
+
+          : escapeHTML(
+              getInitial(
+                character
+              )
+            )
+      }
+
     </div>
 
     <div class="character-name">
@@ -2840,10 +4070,7 @@ function renderCharacterNode(
   node.addEventListener(
     "click",
 
-    function(event) {
-
-      event.stopPropagation();
-
+    function() {
 
       openProfile(
         character.id
@@ -2861,59 +4088,6 @@ function renderCharacterNode(
 
 
 /* =========================================================
-   FAMILY COLORS
-========================================================= */
-
-function getFamilyAccent(
-  familyName
-) {
-
-  const text =
-    familyName || "Unknown";
-
-
-  let hash =
-    0;
-
-
-  for (
-    let i = 0;
-    i < text.length;
-    i++
-  ) {
-
-    hash =
-      (
-        hash * 31 +
-        text.charCodeAt(i)
-      )
-      >>> 0;
-
-  }
-
-
-  const hue =
-    28 +
-    (
-      hash %
-      70
-    );
-
-
-  return {
-
-    border:
-      `hsla(${hue}, 32%, 67%, 0.72)`,
-
-    glow:
-      `hsla(${hue}, 45%, 55%, 0.12)`
-
-  };
-
-}
-
-
-/* =========================================================
    LINES
 ========================================================= */
 
@@ -2921,382 +4095,134 @@ function drawRelationshipLines(
   positions
 ) {
 
-  drawSpouseLines(
-    positions
+  drawPartnerLines(
+    positions,
+    "spouseIds",
+    "tree-line partner-line"
   );
 
 
-  drawLoverLines(
-    positions
+  drawPartnerLines(
+    positions,
+    "loverIds",
+    "tree-line lover-line"
   );
-
-
-  buildParentChildGroups()
-    .forEach(
-      group => {
-
-        drawParentChildGroup(
-          group,
-          positions
-        );
-
-      }
-    );
-
-}
-
-
-function drawSpouseLines(
-  positions
-) {
-
-  const drawn =
-    new Set();
-
-
-  characters.forEach(
-    character => {
-
-      character.spouseIds.forEach(
-        spouseId => {
-
-          const key =
-            makePairKey(
-              character.id,
-              spouseId
-            );
-
-
-          if (
-            drawn.has(key)
-          ) {
-            return;
-          }
-
-
-          drawn.add(key);
-
-
-          const first =
-            positions.get(
-              character.id
-            );
-
-
-          const second =
-            positions.get(
-              spouseId
-            );
-
-
-          if (
-            !first ||
-            !second
-          ) {
-            return;
-          }
-
-
-          addSvgLine(
-            first.x,
-            first.y + 42,
-
-            second.x,
-            second.y + 42,
-
-            "tree-line partner-line"
-          );
-
-        }
-      );
-
-    }
-  );
-
-}
-
-
-function drawLoverLines(
-  positions
-) {
-
-  const drawn =
-    new Set();
-
-
-  characters.forEach(
-    character => {
-
-      character.loverIds.forEach(
-        loverId => {
-
-          const key =
-            makePairKey(
-              character.id,
-              loverId
-            );
-
-
-          if (
-            drawn.has(key)
-          ) {
-            return;
-          }
-
-
-          drawn.add(key);
-
-
-          const first =
-            positions.get(
-              character.id
-            );
-
-
-          const second =
-            positions.get(
-              loverId
-            );
-
-
-          if (
-            !first ||
-            !second
-          ) {
-            return;
-          }
-
-
-          addSvgLine(
-            first.x,
-            first.y + 49,
-
-            second.x,
-            second.y + 49,
-
-            "tree-line lover-line"
-          );
-
-        }
-      );
-
-    }
-  );
-
-}
-
-
-function makePairKey(
-  firstId,
-  secondId
-) {
-
-  return [
-    firstId,
-    secondId
-  ]
-    .sort(
-      (a,b) =>
-        a - b
-    )
-    .join("-");
-
-}
-
-
-function buildParentChildGroups() {
-
-  const groups =
-    new Map();
 
 
   characters.forEach(
     child => {
 
-      const parentIds =
+      const childPosition =
+        positions.get(
+          child.id
+        );
+
+
+      if (!childPosition) {
+        return;
+      }
+
+
+      const parents =
         [
           child.motherId,
           child.fatherId
         ]
           .filter(Boolean)
-          .sort(
-            (a,b) =>
-              a - b
+          .map(
+            id =>
+              positions.get(id)
+          )
+          .filter(Boolean);
+
+
+      parents.forEach(
+        parent => {
+
+          addSvgLine(
+            parent.x,
+            parent.y + 42,
+
+            childPosition.x,
+            childPosition.y,
+
+            "tree-line"
           );
 
-
-      if (
-        parentIds.length === 0
-      ) {
-        return;
-      }
-
-
-      const key =
-        parentIds.join("-");
-
-
-      if (
-        !groups.has(key)
-      ) {
-
-        groups.set(
-          key,
-          {
-            parentIds,
-            children: []
-          }
-        );
-
-      }
-
-
-      groups
-        .get(key)
-        .children
-        .push(child);
+        }
+      );
 
     }
-  );
-
-
-  return Array.from(
-    groups.values()
   );
 
 }
 
 
-function drawParentChildGroup(
-  group,
-  positions
+function drawPartnerLines(
+  positions,
+  field,
+  className
 ) {
 
-  const parents =
-    group.parentIds
-      .map(
-        id =>
-          positions.get(id)
-      )
-      .filter(Boolean);
+  const drawn =
+    new Set();
 
 
-  const children =
-    group.children
-      .map(
-        child =>
-          positions.get(
-            child.id
-          )
-      )
-      .filter(Boolean);
+  characters.forEach(
+    person => {
+
+      person[field].forEach(
+        otherId => {
+
+          const key =
+            [
+              person.id,
+              otherId
+            ]
+              .sort()
+              .join("-");
 
 
-  if (
-    parents.length === 0 ||
-    children.length === 0
-  ) {
-    return;
-  }
+          if (
+            drawn.has(key)
+          ) {
+            return;
+          }
 
 
-  const parentY =
-    Math.max(
-      ...parents.map(
-        parent =>
-          parent.y + 42
-      )
-    );
+          drawn.add(key);
 
 
-  const sourceX =
-    parents.reduce(
-      (sum,parent) =>
-        sum + parent.x,
-      0
-    )
-    /
-    parents.length;
+          const first =
+            positions.get(
+              person.id
+            );
 
 
-  if (
-    parents.length === 2
-  ) {
-
-    addSvgLine(
-      parents[0].x,
-      parentY,
-
-      parents[1].x,
-      parentY,
-
-      "tree-line"
-    );
-
-  }
+          const second =
+            positions.get(
+              otherId
+            );
 
 
-  const branchY =
-    Math.min(
-      ...children.map(
-        child =>
-          child.y
-      )
-    ) - 46;
+          if (
+            first &&
+            second
+          ) {
 
+            addSvgLine(
+              first.x,
+              first.y + 42,
 
-  addSvgLine(
-    sourceX,
-    parentY,
+              second.x,
+              second.y + 42,
 
-    sourceX,
-    branchY,
+              className
+            );
 
-    "tree-line"
-  );
+          }
 
-
-  const childXs =
-    children.map(
-      child =>
-        child.x
-    );
-
-
-  if (
-    children.length > 1
-  ) {
-
-    addSvgLine(
-      Math.min(
-        ...childXs
-      ),
-
-      branchY,
-
-      Math.max(
-        ...childXs
-      ),
-
-      branchY,
-
-      "tree-line"
-    );
-
-  }
-
-
-  children.forEach(
-    child => {
-
-      addSvgLine(
-        child.x,
-        branchY,
-
-        child.x,
-        child.y,
-
-        "tree-line"
+        }
       );
 
     }
@@ -3362,13 +4288,11 @@ function addSvgLine(
 ========================================================= */
 
 function openProfile(
-  characterId
+  id
 ) {
 
   const character =
-    getCharacter(
-      characterId
-    );
+    getCharacter(id);
 
 
   if (!character) {
@@ -3377,7 +4301,7 @@ function openProfile(
 
 
   selectedCharacterId =
-    character.id;
+    id;
 
 
   setProfileText(
@@ -3410,36 +4334,15 @@ function openProfile(
 
   setProfileText(
     "profileAliases",
-
-    character.aliases.length
-      ? character.aliases.join(
-          "\n"
-        )
-      : ""
+    character.aliases.join(
+      "\n"
+    )
   );
 
 
   setProfileText(
     "profileRace",
     character.race
-  );
-
-
-  setProfileText(
-    "profileHairColor",
-    character.hairColor
-  );
-
-
-  setProfileText(
-    "profileEyeColor",
-    character.eyeColor
-  );
-
-
-  setProfileText(
-    "profileSkinColor",
-    character.skinColor
   );
 
 
@@ -3479,6 +4382,33 @@ function openProfile(
   );
 
 
+  document.getElementById(
+    "profileHairColor"
+  ).textContent =
+    getColorName(
+      "hair",
+      character.hairColorId
+    );
+
+
+  document.getElementById(
+    "profileEyeColor"
+  ).textContent =
+    getColorName(
+      "eyes",
+      character.eyeColorId
+    );
+
+
+  document.getElementById(
+    "profileSkinColor"
+  ).textContent =
+    getColorName(
+      "skin",
+      character.skinColorId
+    );
+
+
   renderProfilePortrait(
     character
   );
@@ -3494,26 +4424,8 @@ function openProfile(
   );
 
 
-  const accent =
-    getFamilyAccent(
-      character.familyName
-    );
-
-
-  profilePanel.style.setProperty(
-    "--profile-border",
-    accent.border
-  );
-
-
-  profilePanel.style.setProperty(
-    "--profile-accent",
-    accent.glow
-  );
-
-
   setVantageButton.textContent =
-    character.id ===
+    id ===
     vantageCharacterId
       ? "Current Vantage"
       : "Set as Vantage";
@@ -3553,52 +4465,30 @@ function renderProfilePortrait(
       character.portraitData;
 
 
-    image.alt =
-      "";
-
-
     profilePortrait.appendChild(
       image
     );
 
+  } else {
 
-    return;
+    profilePortrait.textContent =
+      getInitial(
+        character
+      );
 
   }
-
-
-  const span =
-    document.createElement(
-      "span"
-    );
-
-
-  span.textContent =
-    getInitial(
-      character
-    );
-
-
-  profilePortrait.appendChild(
-    span
-  );
 
 }
 
 
-/* SET VANTAGE FROM PROFILE */
+/* =========================================================
+   VANTAGE
+========================================================= */
 
 setVantageButton.addEventListener(
   "click",
 
   function() {
-
-    if (
-      !selectedCharacterId
-    ) {
-      return;
-    }
-
 
     vantageCharacterId =
       selectedCharacterId;
@@ -3606,9 +4496,7 @@ setVantageButton.addEventListener(
 
     saveVantage();
 
-
     renderTree();
-
 
     openProfile(
       selectedCharacterId
@@ -3622,10 +4510,6 @@ setVantageButton.addEventListener(
   }
 );
 
-
-/* =========================================================
-   VANTAGE RELATION
-========================================================= */
 
 function renderVantageRelation(
   subject
@@ -3666,14 +4550,15 @@ function renderVantageRelation(
 }
 
 
+/* Same genealogy logic */
+
 function describeRelationship(
   vantageId,
   subjectId
 ) {
 
   if (
-    vantageId ===
-    subjectId
+    vantageId === subjectId
   ) {
 
     return "Vantage Point";
@@ -3703,26 +4588,13 @@ function describeRelationship(
   }
 
 
-  const blood =
-    describeBloodRelationship(
-      vantage,
-      subject
-    );
-
-
-  const additional =
-    [];
-
-
   if (
     vantage.spouseIds.includes(
       subject.id
     )
   ) {
 
-    additional.push(
-      "Spouse"
-    );
+    return "Spouse";
 
   }
 
@@ -3733,46 +4605,12 @@ function describeRelationship(
     )
   ) {
 
-    additional.push(
-      "Lover"
-    );
+    return "Lover";
 
   }
 
 
-  if (
-    additional.length &&
-    blood
-  ) {
-
-    return `${additional.join(" · ")} · ${blood}`;
-
-  }
-
-
-  if (
-    additional.length
-  ) {
-
-    return additional.join(
-      " · "
-    );
-
-  }
-
-
-  return blood ||
-    "No known relation";
-
-}
-
-
-function describeBloodRelationship(
-  vantage,
-  subject
-) {
-
-  const ancestorDepth =
+  const ancestor =
     getAncestorDepth(
       vantage.id,
       subject.id
@@ -3780,18 +4618,18 @@ function describeBloodRelationship(
 
 
   if (
-    ancestorDepth !== null
+    ancestor !== null
   ) {
 
     return makeAncestorTerm(
       subject,
-      ancestorDepth
+      ancestor
     );
 
   }
 
 
-  const descendantDepth =
+  const descendant =
     getAncestorDepth(
       subject.id,
       vantage.id
@@ -3799,33 +4637,31 @@ function describeBloodRelationship(
 
 
   if (
-    descendantDepth !== null
+    descendant !== null
   ) {
 
     return makeDescendantTerm(
-      descendantDepth
+      descendant
     );
 
   }
 
 
-  const sharedParents =
-    [
-      vantage.motherId,
-      vantage.fatherId
-    ]
-      .filter(Boolean)
-      .filter(
-        parentId =>
-          parentId ===
-          subject.motherId ||
-          parentId ===
-          subject.fatherId
-      );
+  const sameMother =
+    vantage.motherId &&
+    vantage.motherId ===
+    subject.motherId;
+
+
+  const sameFather =
+    vantage.fatherId &&
+    vantage.fatherId ===
+    subject.fatherId;
 
 
   if (
-    sharedParents.length >= 2
+    sameMother &&
+    sameFather
   ) {
 
     return "Sibling";
@@ -3834,7 +4670,8 @@ function describeBloodRelationship(
 
 
   if (
-    sharedParents.length === 1
+    sameMother ||
+    sameFather
   ) {
 
     return "Half-Sibling";
@@ -3842,13 +4679,13 @@ function describeBloodRelationship(
   }
 
 
-  const vantageAncestors =
+  const firstAncestors =
     getAncestorMap(
       vantage.id
     );
 
 
-  const subjectAncestors =
+  const secondAncestors =
     getAncestorMap(
       subject.id
     );
@@ -3858,79 +4695,46 @@ function describeBloodRelationship(
     [];
 
 
-  vantageAncestors.forEach(
-    (vantageDepth, ancestorId) => {
+  firstAncestors.forEach(
+    (firstDepth,id) => {
 
       if (
-        !subjectAncestors.has(
-          ancestorId
-        )
+        secondAncestors.has(id)
       ) {
-        return;
+
+        common.push({
+
+          firstDepth,
+
+          secondDepth:
+            secondAncestors.get(id)
+
+        });
+
       }
-
-
-      common.push({
-
-        vantageDepth,
-
-        subjectDepth:
-          subjectAncestors.get(
-            ancestorId
-          )
-
-      });
 
     }
   );
 
 
-  if (
-    common.length === 0
-  ) {
+  if (!common.length) {
 
-    return null;
+    return "No known relation";
 
   }
 
 
   common.sort(
-    (a,b) => {
-
-      const aMax =
-        Math.max(
-          a.vantageDepth,
-          a.subjectDepth
-        );
-
-
-      const bMax =
-        Math.max(
-          b.vantageDepth,
-          b.subjectDepth
-        );
-
-
-      if (
-        aMax !== bMax
-      ) {
-
-        return aMax - bMax;
-
-      }
-
-
-      return (
-        a.vantageDepth +
-        a.subjectDepth
+    (a,b) =>
+      Math.max(
+        a.firstDepth,
+        a.secondDepth
       )
       -
-      (
-        b.vantageDepth +
-        b.subjectDepth
-      );
-
-    }
+      Math.max(
+        b.firstDepth,
+        b.secondDepth
+      )
   );
 
 
@@ -3938,55 +4742,22 @@ function describeBloodRelationship(
     common[0];
 
 
-  const a =
-    nearest.vantageDepth;
-
-
-  const b =
-    nearest.subjectDepth;
-
-
   if (
-    b === 1 &&
-    a >= 2
-  ) {
-
-    return makeAuntUncleTerm(
-      subject,
-      a - 2
-    );
-
-  }
-
-
-  if (
-    a === 1 &&
-    b >= 2
-  ) {
-
-    return makeNieceNephewTerm(
-      subject,
-      b - 2
-    );
-
-  }
-
-
-  if (
-    a >= 2 &&
-    b >= 2
+    nearest.firstDepth >= 2 &&
+    nearest.secondDepth >= 2
   ) {
 
     const degree =
       Math.min(
-        a,
-        b
+        nearest.firstDepth,
+        nearest.secondDepth
       ) - 1;
 
 
     const removed =
       Math.abs(
-        a - b
+        nearest.firstDepth -
+        nearest.secondDepth
       );
 
 
@@ -3994,12 +4765,14 @@ function describeBloodRelationship(
       `${ordinal(degree)} Cousin`;
 
 
-    if (
-      removed > 0
-    ) {
+    if (removed) {
 
       result +=
-        ` ${removed} ${removed === 1 ? "Time" : "Times"} Removed`;
+        ` ${removed} ${
+          removed === 1
+            ? "Time"
+            : "Times"
+        } Removed`;
 
     }
 
@@ -4009,13 +4782,13 @@ function describeBloodRelationship(
   }
 
 
-  return null;
+  return "Extended Family";
 
 }
 
 
 function getAncestorMap(
-  personId
+  id
 ) {
 
   const result =
@@ -4025,19 +4798,10 @@ function getAncestorMap(
   const queue =
     [
       {
-        id:
-          personId,
-
-        depth:
-          0
+        id,
+        depth: 0
       }
     ];
-
-
-  const visited =
-    new Set(
-      [personId]
-    );
 
 
   while (
@@ -4059,64 +4823,48 @@ function getAncestorMap(
     }
 
 
-    const parents =
-      [
-        person.motherId,
-        person.fatherId
-      ]
-        .filter(Boolean);
+    [
+      person.motherId,
+      person.fatherId
+    ]
+      .filter(Boolean)
+      .forEach(
+        parentId => {
+
+          const depth =
+            current.depth + 1;
 
 
-    parents.forEach(
-      parentId => {
+          if (
+            !result.has(
+              parentId
+            )
+            ||
+            depth <
+            result.get(
+              parentId
+            )
+          ) {
 
-        const depth =
-          current.depth + 1;
-
-
-        if (
-          !result.has(
-            parentId
-          )
-          ||
-          depth <
-          result.get(
-            parentId
-          )
-        ) {
-
-          result.set(
-            parentId,
-            depth
-          );
-
-        }
-
-
-        if (
-          !visited.has(
-            parentId
-          )
-        ) {
-
-          visited.add(
-            parentId
-          );
-
-
-          queue.push({
-
-            id:
+            result.set(
               parentId,
+              depth
+            );
 
-            depth
 
-          });
+            queue.push({
+
+              id:
+                parentId,
+
+              depth
+
+            });
+
+          }
 
         }
-
-      }
-    );
+      );
 
   }
 
@@ -4163,21 +4911,11 @@ function makeAncestorTerm(
     depth === 1
   ) {
 
-    if (
-      role === "mother"
-    ) {
-      return "Mother";
-    }
-
-
-    if (
-      role === "father"
-    ) {
-      return "Father";
-    }
-
-
-    return "Parent";
+    return role === "mother"
+      ? "Mother"
+      : role === "father"
+        ? "Father"
+        : "Parent";
 
   }
 
@@ -4186,48 +4924,26 @@ function makeAncestorTerm(
     depth === 2
   ) {
 
-    if (
-      role === "mother"
-    ) {
-      return "Grandmother";
-    }
-
-
-    if (
-      role === "father"
-    ) {
-      return "Grandfather";
-    }
-
-
-    return "Grandparent";
+    return role === "mother"
+      ? "Grandmother"
+      : role === "father"
+        ? "Grandfather"
+        : "Grandparent";
 
   }
 
 
-  const greats =
-    depth - 2;
+  const great =
+    ordinal(
+      depth - 2
+    );
 
 
-  if (
-    role === "mother"
-  ) {
-
-    return `${ordinal(greats)} Great Grandmother`;
-
-  }
-
-
-  if (
-    role === "father"
-  ) {
-
-    return `${ordinal(greats)} Great Grandfather`;
-
-  }
-
-
-  return `${ordinal(greats)} Great Grandparent`;
+  return role === "mother"
+    ? `${great} Great Grandmother`
+    : role === "father"
+      ? `${great} Great Grandfather`
+      : `${great} Great Grandparent`;
 
 }
 
@@ -4239,100 +4955,28 @@ function makeDescendantTerm(
   if (
     depth === 1
   ) {
-
     return "Child";
-
   }
 
 
   if (
     depth === 2
   ) {
-
     return "Grandchild";
-
   }
 
 
-  return `${ordinal(depth - 2)} Great Grandchild`;
-
-}
-
-
-function makeAuntUncleTerm(
-  person,
-  greatCount
-) {
-
-  const role =
-    inferParentRole(
-      person.id
-    );
-
-
-  let base =
-    "Aunt/Uncle";
-
-
-  if (
-    role === "mother"
-  ) {
-    base = "Aunt";
-  }
-
-
-  if (
-    role === "father"
-  ) {
-    base = "Uncle";
-  }
-
-
-  return greatCount === 0
-    ? base
-    : `${ordinal(greatCount)} Great ${base}`;
-
-}
-
-
-function makeNieceNephewTerm(
-  person,
-  greatCount
-) {
-
-  const role =
-    inferParentRole(
-      person.id
-    );
-
-
-  let base =
-    "Niece/Nephew";
-
-
-  if (
-    role === "mother"
-  ) {
-    base = "Niece";
-  }
-
-
-  if (
-    role === "father"
-  ) {
-    base = "Nephew";
-  }
-
-
-  return greatCount === 0
-    ? base
-    : `${ordinal(greatCount)} Great ${base}`;
+  return `${
+    ordinal(
+      depth - 2
+    )
+  } Great Grandchild`;
 
 }
 
 
 function inferParentRole(
-  personId
+  id
 ) {
 
   let mother =
@@ -4347,22 +4991,16 @@ function inferParentRole(
     character => {
 
       if (
-        character.motherId ===
-        personId
+        character.motherId === id
       ) {
-
         mother = true;
-
       }
 
 
       if (
-        character.fatherId ===
-        personId
+        character.fatherId === id
       ) {
-
         father = true;
-
       }
 
     }
@@ -4373,9 +5011,7 @@ function inferParentRole(
     mother &&
     !father
   ) {
-
     return "mother";
-
   }
 
 
@@ -4383,9 +5019,7 @@ function inferParentRole(
     father &&
     !mother
   ) {
-
     return "father";
-
   }
 
 
@@ -4398,17 +5032,15 @@ function ordinal(
   number
 ) {
 
-  const remainder =
+  const hundred =
     number % 100;
 
 
   if (
-    remainder >= 11 &&
-    remainder <= 13
+    hundred >= 11 &&
+    hundred <= 13
   ) {
-
     return `${number}th`;
-
   }
 
 
@@ -4434,37 +5066,33 @@ function ordinal(
 
 
 /* =========================================================
-   FAMILY PROFILE
+   RELATIVES
 ========================================================= */
 
 function renderRelationshipProfile(
   character
 ) {
 
-  const mother =
-    getCharacter(
-      character.motherId
-    );
-
-
-  const father =
-    getCharacter(
-      character.fatherId
-    );
-
-
   renderRelationshipButtons(
     "profileMother",
-    mother
-      ? [mother]
+    character.motherId
+      ? [
+          getCharacter(
+            character.motherId
+          )
+        ].filter(Boolean)
       : []
   );
 
 
   renderRelationshipButtons(
     "profileFather",
-    father
-      ? [father]
+    character.fatherId
+      ? [
+          getCharacter(
+            character.fatherId
+          )
+        ].filter(Boolean)
       : []
   );
 
@@ -4504,13 +5132,13 @@ function renderRelationshipProfile(
 
 
 function renderRelationshipButtons(
-  containerId,
+  id,
   people
 ) {
 
   const container =
     document.getElementById(
-      containerId
+      id
     );
 
 
@@ -4518,28 +5146,10 @@ function renderRelationshipButtons(
     "";
 
 
-  if (
-    people.length === 0
-  ) {
+  if (!people.length) {
 
-    const empty =
-      document.createElement(
-        "span"
-      );
-
-
-    empty.className =
-      "relationship-empty";
-
-
-    empty.textContent =
+    container.textContent =
       "—";
-
-
-    container.appendChild(
-      empty
-    );
-
 
     return;
 
@@ -4555,12 +5165,12 @@ function renderRelationshipButtons(
         );
 
 
-      button.type =
-        "button";
-
-
       button.className =
         "relationship-button";
+
+
+      button.type =
+        "button";
 
 
       button.textContent =
@@ -4609,55 +5219,43 @@ function getChildren(
 
 
 function getSiblings(
-  characterId
+  id
 ) {
 
-  const character =
-    getCharacter(
-      characterId
-    );
+  const person =
+    getCharacter(id);
 
 
-  if (!character) {
+  if (!person) {
     return [];
   }
 
 
   return characters.filter(
-    other => {
-
-      if (
-        other.id ===
-        character.id
-      ) {
-        return false;
-      }
-
-
-      const sameMother =
-        character.motherId &&
-        other.motherId ===
-        character.motherId;
-
-
-      const sameFather =
-        character.fatherId &&
-        other.fatherId ===
-        character.fatherId;
-
-
-      return Boolean(
-        sameMother ||
-        sameFather
-      );
-
-    }
+    other =>
+      other.id !== id
+      &&
+      (
+        (
+          person.motherId &&
+          other.motherId ===
+          person.motherId
+        )
+        ||
+        (
+          person.fatherId &&
+          other.fatherId ===
+          person.fatherId
+        )
+      )
   );
 
 }
 
 
-/* CLOSE PROFILE */
+/* =========================================================
+   PROFILE BUTTONS
+========================================================= */
 
 function closeProfile() {
 
@@ -4689,39 +5287,87 @@ closeProfileFooterButton.addEventListener(
 );
 
 
-profileBackdrop.addEventListener(
-  "click",
-  closeProfile
-);
-
-
-/* =========================================================
-   DELETE
-========================================================= */
+/* DELETE */
 
 deleteCharacterButton.addEventListener(
   "click",
 
   function() {
 
-    const character =
+    const person =
       getCharacter(
         selectedCharacterId
       );
 
 
-    if (!character) {
+    if (!person) {
       return;
     }
 
 
     openConfirmation(
-      `Delete ${getTreeName(character)}?`,
-      "The character will be removed from the archive. Their children will remain, but any links to this person will be cleared.",
+      `Delete ${getTreeName(person)}?`,
+      "Their character record and relationship links will be removed.",
       function() {
 
-        deleteCharacter(
-          character.id
+        characters =
+          characters.filter(
+            character =>
+              character.id !==
+              person.id
+          );
+
+
+        characters.forEach(
+          character => {
+
+            if (
+              character.motherId ===
+              person.id
+            ) {
+              character.motherId =
+                null;
+            }
+
+
+            if (
+              character.fatherId ===
+              person.id
+            ) {
+              character.fatherId =
+                null;
+            }
+
+
+            character.spouseIds =
+              character.spouseIds
+                .filter(
+                  id =>
+                    id !==
+                    person.id
+                );
+
+
+            character.loverIds =
+              character.loverIds
+                .filter(
+                  id =>
+                    id !==
+                    person.id
+                );
+
+          }
+        );
+
+
+        saveCharacters();
+
+        closeProfile();
+
+        renderTree();
+
+        showToast(
+          "Character deleted"
         );
 
       },
@@ -4732,121 +5378,8 @@ deleteCharacterButton.addEventListener(
 );
 
 
-function deleteCharacter(
-  characterId
-) {
-
-  const deleted =
-    getCharacter(
-      characterId
-    );
-
-
-  characters =
-    characters.filter(
-      character =>
-        character.id !==
-        characterId
-    );
-
-
-  characters.forEach(
-    character => {
-
-      if (
-        character.motherId ===
-        characterId
-      ) {
-
-        character.motherId =
-          null;
-
-      }
-
-
-      if (
-        character.fatherId ===
-        characterId
-      ) {
-
-        character.fatherId =
-          null;
-
-      }
-
-
-      character.spouseIds =
-        character.spouseIds
-          .filter(
-            id =>
-              id !==
-              characterId
-          );
-
-
-      character.loverIds =
-        character.loverIds
-          .filter(
-            id =>
-              id !==
-              characterId
-          );
-
-    }
-  );
-
-
-  if (
-    vantageCharacterId ===
-    characterId
-  ) {
-
-    vantageCharacterId =
-      null;
-
-
-    saveVantage();
-
-  }
-
-
-  saveCharacters();
-
-
-  profileBackdrop.classList.add(
-    "hidden"
-  );
-
-
-  profilePanel.classList.add(
-    "hidden"
-  );
-
-
-  selectedCharacterId =
-    null;
-
-
-  renderTree();
-
-
-  setTimeout(
-    centerTree,
-    50
-  );
-
-
-  showToast(
-    deleted
-      ? `${getTreeName(deleted)} deleted`
-      : "Character deleted"
-  );
-
-}
-
-
 /* =========================================================
-   EDITOR
+   EDIT CHARACTER
 ========================================================= */
 
 editCharacterButton.addEventListener(
@@ -4869,7 +5402,7 @@ function openEditor() {
 
 
   pendingPortraitData =
-    character.portraitData || "";
+    character.portraitData;
 
 
   document.getElementById(
@@ -4940,24 +5473,21 @@ function openEditor() {
     character.life;
 
 
-  setEditColor(
-    "editHairColor",
-    "editHairColorValue",
-    character.hairColor
+  setCharacterColorEditorValue(
+    "hair",
+    character
   );
 
 
-  setEditColor(
-    "editEyeColor",
-    "editEyeColorValue",
-    character.eyeColor
+  setCharacterColorEditorValue(
+    "eyes",
+    character
   );
 
 
-  setEditColor(
-    "editSkinColor",
-    "editSkinColorValue",
-    character.skinColor
+  setCharacterColorEditorValue(
+    "skin",
+    character
   );
 
 
@@ -4971,12 +5501,12 @@ function openEditor() {
   );
 
 
-  profilePanel.classList.add(
+  profileBackdrop.classList.add(
     "hidden"
   );
 
 
-  profileBackdrop.classList.add(
+  profilePanel.classList.add(
     "hidden"
   );
 
@@ -4993,313 +5523,100 @@ function openEditor() {
 }
 
 
-/* PORTRAITS */
-
-editPortraitFile.addEventListener(
-  "change",
-
-  async function() {
-
-    const file =
-      editPortraitFile.files[0];
-
-
-    if (!file) {
-      return;
-    }
-
-
-    try {
-
-      pendingPortraitData =
-        await compressPortrait(
-          file
-        );
-
-
-      const character =
-        getCharacter(
-          selectedCharacterId
-        );
-
-
-      if (character) {
-
-        renderEditPortrait(
-          {
-            ...character,
-            portraitData:
-              pendingPortraitData
-          }
-        );
-
-      }
-
-
-      showToast(
-        "Portrait ready"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-
-      showToast(
-        "That image could not be used"
-      );
-
-    }
-
-  }
-);
-
-
-removePortraitButton.addEventListener(
-  "click",
-
-  function() {
-
-    pendingPortraitData =
-      "";
-
-
-    const character =
-      getCharacter(
-        selectedCharacterId
-      );
-
-
-    if (character) {
-
-      renderEditPortrait(
-        {
-          ...character,
-          portraitData: ""
-        }
-      );
-
-    }
-
-  }
-);
-
-
-function renderEditPortrait(
+function setCharacterColorEditorValue(
+  trait,
   character
 ) {
 
-  editPortraitPreview.innerHTML =
-    "";
+  let select;
+  let custom;
 
 
   if (
-    character.portraitData
+    trait === "hair"
   ) {
 
-    const image =
-      document.createElement(
-        "img"
-      );
+    select =
+      editHairPreset;
+
+    custom =
+      editHairCustom;
 
 
-    image.src =
-      character.portraitData;
+    select.value =
+      character.hairColorId || "";
 
 
-    image.alt =
-      "";
-
-
-    editPortraitPreview.appendChild(
-      image
-    );
-
-
-    return;
+    custom.value =
+      isHexColor(
+        character.hairColor
+      )
+        ? character.hairColor
+        : "#242429";
 
   }
 
 
-  const span =
-    document.createElement(
-      "span"
-    );
+  if (
+    trait === "eyes"
+  ) {
+
+    select =
+      editEyePreset;
+
+    custom =
+      editEyeCustom;
 
 
-  span.textContent =
-    getInitial(
-      character
-    );
+    select.value =
+      character.eyeColorId || "";
 
 
-  editPortraitPreview.appendChild(
-    span
+    custom.value =
+      isHexColor(
+        character.eyeColor
+      )
+        ? character.eyeColor
+        : "#242429";
+
+  }
+
+
+  if (
+    trait === "skin"
+  ) {
+
+    select =
+      editSkinPreset;
+
+    custom =
+      editSkinCustom;
+
+
+    select.value =
+      character.skinColorId || "";
+
+
+    custom.value =
+      isHexColor(
+        character.skinColor
+      )
+        ? character.skinColor
+        : "#F3D2BF";
+
+  }
+
+
+  select.dispatchEvent(
+    new Event(
+      "change"
+    )
   );
 
 }
 
 
-async function compressPortrait(
-  file
-) {
-
-  const dataUrl =
-    await readFileAsDataURL(
-      file
-    );
-
-
-  const image =
-    await loadImage(
-      dataUrl
-    );
-
-
-  const size =
-    320;
-
-
-  const canvas =
-    document.createElement(
-      "canvas"
-    );
-
-
-  canvas.width =
-    size;
-
-
-  canvas.height =
-    size;
-
-
-  const context =
-    canvas.getContext(
-      "2d"
-    );
-
-
-  const sourceSize =
-    Math.min(
-      image.width,
-      image.height
-    );
-
-
-  const sourceX =
-    (
-      image.width -
-      sourceSize
-    ) / 2;
-
-
-  const sourceY =
-    (
-      image.height -
-      sourceSize
-    ) / 2;
-
-
-  context.drawImage(
-    image,
-
-    sourceX,
-    sourceY,
-    sourceSize,
-    sourceSize,
-
-    0,
-    0,
-    size,
-    size
-  );
-
-
-  return canvas.toDataURL(
-    "image/jpeg",
-    0.78
-  );
-
-}
-
-
-function readFileAsDataURL(
-  file
-) {
-
-  return new Promise(
-    function(
-      resolve,
-      reject
-    ) {
-
-      const reader =
-        new FileReader();
-
-
-      reader.onload =
-        function() {
-
-          resolve(
-            reader.result
-          );
-
-        };
-
-
-      reader.onerror =
-        reject;
-
-
-      reader.readAsDataURL(
-        file
-      );
-
-    }
-  );
-
-}
-
-
-function loadImage(
-  source
-) {
-
-  return new Promise(
-    function(
-      resolve,
-      reject
-    ) {
-
-      const image =
-        new Image();
-
-
-      image.onload =
-        function() {
-
-          resolve(
-            image
-          );
-
-        };
-
-
-      image.onerror =
-        reject;
-
-
-      image.src =
-        source;
-
-    }
-  );
-
-}
-
-
-/* RELATIONSHIP SELECTORS */
+/* RELATIONSHIP SELECTS */
 
 function populateRelationshipSelectors(
   character
@@ -5336,14 +5653,14 @@ function populateRelationshipSelectors(
 
 
 function populateSingleSelect(
-  selectId,
+  id,
   currentId,
   selectedId
 ) {
 
   const select =
     document.getElementById(
-      selectId
+      id
     );
 
 
@@ -5356,10 +5673,10 @@ function populateSingleSelect(
       compareCharacterNames
     )
     .forEach(
-      character => {
+      person => {
 
         if (
-          character.id ===
+          person.id ===
           currentId
         ) {
           return;
@@ -5373,19 +5690,17 @@ function populateSingleSelect(
 
 
         option.value =
-          String(
-            character.id
-          );
+          person.id;
 
 
         option.textContent =
           getTreeName(
-            character
+            person
           );
 
 
         option.selected =
-          character.id ===
+          person.id ===
           selectedId;
 
 
@@ -5400,14 +5715,14 @@ function populateSingleSelect(
 
 
 function populateMultiSelect(
-  selectId,
+  id,
   currentId,
   selectedIds
 ) {
 
   const select =
     document.getElementById(
-      selectId
+      id
     );
 
 
@@ -5420,10 +5735,10 @@ function populateMultiSelect(
       compareCharacterNames
     )
     .forEach(
-      character => {
+      person => {
 
         if (
-          character.id ===
+          person.id ===
           currentId
         ) {
           return;
@@ -5437,20 +5752,18 @@ function populateMultiSelect(
 
 
         option.value =
-          String(
-            character.id
-          );
+          person.id;
 
 
         option.textContent =
           getTreeName(
-            character
+            person
           );
 
 
         option.selected =
           selectedIds.includes(
-            character.id
+            person.id
           );
 
 
@@ -5464,52 +5777,7 @@ function populateMultiSelect(
 }
 
 
-function cancelEditor() {
-
-  editBackdrop.classList.add(
-    "hidden"
-  );
-
-
-  editPanel.classList.add(
-    "hidden"
-  );
-
-
-  pendingPortraitData =
-    null;
-
-
-  if (
-    selectedCharacterId
-  ) {
-
-    openProfile(
-      selectedCharacterId
-    );
-
-  }
-
-}
-
-
-closeEditButton.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
-cancelEditButton.addEventListener(
-  "click",
-  cancelEditor
-);
-
-
-editBackdrop.addEventListener(
-  "click",
-  cancelEditor
-);
-
+/* SAVE EDIT */
 
 editCharacterForm.addEventListener(
   "submit",
@@ -5530,11 +5798,11 @@ editCharacterForm.addEventListener(
     }
 
 
-    const oldSpouseIds =
+    const oldSpouses =
       [...character.spouseIds];
 
 
-    const oldLoverIds =
+    const oldLovers =
       [...character.loverIds];
 
 
@@ -5582,6 +5850,12 @@ editCharacterForm.addEventListener(
       );
 
 
+    character.race =
+      getInputValue(
+        "editRace"
+      );
+
+
     character.motherId =
       getSelectedSingleId(
         "editMother"
@@ -5606,28 +5880,22 @@ editCharacterForm.addEventListener(
       );
 
 
-    character.race =
-      getInputValue(
-        "editRace"
-      );
+    applyCharacterColorFromEditor(
+      character,
+      "hair"
+    );
 
 
-    character.hairColor =
-      document.getElementById(
-        "editHairColor"
-      ).value;
+    applyCharacterColorFromEditor(
+      character,
+      "eyes"
+    );
 
 
-    character.eyeColor =
-      document.getElementById(
-        "editEyeColor"
-      ).value;
-
-
-    character.skinColor =
-      document.getElementById(
-        "editSkinColor"
-      ).value;
+    applyCharacterColorFromEditor(
+      character,
+      "skin"
+    );
 
 
     character.physicalFeature =
@@ -5652,24 +5920,23 @@ editCharacterForm.addEventListener(
       pendingPortraitData || "";
 
 
-    syncTwoWayRelationship(
+    syncTwoWay(
       character.id,
-      oldSpouseIds,
+      oldSpouses,
       character.spouseIds,
       "spouseIds"
     );
 
 
-    syncTwoWayRelationship(
+    syncTwoWay(
       character.id,
-      oldLoverIds,
+      oldLovers,
       character.loverIds,
       "loverIds"
     );
 
 
     saveCharacters();
-
 
     renderTree();
 
@@ -5682,10 +5949,6 @@ editCharacterForm.addEventListener(
     editPanel.classList.add(
       "hidden"
     );
-
-
-    pendingPortraitData =
-      null;
 
 
     openProfile(
@@ -5701,74 +5964,455 @@ editCharacterForm.addEventListener(
 );
 
 
-function syncTwoWayRelationship(
+function applyCharacterColorFromEditor(
+  character,
+  trait
+) {
+
+  let select;
+  let custom;
+
+
+  if (
+    trait === "hair"
+  ) {
+
+    select =
+      editHairPreset;
+
+    custom =
+      editHairCustom;
+
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+
+    select =
+      editEyePreset;
+
+    custom =
+      editEyeCustom;
+
+  }
+
+
+  if (
+    trait === "skin"
+  ) {
+
+    select =
+      editSkinPreset;
+
+    custom =
+      editSkinCustom;
+
+  }
+
+
+  const id =
+    select.value;
+
+
+  let hex =
+    "";
+
+
+  if (
+    id === "custom"
+  ) {
+
+    hex =
+      custom.value;
+
+  }
+  else if (id) {
+
+    const preset =
+      findColorPreset(
+        trait,
+        id
+      );
+
+
+    hex =
+      preset
+        ? preset.hex
+        : "";
+
+  }
+
+
+  if (
+    trait === "hair"
+  ) {
+
+    character.hairColorId =
+      id;
+
+    character.hairColor =
+      hex;
+
+  }
+
+
+  if (
+    trait === "eyes"
+  ) {
+
+    character.eyeColorId =
+      id;
+
+    character.eyeColor =
+      hex;
+
+  }
+
+
+  if (
+    trait === "skin"
+  ) {
+
+    character.skinColorId =
+      id;
+
+    character.skinColor =
+      hex;
+
+  }
+
+}
+
+
+/* CANCEL EDIT */
+
+function cancelEditor() {
+
+  editBackdrop.classList.add(
+    "hidden"
+  );
+
+
+  editPanel.classList.add(
+    "hidden"
+  );
+
+
+  if (
+    selectedCharacterId
+  ) {
+
+    openProfile(
+      selectedCharacterId
+    );
+
+  }
+
+}
+
+
+closeEditButton.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+cancelEditButton.addEventListener(
+  "click",
+  cancelEditor
+);
+
+
+/* =========================================================
+   PORTRAITS
+========================================================= */
+
+editPortraitFile.addEventListener(
+  "change",
+
+  async function() {
+
+    const file =
+      editPortraitFile.files[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    pendingPortraitData =
+      await compressPortrait(
+        file
+      );
+
+
+    renderEditPortrait({
+
+      givenName:
+        getInputValue(
+          "editGivenName"
+        ),
+
+      portraitData:
+        pendingPortraitData
+
+    });
+
+  }
+);
+
+
+removePortraitButton.addEventListener(
+  "click",
+
+  function() {
+
+    pendingPortraitData =
+      "";
+
+
+    renderEditPortrait({
+
+      givenName:
+        getInputValue(
+          "editGivenName"
+        ),
+
+      portraitData: ""
+
+    });
+
+  }
+);
+
+
+function renderEditPortrait(
+  character
+) {
+
+  editPortraitPreview.innerHTML =
+    "";
+
+
+  if (
+    character.portraitData
+  ) {
+
+    const image =
+      document.createElement(
+        "img"
+      );
+
+
+    image.src =
+      character.portraitData;
+
+
+    editPortraitPreview.appendChild(
+      image
+    );
+
+  } else {
+
+    editPortraitPreview.textContent =
+      getInitial(
+        character
+      );
+
+  }
+
+}
+
+
+async function compressPortrait(
+  file
+) {
+
+  const source =
+    await readFile(
+      file
+    );
+
+
+  const image =
+    await loadImage(
+      source
+    );
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    320;
+
+  canvas.height =
+    320;
+
+
+  const context =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  const size =
+    Math.min(
+      image.width,
+      image.height
+    );
+
+
+  context.drawImage(
+    image,
+
+    (
+      image.width -
+      size
+    ) / 2,
+
+    (
+      image.height -
+      size
+    ) / 2,
+
+    size,
+    size,
+
+    0,
+    0,
+    320,
+    320
+  );
+
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    0.78
+  );
+
+}
+
+
+function readFile(
+  file
+) {
+
+  return new Promise(
+    resolve => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () =>
+          resolve(
+            reader.result
+          );
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+}
+
+
+function loadImage(
+  source
+) {
+
+  return new Promise(
+    resolve => {
+
+      const image =
+        new Image();
+
+
+      image.onload =
+        () =>
+          resolve(
+            image
+          );
+
+
+      image.src =
+        source;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   TWO-WAY RELATIONSHIPS
+========================================================= */
+
+function syncTwoWay(
   characterId,
   oldIds,
   newIds,
-  fieldName
+  field
 ) {
 
   oldIds.forEach(
-    otherId => {
+    id => {
 
       if (
-        newIds.includes(
-          otherId
-        )
+        newIds.includes(id)
       ) {
         return;
       }
 
 
       const other =
-        getCharacter(
-          otherId
-        );
+        getCharacter(id);
 
 
-      if (!other) {
-        return;
-      }
+      if (other) {
 
-
-      other[fieldName] =
-        other[fieldName]
-          .filter(
-            id =>
-              id !==
+        other[field] =
+          other[field].filter(
+            value =>
+              value !==
               characterId
           );
+
+      }
 
     }
   );
 
 
   newIds.forEach(
-    otherId => {
+    id => {
 
       const other =
-        getCharacter(
-          otherId
+        getCharacter(id);
+
+
+      if (
+        other &&
+        !other[field].includes(
+          characterId
+        )
+      ) {
+
+        other[field].push(
+          characterId
         );
 
-
-      if (!other) {
-        return;
-      }
-
-
-      if (
-        !other[fieldName]
-          .includes(
-            characterId
-          )
-      ) {
-
-        other[fieldName]
-          .push(
-            characterId
-          );
-
       }
 
     }
@@ -5778,147 +6422,86 @@ function syncTwoWayRelationship(
 
 
 /* =========================================================
-   COLORS
+   CONFIRM
 ========================================================= */
 
-setupColorInput(
-  "editHairColor",
-  "editHairColorValue"
-);
-
-
-setupColorInput(
-  "editEyeColor",
-  "editEyeColorValue"
-);
-
-
-setupColorInput(
-  "editSkinColor",
-  "editSkinColorValue"
-);
-
-
-function setupColorInput(
-  inputId,
-  labelId
+function openConfirmation(
+  title,
+  message,
+  action,
+  buttonText
 ) {
 
-  const input =
-    document.getElementById(
-      inputId
-    );
+  confirmTitle.textContent =
+    title;
 
 
-  const label =
-    document.getElementById(
-      labelId
-    );
+  confirmMessage.textContent =
+    message;
 
 
-  input.addEventListener(
-    "input",
+  confirmAcceptButton.textContent =
+    buttonText;
 
-    function() {
 
-      label.textContent =
-        input.value
-          .toUpperCase();
+  confirmAction =
+    action;
 
-    }
+
+  confirmBackdrop.classList.remove(
+    "hidden"
+  );
+
+
+  confirmPanel.classList.remove(
+    "hidden"
   );
 
 }
 
 
-/* =========================================================
-   CLEANUP
-========================================================= */
+function closeConfirmation() {
 
-function cleanBrokenRelationships() {
-
-  const validIds =
-    new Set(
-      characters.map(
-        character =>
-          character.id
-      )
-    );
-
-
-  characters.forEach(
-    character => {
-
-      if (
-        !validIds.has(
-          character.motherId
-        )
-      ) {
-
-        character.motherId =
-          null;
-
-      }
-
-
-      if (
-        !validIds.has(
-          character.fatherId
-        )
-      ) {
-
-        character.fatherId =
-          null;
-
-      }
-
-
-      character.spouseIds =
-        character.spouseIds
-          .filter(
-            id =>
-              validIds.has(id)
-          );
-
-
-      character.loverIds =
-        character.loverIds
-          .filter(
-            id =>
-              validIds.has(id)
-          );
-
-    }
+  confirmBackdrop.classList.add(
+    "hidden"
   );
 
-}
+
+  confirmPanel.classList.add(
+    "hidden"
+  );
 
 
-function cleanInvalidVantage() {
-
-  if (
-    vantageCharacterId ===
-    null
-  ) {
-    return;
-  }
-
-
-  if (
-    !getCharacter(
-      vantageCharacterId
-    )
-  ) {
-
-    vantageCharacterId =
-      null;
-
-
-    saveVantage();
-
-  }
+  confirmAction =
+    null;
 
 }
+
+
+confirmCancelButton.addEventListener(
+  "click",
+  closeConfirmation
+);
+
+
+confirmAcceptButton.addEventListener(
+  "click",
+
+  function() {
+
+    const action =
+      confirmAction;
+
+
+    closeConfirmation();
+
+
+    if (action) {
+      action();
+    }
+
+  }
+);
 
 
 /* =========================================================
@@ -5943,8 +6526,7 @@ function getCharactersFromIds(
 
   return ids
     .map(
-      id =>
-        getCharacter(id)
+      getCharacter
     )
     .filter(Boolean);
 
@@ -5952,12 +6534,12 @@ function getCharactersFromIds(
 
 
 function getSelectedSingleId(
-  selectId
+  id
 ) {
 
   const value =
     document.getElementById(
-      selectId
+      id
     ).value;
 
 
@@ -5969,12 +6551,12 @@ function getSelectedSingleId(
 
 
 function getSelectedMultipleIds(
-  selectId
+  id
 ) {
 
   return Array.from(
     document.getElementById(
-      selectId
+      id
     ).selectedOptions
   )
     .map(
@@ -5994,13 +6576,10 @@ function makeAliasArray(
   return value
     .split(",")
     .map(
-      alias =>
-        alias.trim()
+      item =>
+        item.trim()
     )
-    .filter(
-      alias =>
-        alias !== ""
-    );
+    .filter(Boolean);
 
 }
 
@@ -6010,8 +6589,8 @@ function getTreeName(
 ) {
 
   return `
-    ${character.givenName}
-    ${character.familyName}
+    ${character.givenName || ""}
+    ${character.familyName || ""}
   `
     .replace(
       /\s+/g,
@@ -6050,21 +6629,24 @@ function getInitial(
   character
 ) {
 
-  return character.givenName
+  return (
+    character.givenName ||
+    "?"
+  )
     .charAt(0)
-    .toUpperCase() || "?";
+    .toUpperCase();
 
 }
 
 
 function compareCharacterNames(
-  first,
-  second
+  a,
+  b
 ) {
 
-  return getTreeName(first)
+  return getTreeName(a)
     .localeCompare(
-      getTreeName(second)
+      getTreeName(b)
     );
 
 }
@@ -6074,34 +6656,30 @@ function makeYearText(
   character
 ) {
 
-  const birth =
-    character.birthYear;
+  if (
+    character.birthYear &&
+    character.deathYear
+  ) {
 
+    return `${character.birthYear} – ${character.deathYear}`;
 
-  const death =
-    character.deathYear;
+  }
 
 
   if (
-    birth &&
-    death
+    character.birthYear
   ) {
 
-    return `${birth} – ${death}`;
+    return `${character.birthYear} –`;
 
   }
 
 
-  if (birth) {
+  if (
+    character.deathYear
+  ) {
 
-    return `${birth} –`;
-
-  }
-
-
-  if (death) {
-
-    return `? – ${death}`;
+    return `? – ${character.deathYear}`;
 
   }
 
@@ -6112,12 +6690,12 @@ function makeYearText(
 
 
 function setProfileText(
-  elementId,
+  id,
   value
 ) {
 
   document.getElementById(
-    elementId
+    id
   ).textContent =
     value || "—";
 
@@ -6125,40 +6703,14 @@ function setProfileText(
 
 
 function setColorSwatch(
-  elementId,
+  id,
   color
 ) {
 
   document.getElementById(
-    elementId
+    id
   ).style.background =
     color || "#242429";
-
-}
-
-
-function setEditColor(
-  inputId,
-  labelId,
-  color
-) {
-
-  const safeColor =
-    isHexColor(color)
-      ? color
-      : "#242429";
-
-
-  document.getElementById(
-    inputId
-  ).value =
-    safeColor;
-
-
-  document.getElementById(
-    labelId
-  ).textContent =
-    safeColor.toUpperCase();
 
 }
 
@@ -6168,20 +6720,18 @@ function isHexColor(
 ) {
 
   return /^#[0-9A-Fa-f]{6}$/.test(
-    value
+    value || ""
   );
 
 }
 
 
 function getInputValue(
-  elementId
+  id
 ) {
 
   return document
-    .getElementById(
-      elementId
-    )
+    .getElementById(id)
     .value
     .trim();
 
@@ -6192,39 +6742,202 @@ function escapeHTML(
   value
 ) {
 
-  const element =
+  const div =
     document.createElement(
       "div"
     );
 
 
-  element.textContent =
-    value;
+  div.textContent =
+    value || "";
 
 
-  return element.innerHTML;
+  return div.innerHTML;
 
 }
 
 
-/* RESIZE */
+function capitalize(
+  value
+) {
 
-window.addEventListener(
-  "resize",
+  if (
+    value === "eyes"
+  ) {
+    return "Eyes";
+  }
 
-  function() {
 
-    renderTree();
+  return value
+    .charAt(0)
+    .toUpperCase()
+    +
+    value.slice(1);
+
+}
+
+
+function roundNumber(
+  number
+) {
+
+  return Math.round(
+    number * 100
+  ) / 100;
+
+}
+
+
+function cleanBrokenRelationships() {
+
+  const ids =
+    new Set(
+      characters.map(
+        character =>
+          character.id
+      )
+    );
+
+
+  characters.forEach(
+    character => {
+
+      if (
+        !ids.has(
+          character.motherId
+        )
+      ) {
+        character.motherId =
+          null;
+      }
+
+
+      if (
+        !ids.has(
+          character.fatherId
+        )
+      ) {
+        character.fatherId =
+          null;
+      }
+
+
+      character.spouseIds =
+        character.spouseIds.filter(
+          id =>
+            ids.has(id)
+        );
+
+
+      character.loverIds =
+        character.loverIds.filter(
+          id =>
+            ids.has(id)
+        );
+
+    }
+  );
+
+}
+
+
+function showToast(
+  message
+) {
+
+  clearTimeout(
+    toastTimer
+  );
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.remove(
+    "hidden"
+  );
+
+
+  toastTimer =
+    setTimeout(
+      function() {
+
+        toast.classList.add(
+          "hidden"
+        );
+
+      },
+      2200
+    );
+
+}
+
+
+function focusCharacter(
+  id
+) {
+
+  const position =
+    lastLayout
+      ? lastLayout.positions.get(id)
+      : null;
+
+
+  if (position) {
+
+    const rect =
+      treeCanvas.getBoundingClientRect();
+
+
+    zoom =
+      Math.max(
+        0.9,
+        Math.min(
+          zoom,
+          1.15
+        )
+      );
+
+
+    viewX =
+      rect.width / 2 -
+      position.x * zoom;
+
+
+    viewY =
+      rect.height / 2 -
+      position.y * zoom;
+
+
+    applyViewTransform();
 
   }
-);
 
 
-/* START */
+  setTimeout(
+    function() {
+
+      openProfile(id);
+
+    },
+    180
+  );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+setupCharacterColorEditors();
 
 cleanBrokenRelationships();
 
-cleanInvalidVantage();
+saveCharacters();
+
+saveLibraries();
 
 renderTree();
 
@@ -6233,5 +6946,5 @@ applyViewTransform();
 
 setTimeout(
   centerTree,
-  120
+  100
 );
