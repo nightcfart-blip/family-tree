@@ -2,10 +2,8 @@
   --bg: #0d0c0b;
   --panel: #181613;
   --panel-light: #211e1a;
-
   --ivory: #eee8de;
   --ivory-soft: #c9c0b4;
-
   --muted: #8e8579;
   --gold: #b89a63;
 
@@ -39,12 +37,12 @@ body {
 
 
 body {
-  font-family: var(--sans);
+  overflow: hidden;
 
   background: var(--bg);
   color: var(--ivory);
 
-  overflow: hidden;
+  font-family: var(--sans);
 }
 
 
@@ -56,11 +54,6 @@ select {
 }
 
 
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-
 input,
 textarea,
 select {
@@ -68,12 +61,15 @@ select {
 }
 
 
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
 .hidden {
   display: none !important;
 }
 
-
-/* APP */
 
 .app {
   width: 100vw;
@@ -85,9 +81,9 @@ select {
   background:
     radial-gradient(
       circle at 50% 18%,
-      #1a1713 0%,
+      #1a1713,
       #100f0d 47%,
-      #0b0a09 100%
+      #0b0a09
     );
 }
 
@@ -106,7 +102,7 @@ select {
 }
 
 
-/* TOP */
+/* HEADER */
 
 .topbar {
   min-height: 86px;
@@ -177,8 +173,6 @@ select {
   justify-content: center;
 
   gap: 6px;
-
-  padding: 0 13px;
 
   border: 0;
 
@@ -268,12 +262,12 @@ select {
 
 
 .tree-line {
-  fill: none;
-
   stroke:
     rgba(218,200,169,0.34);
 
   stroke-width: 2;
+
+  fill: none;
 }
 
 
@@ -368,8 +362,7 @@ select {
 }
 
 
-.vantage-node
-.character-circle {
+.vantage-node .character-circle {
   border-color: #d5b777;
 
   box-shadow:
@@ -378,16 +371,13 @@ select {
 }
 
 
-.zoomed-far
-.character-name,
-.zoomed-far
-.character-years {
+.zoomed-far .character-name,
+.zoomed-far .character-years {
   opacity: 0;
 }
 
 
-.zoomed-very-far
-.character-circle {
+.zoomed-very-far .character-circle {
   width: 50px;
   height: 50px;
 }
@@ -446,7 +436,7 @@ select {
 }
 
 
-/* CANVAS CONTROLS */
+/* TREE CONTROLS */
 
 .canvas-controls {
   position: absolute;
@@ -487,6 +477,7 @@ select {
 
 .center-button {
   font-size: 12px;
+
   font-weight: 700;
 }
 
@@ -558,7 +549,7 @@ button:active {
 }
 
 
-/* BACKDROP */
+/* OVERLAYS */
 
 .backdrop {
   position: fixed;
@@ -574,8 +565,6 @@ button:active {
   z-index: 100;
 }
 
-
-/* FLOATING */
 
 .floating-panel {
   position: fixed;
@@ -904,6 +893,62 @@ button:active {
 }
 
 
+.model-summary {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+
+.model-summary div {
+  padding: 12px 6px;
+
+  border:
+    1px solid rgba(184,154,99,0.11);
+
+  border-radius: 12px;
+
+  background:
+    rgba(184,154,99,0.035);
+
+  text-align: center;
+}
+
+
+.model-summary strong {
+  display: block;
+
+  color: #d4bc8e;
+
+  font-family: var(--serif);
+
+  font-size: 20px;
+}
+
+
+.model-summary span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  text-transform: uppercase;
+}
+
+
+.genetics-model-description {
+  margin-top: 12px;
+}
+
+
 /* LIBRARY */
 
 .library-list {
@@ -939,7 +984,6 @@ button:active {
 
 .library-card-header {
   display: flex;
-
   align-items: center;
   justify-content: space-between;
 
@@ -980,8 +1024,23 @@ button:active {
 }
 
 
+.library-info {
+  margin-top: 10px;
+
+  color: #aaa095;
+
+  font-family: var(--serif);
+
+  font-size: 13px;
+
+  line-height: 1.55;
+
+  white-space: pre-wrap;
+}
+
+
 .library-summary {
-  margin-top: 9px;
+  margin-top: 10px;
 
   color: var(--muted);
 
@@ -991,14 +1050,15 @@ button:active {
 }
 
 
-/* DISTRIBUTION */
+/* DISTRIBUTIONS */
 
 .library-editor-panel {
   max-height: 96dvh;
 }
 
 
-.distribution-editor {
+.distribution-editor,
+.ancestry-editor-rows {
   display: grid;
 
   gap: 8px;
@@ -1064,9 +1124,8 @@ button:active {
 
 
 .add-distribution-button {
-  min-height: 43px;
-
   width: 100%;
+  min-height: 43px;
 
   border:
     1px dashed rgba(184,154,99,0.24);
@@ -1085,11 +1144,11 @@ button:active {
 .distribution-total {
   margin-top: 7px;
 
-  text-align: right;
-
   color: var(--muted);
 
   font-size: 11px;
+
+  text-align: right;
 }
 
 
@@ -1103,7 +1162,7 @@ button:active {
 }
 
 
-/* BOTTOM PANEL */
+/* BOTTOM SHEETS */
 
 .bottom-panel {
   position: fixed;
@@ -1295,7 +1354,6 @@ button:active {
   color: #9b8768;
 
   font-size: 10px;
-
   font-weight: 700;
 
   letter-spacing: 0.16em;
@@ -1309,7 +1367,7 @@ button:active {
 }
 
 
-/* ANCESTRY EDITOR */
+/* ANCESTRY */
 
 .ancestry-mode-card {
   padding: 15px;
@@ -1336,8 +1394,7 @@ button:active {
 
 
 .ancestry-mode-card > p {
-  margin:
-    6px 0 0;
+  margin: 6px 0 0;
 
   color: var(--muted);
 
@@ -1370,8 +1427,6 @@ button:active {
 .ancestry-override-row input {
   width: 20px;
   height: 20px;
-
-  flex-shrink: 0;
 }
 
 
@@ -1405,7 +1460,6 @@ button:active {
   color: #887b6e;
 
   font-size: 9px;
-
   font-weight: 700;
 
   letter-spacing: 0.1em;
@@ -1437,8 +1491,7 @@ button:active {
 
 
 .ancestry-editor-section h3 {
-  margin:
-    0 0 5px;
+  margin: 0 0 10px;
 
   font-family: var(--serif);
 
@@ -1447,18 +1500,6 @@ button:active {
   font-weight: 500;
 }
 
-
-.ancestry-editor-rows {
-  display: grid;
-
-  gap: 8px;
-
-  margin:
-    12px 0 9px;
-}
-
-
-/* ANCESTRY PROFILE */
 
 .ancestry-profile-list {
   display: grid;
@@ -1487,8 +1528,6 @@ button:active {
   font-family: var(--serif);
 
   font-size: 14px;
-
-  line-height: 1.3;
 }
 
 
@@ -1496,8 +1535,6 @@ button:active {
   color: #b9a47f;
 
   font-size: 11px;
-
-  font-weight: 650;
 
   white-space: nowrap;
 }
@@ -1509,14 +1546,7 @@ button:active {
 }
 
 
-.ancestry-empty {
-  color: var(--muted);
-
-  font-size: 12px;
-}
-
-
-/* APPEARANCE */
+/* APPEARANCE EDITOR */
 
 .appearance-preset {
   margin-bottom: 24px;
@@ -1591,7 +1621,7 @@ button:active {
 }
 
 
-/* PORTRAIT */
+/* PORTRAITS */
 
 .portrait-editor {
   display: grid;
@@ -1687,9 +1717,9 @@ button:active {
   display: flex;
   flex-direction: column;
 
-  background: #100f0d;
-
   overflow: hidden;
+
+  background: #100f0d;
 
   z-index: 120;
 }
@@ -1744,10 +1774,10 @@ button:active {
 
   overflow: hidden;
 
-  border-radius: 50%;
-
   border:
     2px solid rgba(215,191,150,0.62);
+
+  border-radius: 50%;
 
   background: #211e1a;
 
@@ -1782,7 +1812,6 @@ button:active {
   font-family: var(--serif);
 
   font-size: 31px;
-
   font-weight: 500;
 
   line-height: 1.05;
@@ -1818,8 +1847,6 @@ button:active {
 
 
 .profile-dashboard {
-  padding: 14px;
-
   display: grid;
 
   grid-template-columns:
@@ -1831,10 +1858,13 @@ button:active {
     "family race"
     "family species"
     "family feature"
+    "genetics genetics"
     "achievements achievements"
     "life life";
 
   gap: 12px;
+
+  padding: 14px;
 }
 
 
@@ -1862,9 +1892,9 @@ button:active {
 
   font-size: 9px;
 
-  text-transform: uppercase;
-
   letter-spacing: 0.13em;
+
+  text-transform: uppercase;
 }
 
 
@@ -1921,6 +1951,11 @@ button:active {
   grid-area: feature;
 
   min-height: 240px;
+}
+
+
+.genetics-box {
+  grid-area: genetics;
 }
 
 
@@ -1982,6 +2017,127 @@ button:active {
 }
 
 
+/* GENETIC PROBABILITIES */
+
+.genetics-profile-note {
+  margin:
+    -2px 0 14px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+
+.genetic-trait-card {
+  margin-top: 10px;
+
+  padding: 13px;
+
+  border:
+    1px solid rgba(184,154,99,0.09);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,0.018);
+}
+
+
+.genetic-trait-heading {
+  margin-bottom: 11px;
+
+  color: #c7ab79;
+
+  font-family: var(--serif);
+
+  font-size: 18px;
+}
+
+
+.probability-list {
+  display: grid;
+
+  gap: 7px;
+}
+
+
+.probability-row {
+  display: grid;
+
+  grid-template-columns:
+    25px 1fr auto;
+
+  gap: 9px;
+
+  align-items: center;
+}
+
+
+.probability-swatch {
+  width: 25px;
+  height: 25px;
+
+  border:
+    1px solid rgba(255,255,255,0.14);
+
+  border-radius: 50%;
+}
+
+
+.probability-name {
+  min-width: 0;
+
+  color: #ddd4c9;
+
+  font-family: var(--serif);
+
+  font-size: 13px;
+}
+
+
+.probability-percent {
+  color: #b8a177;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+.probability-actual {
+  color: #eee2c9;
+}
+
+
+.probability-actual::after {
+  content: "  • actual";
+
+  color: #8d7856;
+
+  font-size: 8px;
+
+  font-family: var(--sans);
+
+  text-transform: uppercase;
+}
+
+
+.probability-empty {
+  color: var(--muted);
+
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+
+/* FAMILY */
+
 .vantage-relation {
   margin-bottom: 17px;
 
@@ -2009,9 +2165,9 @@ button:active {
 
 
 .vantage-relation-text {
-  font-family: var(--serif);
-
   color: #dac5a3;
+
+  font-family: var(--serif);
 }
 
 
@@ -2068,6 +2224,8 @@ button:active {
   white-space: pre-wrap;
 }
 
+
+/* PROFILE FOOTER */
 
 .profile-footer {
   position: absolute;
@@ -2149,9 +2307,9 @@ button:active {
 
 
 .confirm-symbol {
-  font-size: 25px;
-
   color: var(--gold);
+
+  font-size: 25px;
 }
 
 
