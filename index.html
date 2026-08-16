@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta name="theme-color" content="#111111">
+  <meta name="theme-color" content="#0d0c0b">
 
   <title>Fantasy Family Tree</title>
 
@@ -26,7 +26,6 @@
         <h1>Family Tree</h1>
       </div>
 
-
       <div class="topbar-actions">
 
         <button
@@ -35,7 +34,10 @@
           type="button"
           aria-label="Search"
         >
-          ⌕
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6"></circle>
+            <path d="M16 16l4 4"></path>
+          </svg>
         </button>
 
         <button
@@ -44,7 +46,14 @@
           type="button"
           aria-label="World settings"
         >
-          ◉
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+            <path d="M12 4v3"></path>
+            <path d="M12 17v3"></path>
+            <path d="M4 12h3"></path>
+            <path d="M17 12h3"></path>
+          </svg>
         </button>
 
         <button
@@ -85,14 +94,16 @@
 
       <div id="emptyState" class="empty-state">
 
-        <div class="empty-symbol">
-          ✦
-        </div>
+        <div class="empty-symbol">✦</div>
+
+        <p class="empty-kicker">
+          The Archive Awaits
+        </p>
 
         <h2>Your tree is empty</h2>
 
         <p>
-          Add your first character to begin building your family.
+          Add your first character to begin recording the lineage.
         </p>
 
         <button
@@ -112,6 +123,7 @@
           id="zoomOutButton"
           class="canvas-control-button"
           type="button"
+          aria-label="Zoom out"
         >
           −
         </button>
@@ -128,6 +140,7 @@
           id="zoomInButton"
           class="canvas-control-button"
           type="button"
+          aria-label="Zoom in"
         >
           +
         </button>
@@ -164,13 +177,14 @@
 
       <div>
         <p class="eyebrow">Find Person</p>
-        <h2>Search</h2>
+        <h2>Search Archive</h2>
       </div>
 
       <button
         id="closeSearchButton"
         class="icon-button"
         type="button"
+        aria-label="Close"
       >
         ×
       </button>
@@ -198,7 +212,7 @@
 
 
 
-  <!-- WORLD / BACKUP / VANTAGE -->
+  <!-- WORLD -->
 
   <div
     id="worldBackdrop"
@@ -213,7 +227,7 @@
     <div class="floating-header">
 
       <div>
-        <p class="eyebrow">World Settings</p>
+        <p class="eyebrow">Archive Controls</p>
         <h2>Your World</h2>
       </div>
 
@@ -221,6 +235,7 @@
         id="closeWorldButton"
         class="icon-button"
         type="button"
+        aria-label="Close"
       >
         ×
       </button>
@@ -230,6 +245,20 @@
 
     <div class="floating-body world-body">
 
+      <div class="world-stats">
+
+        <div class="world-stat">
+          <span>Characters</span>
+          <strong id="characterCount">0</strong>
+        </div>
+
+        <div class="world-stat">
+          <span>Vantage</span>
+          <strong id="worldVantageName">None</strong>
+        </div>
+
+      </div>
+
 
       <section class="world-section">
 
@@ -238,7 +267,7 @@
         </p>
 
         <p class="world-description">
-          Choose the character whose point of view should be used when calculating family relationships.
+          Choose whose perspective is used when calculating every character's relation.
         </p>
 
         <select
@@ -261,7 +290,7 @@
         </p>
 
         <p class="world-description">
-          Export saves your characters, relationships, colors, writing, and vantage point into one backup file.
+          Export the entire archive into one file, or restore a previous world.
         </p>
 
         <button
@@ -312,7 +341,7 @@
     <div class="panel-header">
 
       <div>
-        <p class="eyebrow">New Person</p>
+        <p class="eyebrow">New Record</p>
         <h2>Add Character</h2>
       </div>
 
@@ -356,32 +385,16 @@
           <input id="familyName" type="text" required>
         </label>
 
-
         <div class="field-row">
 
           <label class="field">
-
             <span>Birth Year</span>
-
-            <input
-              id="birthYear"
-              type="text"
-              inputmode="numeric"
-            >
-
+            <input id="birthYear" type="text" inputmode="numeric">
           </label>
 
-
           <label class="field">
-
             <span>Death Year</span>
-
-            <input
-              id="deathYear"
-              type="text"
-              inputmode="numeric"
-            >
-
+            <input id="deathYear" type="text" inputmode="numeric">
           </label>
 
         </div>
@@ -429,7 +442,7 @@
     <div class="profile-topbar">
 
       <p class="eyebrow">
-        Character Profile
+        Character Record
       </p>
 
       <button
@@ -443,268 +456,247 @@
     </div>
 
 
-    <div class="profile-dashboard">
+    <div class="profile-scroll">
 
-
-      <section class="profile-box title-box">
-
-        <span class="box-label">
-          Title
-        </span>
+      <div class="profile-hero">
 
         <div
-          id="profileTitle"
-          class="box-value big-value"
-        ></div>
-
-      </section>
-
-
-      <section class="profile-box name-box">
-
-        <span class="box-label">
-          Name
-        </span>
-
-        <div
-          id="profileFullName"
-          class="profile-main-name"
-        ></div>
-
-        <div
-          id="profileYearsTop"
-          class="profile-main-years"
-        ></div>
-
-      </section>
-
-
-      <section class="profile-box aliases-box">
-
-        <span class="box-label">
-          Aliases
-        </span>
-
-        <div
-          id="profileAliases"
-          class="box-value"
-        ></div>
-
-      </section>
-
-
-      <section class="colors-box">
-
-        <div class="color-profile-item">
-
-          <div
-            id="hairColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
-          <span>Hair Color</span>
-
-          <small
-            id="profileHairColor"
-          ></small>
-
-        </div>
-
-
-        <div class="color-profile-item">
-
-          <div
-            id="eyeColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
-          <span>Eye Color</span>
-
-          <small
-            id="profileEyeColor"
-          ></small>
-
-        </div>
-
-
-        <div class="color-profile-item">
-
-          <div
-            id="skinColorSwatch"
-            class="large-color-swatch"
-          ></div>
-
-          <span>Skin Color</span>
-
-          <small
-            id="profileSkinColor"
-          ></small>
-
-        </div>
-
-      </section>
-
-
-
-      <!-- FAMILY -->
-
-      <section class="profile-box family-box">
-
-        <span class="box-label">
-          Family
-        </span>
-
-
-        <div
-          id="vantageRelation"
-          class="vantage-relation hidden"
+          id="profilePortrait"
+          class="profile-portrait"
         >
+          <span id="profilePortraitInitial"></span>
+        </div>
 
-          <span
-            id="vantageRelationLabel"
-            class="vantage-relation-label"
-          ></span>
+        <div class="profile-hero-text">
 
-          <strong
-            id="vantageRelationText"
-            class="vantage-relation-text"
-          ></strong>
+          <p
+            id="profileTitleHero"
+            class="profile-hero-title"
+          ></p>
+
+          <h2
+            id="profileFullName"
+            class="profile-main-name"
+          ></h2>
+
+          <p
+            id="profileYearsTop"
+            class="profile-main-years"
+          ></p>
+
+          <button
+            id="setVantageButton"
+            class="vantage-profile-button"
+            type="button"
+          >
+            Set as Vantage
+          </button>
 
         </div>
 
+      </div>
 
-        <div class="family-list">
 
-          <div class="family-group">
+      <div class="profile-dashboard">
 
-            <span>Mother</span>
+        <section class="profile-box title-box">
+
+          <span class="box-label">
+            Title
+          </span>
+
+          <div
+            id="profileTitle"
+            class="box-value big-value"
+          ></div>
+
+        </section>
+
+
+        <section class="profile-box aliases-box">
+
+          <span class="box-label">
+            Aliases
+          </span>
+
+          <div
+            id="profileAliases"
+            class="box-value"
+          ></div>
+
+        </section>
+
+
+        <section class="colors-box">
+
+          <div class="color-profile-item">
 
             <div
-              id="profileMother"
-              class="relationship-values"
+              id="hairColorSwatch"
+              class="large-color-swatch"
             ></div>
+
+            <span>Hair</span>
+
+            <small
+              id="profileHairColor"
+            ></small>
 
           </div>
 
 
-          <div class="family-group">
-
-            <span>Father</span>
+          <div class="color-profile-item">
 
             <div
-              id="profileFather"
-              class="relationship-values"
+              id="eyeColorSwatch"
+              class="large-color-swatch"
             ></div>
+
+            <span>Eyes</span>
+
+            <small
+              id="profileEyeColor"
+            ></small>
 
           </div>
 
 
-          <div class="family-group">
-
-            <span>Siblings</span>
+          <div class="color-profile-item">
 
             <div
-              id="profileSiblings"
-              class="relationship-values"
+              id="skinColorSwatch"
+              class="large-color-swatch"
             ></div>
+
+            <span>Skin</span>
+
+            <small
+              id="profileSkinColor"
+            ></small>
+
+          </div>
+
+        </section>
+
+
+        <section class="profile-box family-box">
+
+          <span class="box-label">
+            Family
+          </span>
+
+
+          <div
+            id="vantageRelation"
+            class="vantage-relation hidden"
+          >
+
+            <span
+              id="vantageRelationLabel"
+              class="vantage-relation-label"
+            ></span>
+
+            <strong
+              id="vantageRelationText"
+              class="vantage-relation-text"
+            ></strong>
 
           </div>
 
 
-          <div class="family-group">
+          <div class="family-list">
 
-            <span>Spouses</span>
+            <div class="family-group">
+              <span>Mother</span>
+              <div id="profileMother" class="relationship-values"></div>
+            </div>
 
-            <div
-              id="profileSpouses"
-              class="relationship-values"
-            ></div>
+            <div class="family-group">
+              <span>Father</span>
+              <div id="profileFather" class="relationship-values"></div>
+            </div>
+
+            <div class="family-group">
+              <span>Siblings</span>
+              <div id="profileSiblings" class="relationship-values"></div>
+            </div>
+
+            <div class="family-group">
+              <span>Spouses</span>
+              <div id="profileSpouses" class="relationship-values"></div>
+            </div>
+
+            <div class="family-group">
+              <span>Lovers</span>
+              <div id="profileLovers" class="relationship-values"></div>
+            </div>
+
+            <div class="family-group">
+              <span>Children</span>
+              <div id="profileChildren" class="relationship-values"></div>
+            </div>
 
           </div>
 
-
-          <div class="family-group">
-
-            <span>Lovers</span>
-
-            <div
-              id="profileLovers"
-              class="relationship-values"
-            ></div>
-
-          </div>
+        </section>
 
 
-          <div class="family-group">
+        <section class="profile-box race-box">
 
-            <span>Children</span>
+          <span class="box-label">
+            Race
+          </span>
 
-            <div
-              id="profileChildren"
-              class="relationship-values"
-            ></div>
+          <div
+            id="profileRace"
+            class="box-value centered-value"
+          ></div>
 
-          </div>
-
-        </div>
-
-      </section>
+        </section>
 
 
-      <section class="profile-box race-box">
+        <section class="profile-box feature-box">
 
-        <span class="box-label">
-          Race
-        </span>
+          <span class="box-label">
+            Notable Physical Feature
+          </span>
 
-        <div
-          id="profileRace"
-          class="box-value centered-value"
-        ></div>
+          <div
+            id="profilePhysicalFeature"
+            class="box-value"
+          ></div>
 
-      </section>
-
-
-      <section class="profile-box feature-box">
-
-        <span class="box-label">
-          Notable Physical Feature
-        </span>
-
-        <div
-          id="profilePhysicalFeature"
-          class="box-value"
-        ></div>
-
-      </section>
+        </section>
 
 
-      <section class="profile-box achievements-box">
+        <section class="profile-box achievements-box">
 
-        <span class="box-label">
-          Noteworthy Achievements
-        </span>
+          <span class="box-label">
+            Noteworthy Achievements
+          </span>
 
-        <div
-          id="profileAchievements"
-          class="box-value long-value"
-        ></div>
+          <div
+            id="profileAchievements"
+            class="box-value long-value"
+          ></div>
 
-      </section>
+        </section>
 
 
-      <section class="profile-box life-box">
+        <section class="profile-box life-box">
 
-        <span class="box-label">
-          Life
-        </span>
+          <span class="box-label">
+            Life
+          </span>
 
-        <div
-          id="profileLife"
-          class="life-text"
-        ></div>
+          <div
+            id="profileLife"
+            class="life-text"
+          ></div>
 
-      </section>
+        </section>
+
+      </div>
 
     </div>
 
@@ -758,10 +750,7 @@
     <div class="panel-header">
 
       <div>
-        <p class="eyebrow">
-          Character Editor
-        </p>
-
+        <p class="eyebrow">Character Editor</p>
         <h2>Edit Character</h2>
       </div>
 
@@ -779,6 +768,48 @@
     <form id="editCharacterForm">
 
       <div class="form-body">
+
+
+        <div class="editor-heading">
+          Portrait
+        </div>
+
+
+        <div class="portrait-editor">
+
+          <div
+            id="editPortraitPreview"
+            class="portrait-preview"
+          >
+            <span id="editPortraitInitial"></span>
+          </div>
+
+
+          <div class="portrait-actions">
+
+            <label class="portrait-upload-button">
+
+              Choose Portrait
+
+              <input
+                id="editPortraitFile"
+                type="file"
+                accept="image/*"
+              >
+
+            </label>
+
+            <button
+              id="removePortraitButton"
+              class="portrait-remove-button"
+              type="button"
+            >
+              Remove Portrait
+            </button>
+
+          </div>
+
+        </div>
 
 
         <div class="editor-heading">
@@ -819,28 +850,13 @@
         <div class="field-row">
 
           <label class="field">
-
             <span>Birth Year</span>
-
-            <input
-              id="editBirthYear"
-              type="text"
-              inputmode="numeric"
-            >
-
+            <input id="editBirthYear" type="text" inputmode="numeric">
           </label>
 
-
           <label class="field">
-
             <span>Death Year</span>
-
-            <input
-              id="editDeathYear"
-              type="text"
-              inputmode="numeric"
-            >
-
+            <input id="editDeathYear" type="text" inputmode="numeric">
           </label>
 
         </div>
@@ -852,29 +868,18 @@
 
 
         <label class="field">
-
           <span>Mother</span>
-
-          <select
-            id="editMother"
-          ></select>
-
+          <select id="editMother"></select>
         </label>
 
 
         <label class="field">
-
           <span>Father</span>
-
-          <select
-            id="editFather"
-          ></select>
-
+          <select id="editFather"></select>
         </label>
 
 
         <label class="field">
-
           <span>Spouses</span>
 
           <select
@@ -887,7 +892,6 @@
 
 
         <label class="field">
-
           <span>Lovers</span>
 
           <select
@@ -914,7 +918,7 @@
 
           <label class="color-editor-field">
 
-            <span>Hair Color</span>
+            <span>Hair</span>
 
             <input
               id="editHairColor"
@@ -931,7 +935,7 @@
 
           <label class="color-editor-field">
 
-            <span>Eye Color</span>
+            <span>Eyes</span>
 
             <input
               id="editEyeColor"
@@ -948,7 +952,7 @@
 
           <label class="color-editor-field">
 
-            <span>Skin Color</span>
+            <span>Skin</span>
 
             <input
               id="editSkinColor"
@@ -983,7 +987,6 @@
           Noteworthy Achievements
         </div>
 
-
         <label class="field">
 
           <textarea
@@ -997,7 +1000,6 @@
         <div class="editor-heading">
           Life
         </div>
-
 
         <label class="field">
 
@@ -1034,6 +1036,64 @@
     </form>
 
   </section>
+
+
+
+  <!-- CONFIRMATION SHEET -->
+
+  <div
+    id="confirmBackdrop"
+    class="backdrop hidden"
+  ></div>
+
+  <section
+    id="confirmPanel"
+    class="confirm-panel hidden"
+  >
+
+    <div class="confirm-symbol">
+      ✦
+    </div>
+
+    <p class="eyebrow">
+      Please Confirm
+    </p>
+
+    <h2 id="confirmTitle"></h2>
+
+    <p id="confirmMessage"></p>
+
+
+    <div class="confirm-actions">
+
+      <button
+        id="confirmCancelButton"
+        class="secondary-button"
+        type="button"
+      >
+        Cancel
+      </button>
+
+      <button
+        id="confirmAcceptButton"
+        class="danger-confirm-button"
+        type="button"
+      >
+        Confirm
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- TOAST -->
+
+  <div
+    id="toast"
+    class="toast hidden"
+  ></div>
 
 
   <script src="app.js"></script>
