@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -8,23 +10,47 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta name="theme-color" content="#0d0c0b">
+  <meta
+    name="theme-color"
+    content="#0d0c0b"
+  >
 
-  <title>Fantasy Family Tree</title>
+  <title>
+    Fantasy Family Tree
+  </title>
 
-  <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
 </head>
+
 
 <body>
 
+
 <div class="app">
+
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
 
   <header class="topbar">
 
     <div class="topbar-title">
-      <p class="eyebrow">Private Archive</p>
-      <h1>Family Tree</h1>
+
+      <p class="eyebrow">
+        Private Archive
+      </p>
+
+      <h1>
+        Family Tree
+      </h1>
+
     </div>
+
 
     <div class="topbar-actions">
 
@@ -32,25 +58,46 @@
         id="searchButton"
         class="top-icon-button"
         type="button"
+        aria-label="Search"
       >
         ⌕
       </button>
+
+
+      <button
+        id="arrangeModeButton"
+        class="top-icon-button"
+        type="button"
+        aria-label="Arrange tree"
+      >
+        ✥
+      </button>
+
 
       <button
         id="worldButton"
         class="top-icon-button"
         type="button"
+        aria-label="World settings"
       >
         ◉
       </button>
+
 
       <button
         id="addCharacterButton"
         class="add-button"
         type="button"
       >
-        <span class="plus">+</span>
-        <span>Add</span>
+
+        <span class="plus">
+          +
+        </span>
+
+        <span>
+          Add
+        </span>
+
       </button>
 
     </div>
@@ -58,32 +105,71 @@
   </header>
 
 
-  <main id="treeCanvas" class="tree-canvas">
 
-    <div id="treeViewport" class="tree-viewport">
+  <!-- =====================================================
+       TREE
+  ====================================================== -->
+
+  <main
+    id="treeCanvas"
+    class="tree-canvas"
+  >
+
+
+    <div
+      id="treeViewport"
+      class="tree-viewport"
+    >
 
       <div class="tree-world">
+
 
         <svg
           id="treeLines"
           class="tree-lines"
-        ></svg>
+          viewBox="0 0 6000 6000"
+          preserveAspectRatio="none"
+        >
+
+          <g
+            id="relationshipLineLayer"
+            class="relationship-line-layer"
+          ></g>
+
+          <g
+            id="relationshipMarkerLayer"
+            class="relationship-marker-layer"
+          ></g>
+
+        </svg>
+
 
         <div
           id="characterLayer"
           class="character-layer"
         ></div>
 
+
       </div>
 
     </div>
 
 
-    <div id="emptyState" class="empty-state">
 
-      <div class="empty-symbol">✦</div>
+    <!-- EMPTY STATE -->
 
-      <h2>Your tree is empty</h2>
+    <div
+      id="emptyState"
+      class="empty-state"
+    >
+
+      <div class="empty-symbol">
+        ✦
+      </div>
+
+      <h2>
+        Your tree is empty
+      </h2>
 
       <p>
         Add your first character to begin recording the lineage.
@@ -99,6 +185,54 @@
 
     </div>
 
+
+
+    <!-- ARRANGE MODE BAR -->
+
+    <div
+      id="arrangeToolbar"
+      class="arrange-toolbar hidden"
+    >
+
+      <div class="arrange-toolbar-text">
+
+        <span class="arrange-toolbar-title">
+          Arrange Tree
+        </span>
+
+        <small>
+          Drag characters. Positions snap to the grid.
+        </small>
+
+      </div>
+
+
+      <div class="arrange-toolbar-actions">
+
+        <button
+          id="resetLayoutButton"
+          class="arrange-toolbar-button"
+          type="button"
+        >
+          Reset Layout
+        </button>
+
+
+        <button
+          id="finishArrangeButton"
+          class="arrange-toolbar-button arrange-done-button"
+          type="button"
+        >
+          Done
+        </button>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- CANVAS CONTROLS -->
 
     <div class="canvas-controls">
 
@@ -128,28 +262,51 @@
 
     </div>
 
-    <div id="zoomIndicator" class="zoom-indicator">
+
+    <div
+      id="zoomIndicator"
+      class="zoom-indicator"
+    >
       100%
     </div>
 
+
   </main>
+
 
 </div>
 
 
 
-<!-- SEARCH -->
+<!-- =======================================================
+     SEARCH
+======================================================= -->
 
-<div id="searchBackdrop" class="backdrop hidden"></div>
+<div
+  id="searchBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="searchPanel" class="floating-panel hidden">
+
+<section
+  id="searchPanel"
+  class="floating-panel hidden"
+>
 
   <div class="floating-header">
 
     <div>
-      <p class="eyebrow">Find Person</p>
-      <h2>Search Archive</h2>
+
+      <p class="eyebrow">
+        Find Person
+      </p>
+
+      <h2>
+        Search Archive
+      </h2>
+
     </div>
+
 
     <button
       id="closeSearchButton"
@@ -160,6 +317,7 @@
     </button>
 
   </div>
+
 
   <div class="floating-body">
 
@@ -181,18 +339,35 @@
 
 
 
-<!-- WORLD -->
+<!-- =======================================================
+     WORLD
+======================================================= -->
 
-<div id="worldBackdrop" class="backdrop hidden"></div>
+<div
+  id="worldBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="worldPanel" class="floating-panel hidden">
+
+<section
+  id="worldPanel"
+  class="floating-panel hidden"
+>
 
   <div class="floating-header">
 
     <div>
-      <p class="eyebrow">Archive Controls</p>
-      <h2>Your World</h2>
+
+      <p class="eyebrow">
+        Archive Controls
+      </p>
+
+      <h2>
+        Your World
+      </h2>
+
     </div>
+
 
     <button
       id="closeWorldButton"
@@ -207,20 +382,41 @@
 
   <div class="floating-body world-body">
 
+
+    <!-- WORLD STATS -->
+
     <div class="world-stats">
 
       <div class="world-stat">
-        <span>Characters</span>
-        <strong id="characterCount">0</strong>
+
+        <span>
+          Characters
+        </span>
+
+        <strong id="characterCount">
+          0
+        </strong>
+
       </div>
 
+
       <div class="world-stat">
-        <span>Vantage</span>
-        <strong id="worldVantageName">None</strong>
+
+        <span>
+          Vantage
+        </span>
+
+        <strong id="worldVantageName">
+          None
+        </strong>
+
       </div>
 
     </div>
 
+
+
+    <!-- VANTAGE -->
 
     <section class="world-section">
 
@@ -228,22 +424,254 @@
         Vantage Point
       </p>
 
+
       <select
         id="vantageSelect"
         class="world-select"
       ></select>
+
 
       <div
         id="vantageStatus"
         class="vantage-status"
       ></div>
 
+
       <p class="world-description">
-        The tree visually focuses around this character. Direct ancestors remain clear regardless of generation.
+        Direct ancestors remain fully clear regardless of generation. More distant side branches gradually recede.
       </p>
 
     </section>
 
+
+
+    <!-- TREE ARRANGEMENT -->
+
+    <section class="world-section">
+
+      <p class="world-label">
+        Tree Arrangement
+      </p>
+
+
+      <p class="world-description">
+        Automatically place the tree, then manually adjust characters on a snapping grid.
+      </p>
+
+
+      <button
+        id="enterArrangeModeButton"
+        class="world-action-button"
+        type="button"
+      >
+        Arrange Tree
+      </button>
+
+
+      <button
+        id="resetWorldLayoutButton"
+        class="world-action-button secondary-world-button"
+        type="button"
+      >
+        Reset All Positions
+      </button>
+
+    </section>
+
+
+
+    <!-- RELATIONSHIP LAYERS -->
+
+    <section class="world-section">
+
+      <p class="world-label">
+        Relationship Layers
+      </p>
+
+
+      <p class="world-description">
+        Temporarily simplify enormous trees by hiding connection types.
+      </p>
+
+
+      <label class="world-toggle-row">
+
+        <span>
+
+          <strong>
+            Parent & Child
+          </strong>
+
+          <small>
+            Genealogical branches
+          </small>
+
+        </span>
+
+        <input
+          id="showParentLinesToggle"
+          type="checkbox"
+          checked
+        >
+
+      </label>
+
+
+      <label class="world-toggle-row">
+
+        <span>
+
+          <strong>
+            Spouses
+          </strong>
+
+          <small>
+            Double bond lines
+          </small>
+
+        </span>
+
+        <input
+          id="showSpouseLinesToggle"
+          type="checkbox"
+          checked
+        >
+
+      </label>
+
+
+      <label class="world-toggle-row">
+
+        <span>
+
+          <strong>
+            Lovers
+          </strong>
+
+          <small>
+            Dashed relationship lines
+          </small>
+
+        </span>
+
+        <input
+          id="showLoverLinesToggle"
+          type="checkbox"
+          checked
+        >
+
+      </label>
+
+
+      <label class="world-toggle-row">
+
+        <span>
+
+          <strong>
+            Manual Siblings
+          </strong>
+
+          <small>
+            Sibling bonds without known parents
+          </small>
+
+        </span>
+
+        <input
+          id="showSiblingLinesToggle"
+          type="checkbox"
+          checked
+        >
+
+      </label>
+
+    </section>
+
+
+
+    <!-- LINE LEGEND -->
+
+    <section class="world-section">
+
+      <p class="world-label">
+        Connection Guide
+      </p>
+
+
+      <div class="relationship-legend">
+
+
+        <div class="relationship-legend-row">
+
+          <span class="legend-line parent-legend-line"></span>
+
+          <div>
+            <strong>
+              Parent / Child
+            </strong>
+            <small>
+              Single solid branch
+            </small>
+          </div>
+
+        </div>
+
+
+        <div class="relationship-legend-row">
+
+          <span class="legend-line spouse-legend-line"></span>
+
+          <div>
+            <strong>
+              Spouse
+            </strong>
+            <small>
+              Double union line
+            </small>
+          </div>
+
+        </div>
+
+
+        <div class="relationship-legend-row">
+
+          <span class="legend-line lover-legend-line"></span>
+
+          <div>
+            <strong>
+              Lover
+            </strong>
+            <small>
+              Dashed line
+            </small>
+          </div>
+
+        </div>
+
+
+        <div class="relationship-legend-row">
+
+          <span class="legend-line sibling-legend-line"></span>
+
+          <div>
+            <strong>
+              Manual Sibling
+            </strong>
+            <small>
+              Dotted sibling bond
+            </small>
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+
+    <!-- GENETICS LIBRARIES -->
 
     <section class="world-section">
 
@@ -251,9 +679,11 @@
         Genetics Libraries
       </p>
 
+
       <p class="world-description">
-        Create your world's Races and Species and define their genetic appearance tendencies.
+        New Races and Species begin with every available Hair, Eye and Skin color equally probable. You can then customize them.
       </p>
+
 
       <button
         id="manageRacesButton"
@@ -263,6 +693,7 @@
         Manage Races
       </button>
 
+
       <button
         id="manageSpeciesButton"
         class="world-action-button secondary-world-button"
@@ -271,15 +702,21 @@
         Manage Species
       </button>
 
+
       <div class="library-counts">
 
         <span>
-          <strong id="raceLibraryCount">0</strong>
+          <strong id="raceLibraryCount">
+            0
+          </strong>
           Races
         </span>
 
+
         <span>
-          <strong id="speciesLibraryCount">0</strong>
+          <strong id="speciesLibraryCount">
+            0
+          </strong>
           Species
         </span>
 
@@ -288,11 +725,15 @@
     </section>
 
 
+
+    <!-- GENETIC MODEL -->
+
     <section class="world-section">
 
       <p class="world-label">
         Genetic Model
       </p>
+
 
       <p class="world-description">
         Choose how strongly family, Race and Species influence appearance probabilities.
@@ -305,11 +746,15 @@
           Overall Influence
         </div>
 
+
         <label class="genetic-setting-row">
 
-          <span>Family</span>
+          <span>
+            Family
+          </span>
 
           <div>
+
             <input
               id="familyWeightInput"
               type="number"
@@ -319,7 +764,10 @@
               inputmode="decimal"
             >
 
-            <strong>%</strong>
+            <strong>
+              %
+            </strong>
+
           </div>
 
         </label>
@@ -327,9 +775,12 @@
 
         <label class="genetic-setting-row">
 
-          <span>Race</span>
+          <span>
+            Race
+          </span>
 
           <div>
+
             <input
               id="raceWeightInput"
               type="number"
@@ -339,7 +790,10 @@
               inputmode="decimal"
             >
 
-            <strong>%</strong>
+            <strong>
+              %
+            </strong>
+
           </div>
 
         </label>
@@ -347,9 +801,12 @@
 
         <label class="genetic-setting-row">
 
-          <span>Species</span>
+          <span>
+            Species
+          </span>
 
           <div>
+
             <input
               id="speciesWeightInput"
               type="number"
@@ -359,7 +816,10 @@
               inputmode="decimal"
             >
 
-            <strong>%</strong>
+            <strong>
+              %
+            </strong>
+
           </div>
 
         </label>
@@ -375,11 +835,13 @@
       </div>
 
 
+
       <div class="genetic-settings-group">
 
         <div class="genetic-settings-title">
           Parent Contribution
         </div>
+
 
         <p class="world-description">
           Controls how much of a parent's contribution comes from inherited possibilities versus the color they actually display.
@@ -388,9 +850,12 @@
 
         <label class="genetic-setting-row">
 
-          <span>Inherited Genetics</span>
+          <span>
+            Inherited Genetics
+          </span>
 
           <div>
+
             <input
               id="parentGeneticWeightInput"
               type="number"
@@ -400,7 +865,10 @@
               inputmode="decimal"
             >
 
-            <strong>%</strong>
+            <strong>
+              %
+            </strong>
+
           </div>
 
         </label>
@@ -408,9 +876,12 @@
 
         <label class="genetic-setting-row">
 
-          <span>Actual Appearance</span>
+          <span>
+            Actual Appearance
+          </span>
 
           <div>
+
             <input
               id="parentActualWeightInput"
               type="number"
@@ -420,7 +891,10 @@
               inputmode="decimal"
             >
 
-            <strong>%</strong>
+            <strong>
+              %
+            </strong>
+
           </div>
 
         </label>
@@ -447,11 +921,15 @@
     </section>
 
 
+
+    <!-- BACKUP -->
+
     <section class="world-section">
 
       <p class="world-label">
         Backup
       </p>
+
 
       <button
         id="exportWorldButton"
@@ -461,6 +939,7 @@
         Export World
       </button>
 
+
       <button
         id="importWorldButton"
         class="world-action-button secondary-world-button"
@@ -468,6 +947,7 @@
       >
         Import World
       </button>
+
 
       <input
         id="importWorldFile"
@@ -478,24 +958,42 @@
 
     </section>
 
+
   </div>
 
 </section>
 
 
 
-<!-- LIBRARY -->
+<!-- =======================================================
+     LIBRARY
+======================================================= -->
 
-<div id="libraryBackdrop" class="backdrop hidden"></div>
+<div
+  id="libraryBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="libraryPanel" class="floating-panel hidden">
+
+<section
+  id="libraryPanel"
+  class="floating-panel hidden"
+>
 
   <div class="floating-header">
 
     <div>
-      <p class="eyebrow">Genetics Library</p>
-      <h2 id="libraryPanelTitle">Races</h2>
+
+      <p class="eyebrow">
+        Genetics Library
+      </p>
+
+      <h2 id="libraryPanelTitle">
+        Races
+      </h2>
+
     </div>
+
 
     <button
       id="closeLibraryButton"
@@ -518,6 +1016,7 @@
       + Add
     </button>
 
+
     <div
       id="libraryList"
       class="library-list"
@@ -529,12 +1028,15 @@
 
 
 
-<!-- LIBRARY EDITOR -->
+<!-- =======================================================
+     LIBRARY EDITOR
+======================================================= -->
 
 <div
   id="libraryEditorBackdrop"
   class="backdrop hidden"
 ></div>
+
 
 <section
   id="libraryEditorPanel"
@@ -543,12 +1045,21 @@
 
   <div class="panel-handle"></div>
 
+
   <div class="panel-header">
 
     <div>
-      <p class="eyebrow">Genetics Library</p>
-      <h2 id="libraryEditorTitle">New Race</h2>
+
+      <p class="eyebrow">
+        Genetics Library
+      </p>
+
+      <h2 id="libraryEditorTitle">
+        New Race
+      </h2>
+
     </div>
+
 
     <button
       id="closeLibraryEditorButton"
@@ -563,34 +1074,92 @@
 
   <div class="form-body">
 
+
     <label class="field">
-      <span>Name *</span>
-      <input id="libraryNameInput" type="text">
+
+      <span>
+        Name *
+      </span>
+
+      <input
+        id="libraryNameInput"
+        type="text"
+      >
+
     </label>
 
 
     <label class="field">
-      <span>Additional Information</span>
+
+      <span>
+        Additional Information
+      </span>
 
       <textarea
         id="libraryInfoInput"
         rows="7"
       ></textarea>
+
     </label>
 
+
+
+    <div class="equal-probability-card">
+
+      <div>
+
+        <strong>
+          Equal Probability Baseline
+        </strong>
+
+        <p>
+          Fill Hair, Eyes and Skin with every preset at an equal probability.
+        </p>
+
+      </div>
+
+
+      <button
+        id="resetAllDistributionsEqualButton"
+        class="equal-probability-button"
+        type="button"
+      >
+        Reset All to Equal
+      </button>
+
+    </div>
+
+
+
+    <!-- HAIR DISTRIBUTION -->
 
     <div class="editor-heading">
       Base Hair Probabilities
     </div>
 
-    <p class="genetics-helper">
-      Optional. If used, percentages must total 100%.
-    </p>
+
+    <div class="distribution-heading-row">
+
+      <p class="genetics-helper">
+        Percentages must total 100%.
+      </p>
+
+      <button
+        id="setHairEqualButton"
+        class="mini-equal-button"
+        type="button"
+      >
+        Equalize
+      </button>
+
+    </div>
+
 
     <div
       id="hairDistributionEditor"
       class="distribution-editor"
     ></div>
+
 
     <button
       class="add-distribution-button"
@@ -600,6 +1169,7 @@
       + Add Hair Color
     </button>
 
+
     <div
       id="hairDistributionTotal"
       class="distribution-total"
@@ -608,18 +1178,36 @@
     </div>
 
 
+
+    <!-- EYE DISTRIBUTION -->
+
     <div class="editor-heading">
       Base Eye Probabilities
     </div>
 
-    <p class="genetics-helper">
-      Optional. If used, percentages must total 100%.
-    </p>
+
+    <div class="distribution-heading-row">
+
+      <p class="genetics-helper">
+        Percentages must total 100%.
+      </p>
+
+      <button
+        id="setEyeEqualButton"
+        class="mini-equal-button"
+        type="button"
+      >
+        Equalize
+      </button>
+
+    </div>
+
 
     <div
       id="eyeDistributionEditor"
       class="distribution-editor"
     ></div>
+
 
     <button
       class="add-distribution-button"
@@ -629,6 +1217,7 @@
       + Add Eye Color
     </button>
 
+
     <div
       id="eyeDistributionTotal"
       class="distribution-total"
@@ -637,18 +1226,36 @@
     </div>
 
 
+
+    <!-- SKIN DISTRIBUTION -->
+
     <div class="editor-heading">
       Base Skin Probabilities
     </div>
 
-    <p class="genetics-helper">
-      Optional. If used, percentages must total 100%.
-    </p>
+
+    <div class="distribution-heading-row">
+
+      <p class="genetics-helper">
+        Percentages must total 100%.
+      </p>
+
+      <button
+        id="setSkinEqualButton"
+        class="mini-equal-button"
+        type="button"
+      >
+        Equalize
+      </button>
+
+    </div>
+
 
     <div
       id="skinDistributionEditor"
       class="distribution-editor"
     ></div>
+
 
     <button
       class="add-distribution-button"
@@ -658,12 +1265,14 @@
       + Add Skin Color
     </button>
 
+
     <div
       id="skinDistributionTotal"
       class="distribution-total"
     >
       Total: 0%
     </div>
+
 
   </div>
 
@@ -677,6 +1286,7 @@
     >
       Cancel
     </button>
+
 
     <button
       id="saveLibraryItemButton"
@@ -692,20 +1302,38 @@
 
 
 
-<!-- ADD CHARACTER -->
+<!-- =======================================================
+     ADD CHARACTER
+======================================================= -->
 
-<div id="formBackdrop" class="backdrop hidden"></div>
+<div
+  id="formBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="characterFormPanel" class="bottom-panel hidden">
+
+<section
+  id="characterFormPanel"
+  class="bottom-panel hidden"
+>
 
   <div class="panel-handle"></div>
+
 
   <div class="panel-header">
 
     <div>
-      <p class="eyebrow">New Record</p>
-      <h2>Add Character</h2>
+
+      <p class="eyebrow">
+        New Record
+      </p>
+
+      <h2>
+        Add Character
+      </h2>
+
     </div>
+
 
     <button
       id="closeFormButton"
@@ -722,56 +1350,140 @@
 
     <div class="form-body">
 
-      <label class="field">
-        <span>Title</span>
-        <input id="title" type="text">
-      </label>
 
       <label class="field">
-        <span>Given Name *</span>
-        <input id="givenName" type="text" required>
+
+        <span>
+          Title
+        </span>
+
+        <input
+          id="title"
+          type="text"
+        >
+
       </label>
 
-      <label class="field">
-        <span>Aliases</span>
-        <input id="aliases" type="text">
-      </label>
 
       <label class="field">
-        <span>Maiden Name</span>
-        <input id="maidenName" type="text">
+
+        <span>
+          Given Name *
+        </span>
+
+        <input
+          id="givenName"
+          type="text"
+          required
+        >
+
       </label>
 
-      <label class="field">
-        <span>Family Name</span>
-        <input id="familyName" type="text">
-      </label>
 
       <label class="field">
-        <span>Gender</span>
+
+        <span>
+          Aliases
+        </span>
+
+        <input
+          id="aliases"
+          type="text"
+        >
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Maiden Name
+        </span>
+
+        <input
+          id="maidenName"
+          type="text"
+        >
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Family Name
+        </span>
+
+        <input
+          id="familyName"
+          type="text"
+        >
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Gender
+        </span>
 
         <select id="gender">
-          <option value="unknown">Unknown</option>
-          <option value="female">Female</option>
-          <option value="male">Male</option>
-          <option value="nonbinary">Nonbinary</option>
+
+          <option value="unknown">
+            Unknown
+          </option>
+
+          <option value="female">
+            Female
+          </option>
+
+          <option value="male">
+            Male
+          </option>
+
+          <option value="nonbinary">
+            Nonbinary
+          </option>
+
         </select>
+
       </label>
 
 
       <div class="field-row">
 
         <label class="field">
-          <span>Birth Year</span>
-          <input id="birthYear" type="text" inputmode="numeric">
+
+          <span>
+            Birth Year
+          </span>
+
+          <input
+            id="birthYear"
+            type="text"
+            inputmode="numeric"
+          >
+
         </label>
 
+
         <label class="field">
-          <span>Death Year</span>
-          <input id="deathYear" type="text" inputmode="numeric">
+
+          <span>
+            Death Year
+          </span>
+
+          <input
+            id="deathYear"
+            type="text"
+            inputmode="numeric"
+          >
+
         </label>
 
       </div>
+
 
     </div>
 
@@ -786,7 +1498,11 @@
         Cancel
       </button>
 
-      <button class="save-button" type="submit">
+
+      <button
+        class="save-button"
+        type="submit"
+      >
         Save Character
       </button>
 
@@ -798,17 +1514,27 @@
 
 
 
-<!-- PROFILE -->
+<!-- =======================================================
+     PROFILE
+======================================================= -->
 
-<div id="profileBackdrop" class="backdrop hidden"></div>
+<div
+  id="profileBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="profilePanel" class="profile-panel hidden">
+
+<section
+  id="profilePanel"
+  class="profile-panel hidden"
+>
 
   <div class="profile-topbar">
 
     <p class="eyebrow">
       Character Record
     </p>
+
 
     <button
       id="closeProfileButton"
@@ -823,12 +1549,26 @@
 
   <div class="profile-scroll">
 
+
     <div class="profile-hero">
 
       <div
-        id="profilePortrait"
-        class="profile-portrait"
-      ></div>
+        id="profilePortraitWrap"
+        class="profile-portrait-wrap"
+      >
+
+        <div
+          id="profileAdornment"
+          class="profile-adornment"
+        ></div>
+
+        <div
+          id="profilePortrait"
+          class="profile-portrait"
+        ></div>
+
+      </div>
+
 
       <div class="profile-hero-text">
 
@@ -837,15 +1577,18 @@
           class="profile-hero-title"
         ></p>
 
+
         <h2
           id="profileFullName"
           class="profile-main-name"
         ></h2>
 
+
         <p
           id="profileYearsTop"
           class="profile-main-years"
         ></p>
+
 
         <button
           id="setVantageButton"
@@ -860,7 +1603,9 @@
     </div>
 
 
+
     <div class="profile-dashboard">
+
 
       <section class="profile-box title-box">
 
@@ -874,6 +1619,7 @@
         ></div>
 
       </section>
+
 
 
       <section class="profile-box aliases-box">
@@ -890,6 +1636,7 @@
       </section>
 
 
+
       <section class="profile-box gender-box">
 
         <span class="box-label">
@@ -904,7 +1651,9 @@
       </section>
 
 
+
       <section class="colors-box">
+
 
         <div class="color-profile-item">
 
@@ -913,7 +1662,9 @@
             class="large-color-swatch"
           ></div>
 
-          <span>Hair</span>
+          <span>
+            Hair
+          </span>
 
           <small id="profileHairColor"></small>
 
@@ -927,7 +1678,9 @@
             class="large-color-swatch"
           ></div>
 
-          <span>Eyes</span>
+          <span>
+            Eyes
+          </span>
 
           <small id="profileEyeColor"></small>
 
@@ -941,13 +1694,17 @@
             class="large-color-swatch"
           ></div>
 
-          <span>Skin</span>
+          <span>
+            Skin
+          </span>
 
           <small id="profileSkinColor"></small>
 
         </div>
 
+
       </section>
+
 
 
       <section class="profile-box family-box">
@@ -977,39 +1734,95 @@
 
         <div class="family-list">
 
-          <div class="family-group">
-            <span>Mother</span>
-            <div id="profileMother" class="relationship-values"></div>
-          </div>
 
           <div class="family-group">
-            <span>Father</span>
-            <div id="profileFather" class="relationship-values"></div>
+
+            <span>
+              Mother
+            </span>
+
+            <div
+              id="profileMother"
+              class="relationship-values"
+            ></div>
+
           </div>
 
-          <div class="family-group">
-            <span>Siblings</span>
-            <div id="profileSiblings" class="relationship-values"></div>
-          </div>
 
           <div class="family-group">
-            <span>Spouses</span>
-            <div id="profileSpouses" class="relationship-values"></div>
+
+            <span>
+              Father
+            </span>
+
+            <div
+              id="profileFather"
+              class="relationship-values"
+            ></div>
+
           </div>
 
-          <div class="family-group">
-            <span>Lovers</span>
-            <div id="profileLovers" class="relationship-values"></div>
-          </div>
 
           <div class="family-group">
-            <span>Children</span>
-            <div id="profileChildren" class="relationship-values"></div>
+
+            <span>
+              Siblings
+            </span>
+
+            <div
+              id="profileSiblings"
+              class="relationship-values"
+            ></div>
+
           </div>
+
+
+          <div class="family-group">
+
+            <span>
+              Spouses
+            </span>
+
+            <div
+              id="profileSpouses"
+              class="relationship-values"
+            ></div>
+
+          </div>
+
+
+          <div class="family-group">
+
+            <span>
+              Lovers
+            </span>
+
+            <div
+              id="profileLovers"
+              class="relationship-values"
+            ></div>
+
+          </div>
+
+
+          <div class="family-group">
+
+            <span>
+              Children
+            </span>
+
+            <div
+              id="profileChildren"
+              class="relationship-values"
+            ></div>
+
+          </div>
+
 
         </div>
 
       </section>
+
 
 
       <section class="profile-box race-box">
@@ -1026,6 +1839,7 @@
       </section>
 
 
+
       <section class="profile-box species-box">
 
         <span class="box-label">
@@ -1038,6 +1852,22 @@
         ></div>
 
       </section>
+
+
+
+      <section class="profile-box adornment-box">
+
+        <span class="box-label">
+          Adornment
+        </span>
+
+        <div
+          id="profileAdornmentName"
+          class="box-value big-value"
+        ></div>
+
+      </section>
+
 
 
       <section class="profile-box feature-box">
@@ -1054,6 +1884,7 @@
       </section>
 
 
+
       <section class="profile-box achievements-box">
 
         <span class="box-label">
@@ -1068,6 +1899,7 @@
       </section>
 
 
+
       <section class="profile-box life-box">
 
         <span class="box-label">
@@ -1080,6 +1912,7 @@
         ></div>
 
       </section>
+
 
     </div>
 
@@ -1096,6 +1929,7 @@
       Edit
     </button>
 
+
     <button
       id="deleteCharacterButton"
       class="delete-button"
@@ -1103,6 +1937,7 @@
     >
       Delete
     </button>
+
 
     <button
       id="closeProfileFooterButton"
@@ -1118,20 +1953,38 @@
 
 
 
-<!-- EDIT CHARACTER -->
+<!-- =======================================================
+     EDIT CHARACTER
+======================================================= -->
 
-<div id="editBackdrop" class="backdrop hidden"></div>
+<div
+  id="editBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="editPanel" class="bottom-panel editor-panel hidden">
+
+<section
+  id="editPanel"
+  class="bottom-panel editor-panel hidden"
+>
 
   <div class="panel-handle"></div>
+
 
   <div class="panel-header">
 
     <div>
-      <p class="eyebrow">Character Editor</p>
-      <h2>Edit Character</h2>
+
+      <p class="eyebrow">
+        Character Editor
+      </p>
+
+      <h2>
+        Edit Character
+      </h2>
+
     </div>
+
 
     <button
       id="closeEditButton"
@@ -1148,9 +2001,14 @@
 
     <div class="form-body">
 
+
+
+      <!-- PORTRAIT -->
+
       <div class="editor-heading">
         Portrait
       </div>
+
 
       <div class="portrait-editor">
 
@@ -1158,6 +2016,7 @@
           id="editPortraitPreview"
           class="portrait-preview"
         ></div>
+
 
         <div class="portrait-actions">
 
@@ -1173,6 +2032,7 @@
 
           </label>
 
+
           <button
             id="removePortraitButton"
             class="portrait-remove-button"
@@ -1186,84 +2046,339 @@
       </div>
 
 
+
+      <!-- IDENTITY -->
+
       <div class="editor-heading">
         Identity
       </div>
 
-      <label class="field">
-        <span>Title</span>
-        <input id="editTitle" type="text">
-      </label>
 
       <label class="field">
-        <span>Given Name *</span>
-        <input id="editGivenName" type="text" required>
+
+        <span>
+          Title
+        </span>
+
+        <input
+          id="editTitle"
+          type="text"
+        >
+
       </label>
 
-      <label class="field">
-        <span>Aliases</span>
-        <input id="editAliases" type="text">
-      </label>
 
       <label class="field">
-        <span>Maiden Name</span>
-        <input id="editMaidenName" type="text">
+
+        <span>
+          Given Name *
+        </span>
+
+        <input
+          id="editGivenName"
+          type="text"
+          required
+        >
+
       </label>
 
-      <label class="field">
-        <span>Family Name</span>
-        <input id="editFamilyName" type="text">
-      </label>
 
       <label class="field">
-        <span>Gender</span>
+
+        <span>
+          Aliases
+        </span>
+
+        <input
+          id="editAliases"
+          type="text"
+        >
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Maiden Name
+        </span>
+
+        <input
+          id="editMaidenName"
+          type="text"
+        >
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Family Name
+        </span>
+
+        <input
+          id="editFamilyName"
+          type="text"
+        >
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Gender
+        </span>
 
         <select id="editGender">
-          <option value="unknown">Unknown</option>
-          <option value="female">Female</option>
-          <option value="male">Male</option>
-          <option value="nonbinary">Nonbinary</option>
+
+          <option value="unknown">
+            Unknown
+          </option>
+
+          <option value="female">
+            Female
+          </option>
+
+          <option value="male">
+            Male
+          </option>
+
+          <option value="nonbinary">
+            Nonbinary
+          </option>
+
         </select>
+
       </label>
 
+
+
+      <!-- DATES -->
 
       <div class="editor-heading">
         Dates
       </div>
 
+
       <div class="field-row">
 
         <label class="field">
-          <span>Birth Year</span>
-          <input id="editBirthYear" type="text" inputmode="numeric">
+
+          <span>
+            Birth Year
+          </span>
+
+          <input
+            id="editBirthYear"
+            type="text"
+            inputmode="numeric"
+          >
+
         </label>
 
+
         <label class="field">
-          <span>Death Year</span>
-          <input id="editDeathYear" type="text" inputmode="numeric">
+
+          <span>
+            Death Year
+          </span>
+
+          <input
+            id="editDeathYear"
+            type="text"
+            inputmode="numeric"
+          >
+
         </label>
 
       </div>
 
+
+
+      <!-- TREE APPEARANCE -->
+
+      <div class="editor-heading">
+        Tree Appearance
+      </div>
+
+
+      <div class="tree-style-card">
+
+
+        <label class="field">
+
+          <span>
+            Primary Adornment
+          </span>
+
+          <select id="editAdornment">
+
+            <option value="none">
+              None
+            </option>
+
+            <option value="halo">
+              Halo — Divine
+            </option>
+
+            <option value="crown">
+              Crown — Royalty
+            </option>
+
+            <option value="laurel">
+              Laurel — Honored
+            </option>
+
+            <option value="horns">
+              Horns
+            </option>
+
+            <option value="arcane">
+              Arcane Ring
+            </option>
+
+            <option value="star">
+              Star — Chosen
+            </option>
+
+            <option value="mourning">
+              Mourning Ring
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="tree-style-toggle">
+
+          <div>
+
+            <strong>
+              Luminous Aura
+            </strong>
+
+            <small>
+              A restrained glow behind the character.
+            </small>
+
+          </div>
+
+          <input
+            id="editDivineGlow"
+            type="checkbox"
+          >
+
+        </label>
+
+
+        <div
+          id="adornmentPreview"
+          class="adornment-preview"
+        >
+
+          <div
+            id="adornmentPreviewDecoration"
+            class="node-adornment"
+          ></div>
+
+          <div class="adornment-preview-circle">
+            ✦
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- TREE POSITION -->
+
+      <div class="editor-heading">
+        Tree Placement
+      </div>
+
+
+      <div class="tree-placement-card">
+
+
+        <label class="tree-style-toggle">
+
+          <div>
+
+            <strong>
+              Lock Position
+            </strong>
+
+            <small>
+              Keep this character fixed when the automatic layout changes.
+            </small>
+
+          </div>
+
+          <input
+            id="editPositionLocked"
+            type="checkbox"
+          >
+
+        </label>
+
+
+        <button
+          id="resetCharacterPositionButton"
+          class="reset-character-position-button"
+          type="button"
+        >
+          Reset This Character's Position
+        </button>
+
+
+        <p class="field-helper">
+          Manual positions are changed from Arrange Tree mode on the main canvas.
+        </p>
+
+
+      </div>
+
+
+
+      <!-- RELATIONSHIPS -->
 
       <div class="editor-heading">
         Relationships
       </div>
 
+
       <label class="field">
-        <span>Mother</span>
+
+        <span>
+          Mother
+        </span>
+
         <select id="editMother"></select>
+
       </label>
 
+
       <label class="field">
-        <span>Father</span>
+
+        <span>
+          Father
+        </span>
+
         <select id="editFather"></select>
+
       </label>
 
 
       <label class="field">
 
-        <span>Manual Siblings</span>
+        <span>
+          Manual Siblings
+        </span>
 
         <p class="field-helper">
           Use this when characters are siblings even if their parents are unknown or different.
@@ -1280,7 +2395,9 @@
 
       <label class="field">
 
-        <span>Spouses</span>
+        <span>
+          Spouses
+        </span>
 
         <select
           id="editSpouses"
@@ -1293,7 +2410,9 @@
 
       <label class="field">
 
-        <span>Lovers</span>
+        <span>
+          Lovers
+        </span>
 
         <select
           id="editLovers"
@@ -1303,6 +2422,9 @@
 
       </label>
 
+
+
+      <!-- ANCESTRY -->
 
       <div class="editor-heading">
         Ancestry
@@ -1315,7 +2437,9 @@
           Founder Ancestry
         </strong>
 
+
         <p id="ancestryModeDescription"></p>
+
 
         <label
           id="ancestryOverrideWrap"
@@ -1336,14 +2460,18 @@
       </div>
 
 
+
       <div
         id="automaticAncestryPreview"
         class="automatic-ancestry-preview hidden"
       >
 
+
         <div class="automatic-preview-box">
 
-          <span>Automatic Race</span>
+          <span>
+            Automatic Race
+          </span>
 
           <div
             id="automaticRacePreview"
@@ -1355,7 +2483,9 @@
 
         <div class="automatic-preview-box">
 
-          <span>Automatic Species</span>
+          <span>
+            Automatic Species
+          </span>
 
           <div
             id="automaticSpeciesPreview"
@@ -1364,7 +2494,9 @@
 
         </div>
 
+
       </div>
+
 
 
       <div
@@ -1372,14 +2504,19 @@
         class="manual-ancestry-editor"
       >
 
+
         <div class="ancestry-editor-section">
 
-          <h3>Race</h3>
+          <h3>
+            Race
+          </h3>
+
 
           <div
             id="raceAncestryRows"
             class="ancestry-editor-rows"
           ></div>
+
 
           <button
             id="addRaceAncestryButton"
@@ -1388,6 +2525,7 @@
           >
             + Add Race
           </button>
+
 
           <div
             id="raceAncestryTotal"
@@ -1399,14 +2537,19 @@
         </div>
 
 
+
         <div class="ancestry-editor-section">
 
-          <h3>Species</h3>
+          <h3>
+            Species
+          </h3>
+
 
           <div
             id="speciesAncestryRows"
             class="ancestry-editor-rows"
           ></div>
+
 
           <button
             id="addSpeciesAncestryButton"
@@ -1415,6 +2558,7 @@
           >
             + Add Species
           </button>
+
 
           <div
             id="speciesAncestryTotal"
@@ -1425,12 +2569,17 @@
 
         </div>
 
+
       </div>
 
+
+
+      <!-- APPEARANCE -->
 
       <div class="editor-heading">
         Appearance
       </div>
+
 
 
       <!-- HAIR -->
@@ -1440,6 +2589,7 @@
         <div class="appearance-genetics-header">
 
           <div>
+
             <span class="appearance-genetics-kicker">
               Hair
             </span>
@@ -1447,7 +2597,9 @@
             <h3>
               Hair Color
             </h3>
+
           </div>
+
 
           <button
             id="spinHairButton"
@@ -1461,8 +2613,13 @@
 
 
         <label class="field">
-          <span>Actual Hair Color</span>
+
+          <span>
+            Actual Hair Color
+          </span>
+
           <select id="editHairPreset"></select>
+
         </label>
 
 
@@ -1482,8 +2639,16 @@
           id="editHairCustomWrap"
           class="custom-color-field hidden"
         >
-          <span>Custom Hair Color</span>
-          <input id="editHairCustom" type="color">
+
+          <span>
+            Custom Hair Color
+          </span>
+
+          <input
+            id="editHairCustom"
+            type="color"
+          >
+
         </label>
 
 
@@ -1492,6 +2657,7 @@
           <div class="edit-genetics-title">
             Genetic Possibilities
           </div>
+
 
           <div
             id="editHairProbabilities"
@@ -1503,6 +2669,7 @@
       </section>
 
 
+
       <!-- EYES -->
 
       <section class="appearance-genetics-card">
@@ -1510,6 +2677,7 @@
         <div class="appearance-genetics-header">
 
           <div>
+
             <span class="appearance-genetics-kicker">
               Eyes
             </span>
@@ -1517,7 +2685,9 @@
             <h3>
               Eye Color
             </h3>
+
           </div>
+
 
           <button
             id="spinEyeButton"
@@ -1531,8 +2701,13 @@
 
 
         <label class="field">
-          <span>Actual Eye Color</span>
+
+          <span>
+            Actual Eye Color
+          </span>
+
           <select id="editEyePreset"></select>
+
         </label>
 
 
@@ -1552,8 +2727,16 @@
           id="editEyeCustomWrap"
           class="custom-color-field hidden"
         >
-          <span>Custom Eye Color</span>
-          <input id="editEyeCustom" type="color">
+
+          <span>
+            Custom Eye Color
+          </span>
+
+          <input
+            id="editEyeCustom"
+            type="color"
+          >
+
         </label>
 
 
@@ -1562,6 +2745,7 @@
           <div class="edit-genetics-title">
             Genetic Possibilities
           </div>
+
 
           <div
             id="editEyeProbabilities"
@@ -1573,6 +2757,7 @@
       </section>
 
 
+
       <!-- SKIN -->
 
       <section class="appearance-genetics-card">
@@ -1580,6 +2765,7 @@
         <div class="appearance-genetics-header">
 
           <div>
+
             <span class="appearance-genetics-kicker">
               Skin
             </span>
@@ -1587,7 +2773,9 @@
             <h3>
               Skin Color
             </h3>
+
           </div>
+
 
           <button
             id="spinSkinButton"
@@ -1601,8 +2789,13 @@
 
 
         <label class="field">
-          <span>Actual Skin Color</span>
+
+          <span>
+            Actual Skin Color
+          </span>
+
           <select id="editSkinPreset"></select>
+
         </label>
 
 
@@ -1622,8 +2815,16 @@
           id="editSkinCustomWrap"
           class="custom-color-field hidden"
         >
-          <span>Custom Skin Color</span>
-          <input id="editSkinCustom" type="color">
+
+          <span>
+            Custom Skin Color
+          </span>
+
+          <input
+            id="editSkinCustom"
+            type="color"
+          >
+
         </label>
 
 
@@ -1632,6 +2833,7 @@
           <div class="edit-genetics-title">
             Genetic Possibilities
           </div>
+
 
           <div
             id="editSkinProbabilities"
@@ -1642,6 +2844,9 @@
 
       </section>
 
+
+
+      <!-- PHYSICAL FEATURE -->
 
       <label class="field">
 
@@ -1657,26 +2862,42 @@
       </label>
 
 
+
+      <!-- ACHIEVEMENTS -->
+
       <div class="editor-heading">
         Noteworthy Achievements
       </div>
 
+
       <label class="field">
-        <textarea id="editAchievements" rows="7"></textarea>
+
+        <textarea
+          id="editAchievements"
+          rows="7"
+        ></textarea>
+
       </label>
 
+
+
+      <!-- LIFE -->
 
       <div class="editor-heading">
         Life
       </div>
 
+
       <label class="field">
+
         <textarea
           id="editLife"
           class="life-editor"
           rows="15"
         ></textarea>
+
       </label>
+
 
     </div>
 
@@ -1691,7 +2912,11 @@
         Cancel
       </button>
 
-      <button class="save-button" type="submit">
+
+      <button
+        class="save-button"
+        type="submit"
+      >
         Save Changes
       </button>
 
@@ -1703,12 +2928,15 @@
 
 
 
-<!-- PROBABILITY WHEEL -->
+<!-- =======================================================
+     PROBABILITY WHEEL
+======================================================= -->
 
 <div
   id="probabilityWheelBackdrop"
   class="backdrop hidden"
 ></div>
+
 
 <section
   id="probabilityWheelPanel"
@@ -1718,6 +2946,7 @@
   <div class="probability-wheel-topbar">
 
     <div>
+
       <p class="eyebrow">
         Genetic Randomizer
       </p>
@@ -1725,7 +2954,9 @@
       <h2 id="probabilityWheelTitle">
         Hair Probability Wheel
       </h2>
+
     </div>
+
 
     <button
       id="closeProbabilityWheelButton"
@@ -1741,7 +2972,7 @@
   <div class="probability-wheel-body">
 
     <p class="probability-wheel-description">
-      Each section of the wheel follows this character's calculated genetic percentages.
+      Each section follows this character's calculated genetic percentages.
     </p>
 
 
@@ -1776,12 +3007,14 @@
         Result
       </span>
 
+
       <div class="wheel-result-main">
 
         <div
           id="probabilityWheelResultSwatch"
           class="wheel-result-swatch"
         ></div>
+
 
         <div>
 
@@ -1809,8 +3042,9 @@
       class="secondary-button"
       type="button"
     >
-      Spin Again
+      Spin
     </button>
+
 
     <button
       id="applyWheelResultButton"
@@ -1827,21 +3061,36 @@
 
 
 
-<!-- CONFIRM -->
+<!-- =======================================================
+     CONFIRM
+======================================================= -->
 
-<div id="confirmBackdrop" class="backdrop hidden"></div>
+<div
+  id="confirmBackdrop"
+  class="backdrop hidden"
+></div>
 
-<section id="confirmPanel" class="confirm-panel hidden">
 
-  <div class="confirm-symbol">✦</div>
+<section
+  id="confirmPanel"
+  class="confirm-panel hidden"
+>
+
+  <div class="confirm-symbol">
+    ✦
+  </div>
+
 
   <p class="eyebrow">
     Please Confirm
   </p>
 
+
   <h2 id="confirmTitle"></h2>
 
+
   <p id="confirmMessage"></p>
+
 
   <div class="confirm-actions">
 
@@ -1852,6 +3101,7 @@
     >
       Cancel
     </button>
+
 
     <button
       id="confirmAcceptButton"
@@ -1866,11 +3116,17 @@
 </section>
 
 
-<div id="toast" class="toast hidden"></div>
+
+<div
+  id="toast"
+  class="toast hidden"
+></div>
+
 
 
 <script src="data.js"></script>
 <script src="app.js"></script>
+
 
 </body>
 </html>
